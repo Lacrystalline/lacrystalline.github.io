@@ -262,6 +262,29 @@ section{padding:72px 0}
 .svc-note{color:var(--crys-dim);font-size:.82rem;margin-top:.35em;letter-spacing:.03em}
 .svc-poem{font-family:var(--serif);font-style:italic;color:var(--crys-dim);font-size:.98rem;margin-top:.4em}
 
+
+/* ---------- section visual assets ---------- */
+.section-mark{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.section-mark img{width:88px;height:88px;object-fit:contain;filter:drop-shadow(0 0 18px rgba(127,211,214,.16))}
+.section-mark .mini{color:var(--crys-dim);font-size:.82rem;letter-spacing:.26em;text-transform:uppercase}
+.section-mark .mini-en{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1rem;letter-spacing:.04em;margin-top:.25em}
+
+.drink{
+  display:grid;grid-template-columns:112px 1fr auto;gap:10px 20px;
+  padding:26px 0;border-bottom:1px solid var(--line);align-items:start;
+}
+.drink:last-child{border-bottom:none}
+.d-thumb{grid-column:1/2;grid-row:1/4;align-self:center;width:100%;max-width:112px;aspect-ratio:1/1;object-fit:contain;filter:drop-shadow(0 0 18px rgba(127,211,214,.14))}
+.d-main{grid-column:2/3}
+.d-price{grid-column:3/4;grid-row:1/2;justify-self:end}
+.d-desc{grid-column:2/3;color:var(--mute);font-size:.96rem;margin-top:.5em;max-width:34em;letter-spacing:.02em}
+.d-poem{grid-column:2/4;font-family:var(--serif);font-style:italic;color:var(--crys-dim);font-size:1rem;margin-top:.5em;letter-spacing:.04em}
+.menu-note{margin-top:18px;color:var(--mute);font-size:.92rem}
+.order-cta{margin-top:34px;display:flex;justify-content:center}
+.order-btn{display:inline-flex;align-items:center;gap:12px;padding:11px 18px;border:1px solid rgba(127,211,214,.35);border-radius:4px;background:rgba(127,211,214,.07);color:var(--mist);text-decoration:none;letter-spacing:.14em;transition:.24s}
+.order-btn img{width:32px;height:32px;object-fit:contain}
+.order-btn:hover{border-color:var(--crys);background:rgba(127,211,214,.14);transform:translateY(-1px)}
+
 /* ---------- master ---------- */
 .master{
   display:grid;grid-template-columns:230px 1fr;gap:40px;align-items:start;
@@ -314,8 +337,12 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
   .worlds{grid-template-columns:1fr}
   .master{grid-template-columns:1fr;gap:24px}
   .portrait{max-width:210px;margin:0 auto}
-  .drink{grid-template-columns:1fr;gap:2px}
-  .d-price{margin-top:.2em}
+  .drink{grid-template-columns:1fr;gap:8px}
+  .d-thumb{grid-column:auto;grid-row:auto;max-width:130px;margin:0 auto 6px}
+  .d-main,.d-desc,.d-poem,.d-price{grid-column:auto}
+  .d-price{justify-self:start;margin-top:.2em}
+  .section-mark{flex-direction:column;align-items:flex-start}
+  .section-mark img{width:72px;height:72px}
 }
 </style>
 </head>
@@ -354,7 +381,13 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 <!-- ABOUT -->
 <section class="about" id="about">
   <div class="wrap">
-    <div class="eyebrow">關於此間</div>
+    <div class="section-mark">
+      <img src="assets/icon_portal.png" alt="特異點之門">
+      <div>
+        <div class="mini">關於此間</div>
+        <div class="mini-en">A Node Between Worlds</div>
+      </div>
+    </div>
     <h2 class="s-title">此間由來<span class="cn">A NODE BETWEEN WORLDS</span></h2>
     <p>《水晶庭》並非水晶塔本身，而是一座仿其原理而生的<span class="accent">「特異點」</span>——承接了那座亞拉戈古塔「連接兩個世界」的力量碎片。</p>
     <p>無人知曉它為何選在海霧村顯現，只知它同時朝向兩扇窗：一扇是繁華的都市之夜，一扇是霧雨中的寧靜山林，彷彿要把那座塔連接的兩端，都收攏在這一方庭院裡。</p>
@@ -382,35 +415,40 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
     <div style="margin-top:24px">
 
       <div class="drink" style="--attr:#7fd3d6">
-        <div class="d-name"><span class="cn">水晶之光</span><span class="en">Crystal</span><span class="d-attr" style="--attr:#7fd3d6">意力 MND</span></div>
+        <img class="d-thumb" src="assets/drink_crystal.png" alt="水晶之光">
+        <div class="d-main d-name"><span class="cn">水晶之光</span><span class="en">Crystal</span><span class="d-attr" style="--attr:#7fd3d6">意力 MND</span></div>
         <div class="d-price">20,000<span class='gil'>Gil</span></div>
         <div class="d-desc">澄澈無色烈酒為底，注入冰晶與微氣泡，入口清冽、尾韻回甘泛光。本店招牌。</div>
         <div class="d-poem">那抹被遺忘的光，原來一直在杯底。</div>
       </div>
 
       <div class="drink">
-        <div class="d-name"><span class="cn">深邃青金</span><span class="en">Lapis Lazuli</span><span class="d-attr" style="--attr:#5b7fd8">智力 INT</span></div>
+        <img class="d-thumb" src="assets/drink_lapis.png" alt="深邃青金">
+        <div class="d-main d-name"><span class="cn">深邃青金</span><span class="en">Lapis Lazuli</span><span class="d-attr" style="--attr:#5b7fd8">智力 INT</span></div>
         <div class="d-price">15,000<span class='gil'>Gil</span></div>
         <div class="d-desc">濃郁莓果與紫羅蘭調的深藍調酒，撒上細碎金箔，如綴滿星塵的夜幕。</div>
         <div class="d-poem">把整座城市的燈火，斟進一只杯中。</div>
       </div>
 
       <div class="drink">
-        <div class="d-name"><span class="cn">熾焰紅寶</span><span class="en">Ruby</span><span class="d-attr" style="--attr:#d87a8f">剛力 STR</span></div>
+        <img class="d-thumb" src="assets/drink_ruby.png" alt="熾焰紅寶">
+        <div class="d-main d-name"><span class="cn">熾焰紅寶</span><span class="en">Ruby</span><span class="d-attr" style="--attr:#d87a8f">剛力 STR</span></div>
         <div class="d-price">15,000<span class='gil'>Gil</span></div>
         <div class="d-desc">玫瑰與莓果的濃烈紅酒基調，一入喉便燃起暖意，餘韻悠長。</div>
         <div class="d-poem">心口那簇火，從未真正熄滅。</div>
       </div>
 
       <div class="drink">
-        <div class="d-name"><span class="cn">迷夢紫晶</span><span class="en">Amethyst</span><span class="d-attr" style="--attr:#a97fd8">巧力 DEX</span></div>
+        <img class="d-thumb" src="assets/drink_amethyst.png" alt="迷夢紫晶">
+        <div class="d-main d-name"><span class="cn">迷夢紫晶</span><span class="en">Amethyst</span><span class="d-attr" style="--attr:#a97fd8">巧力 DEX</span></div>
         <div class="d-price">15,000<span class='gil'>Gil</span></div>
         <div class="d-desc">葡萄與薰衣草交織的紫調特飲，香氣輕盈、口感圓潤細緻。</div>
         <div class="d-poem">夢與清醒的交界，是一抹淡紫。</div>
       </div>
 
       <div class="drink">
-        <div class="d-name"><span class="cn">曦光黃玉</span><span class="en">Topaz</span><span class="d-attr" style="--attr:#d8b87a">耐力 VIT</span></div>
+        <img class="d-thumb" src="assets/drink_topaz.png" alt="曦光黃玉">
+        <div class="d-main d-name"><span class="cn">曦光黃玉</span><span class="en">Topaz</span><span class="d-attr" style="--attr:#d8b87a">耐力 VIT</span></div>
         <div class="d-price">15,000<span class='gil'>Gil</span></div>
         <div class="d-desc">柑橘與白葡萄的暖金色調酒，清透微甜、氣泡輕盈，如陽光穿過琥珀。</div>
         <div class="d-poem">風雨過後，總有人為你留一盞燈。</div>
@@ -432,6 +470,9 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <p>有些酒，不在單上。<br>若你與這裡的某個人夠熟，或許會嚐到——<br>一杯只為你、只屬於今夜的光。</p>
     </div>
 
+    <div class="order-cta">
+      <a class="order-btn" href="order.html"><img src="assets/icon_order.png" alt="點餐">前往點餐</a>
+    </div>
 
   </div>
 </section>
@@ -446,21 +487,24 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
     <div style="margin-top:24px">
 
       <div class="drink">
-        <div class="d-name"><span class="cn">星屑</span><span class="en">Stardust</span></div>
+        <img class="d-thumb" src="assets/bite_stardust.png" alt="星屑">
+        <div class="d-main d-name"><span class="cn">星屑</span><span class="en">Stardust</span></div>
         <div class="d-price">25,000<span class='gil'>Gil</span></div>
         <div class="d-desc">烘得金黃的手工餅乾，灑上細砂糖如撒落的星塵，配酒或配茶都相宜。</div>
         <div class="d-poem">把一小塊夜空，收進口袋裡。</div>
       </div>
 
       <div class="drink">
-        <div class="d-name"><span class="cn">熔晶</span><span class="en">Molten Geode</span></div>
+        <img class="d-thumb" src="assets/bite_geode.png" alt="熔晶">
+        <div class="d-main d-name"><span class="cn">熔晶</span><span class="en">Molten Geode</span></div>
         <div class="d-price">25,000<span class='gil'>Gil</span></div>
         <div class="d-desc">熱騰騰的焗烤乳酪，表層金脆、內裡如熔化的晶心般牽絲流動。</div>
         <div class="d-poem">最堅硬的殼裡，藏著最柔軟的芯。</div>
       </div>
 
       <div class="drink">
-        <div class="d-name"><span class="cn">月落</span><span class="en">Moonfall</span></div>
+        <img class="d-thumb" src="assets/bite_moonfall.png" alt="月落">
+        <div class="d-main d-name"><span class="cn">月落</span><span class="en">Moonfall</span></div>
         <div class="d-price">25,000<span class='gil'>Gil</span></div>
         <div class="d-desc">乳白如月華傾落的燉湯，深海漁獲熬煮多時，鮮醇暖心。</div>
         <div class="d-poem">月亮沉進碗裡的那一刻，最暖。</div>

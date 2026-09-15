@@ -86,6 +86,38 @@ img{display:block;max-width:100%}
 .qn{min-width:18px;text-align:center;color:var(--mist)}
 .cat{color:var(--crys-dim);font-size:.78rem;letter-spacing:.2em;margin:16px 0 8px;font-family:var(--serif);font-style:italic}
 
+
+.head-mark{display:flex;align-items:center;gap:18px;margin-bottom:10px}
+.head-mark img{width:88px;height:88px;object-fit:contain;filter:drop-shadow(0 0 18px rgba(127,211,214,.18))}
+.head-copy .ey{margin-bottom:0}
+.head-copy .sub{margin-top:.35rem}
+
+.members{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.member{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--line);border-radius:4px;background:rgba(17,26,43,.25);cursor:pointer;transition:.2s}
+.member:hover{border-color:var(--crys-dim)}
+.member.sel{border-color:var(--crys);background:rgba(127,211,214,.07)}
+.member .av{width:64px;height:64px;border-radius:4px;object-fit:cover;background:rgba(13,20,32,.8)}
+.member .info{min-width:0}
+.member .nm{color:var(--mist);font-size:1rem}
+.member .nm .en{color:var(--crys-dim);font-style:italic;font-size:.82rem;margin-left:.35em}
+.member .role,.member .tags{color:var(--mute);font-size:.82rem;line-height:1.7}
+.member .pick{margin-left:auto;width:18px;height:18px;border-radius:50%;border:1px solid var(--line)}
+.member.sel .pick{background:var(--crys);border-color:var(--crys);box-shadow:0 0 0 2px rgba(127,211,214,.14)}
+
+.opt.menu-item{display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:12px}
+.opt.menu-item .thumb{width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 0 14px rgba(127,211,214,.12))}
+.opt.menu-item .meta{display:flex;flex-direction:column;gap:4px;min-width:0}
+.opt.menu-item .subtxt{color:var(--mute);font-size:.78rem;line-height:1.6}
+.opt.menu-item .qty{margin-left:0}
+
+@media(max-width:640px){
+  .head-mark{align-items:flex-start}
+  .head-mark img{width:72px;height:72px}
+  .opt.menu-item{grid-template-columns:60px 1fr;gap:10px}
+  .opt.menu-item .thumb{width:60px;height:60px}
+  .opt.menu-item .qty{grid-column:1/-1;justify-content:flex-end}
+}
+
 /* summary + submit */
 .summary{position:sticky;bottom:0;margin-top:26px;background:linear-gradient(to top,rgba(8,12,20,.97),rgba(8,12,20,.9));border-top:1px solid var(--line);padding:16px 22px;backdrop-filter:blur(8px)}
 .summary .row{display:flex;justify-content:space-between;align-items:center;max-width:760px;margin:0 auto}
@@ -116,9 +148,14 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 
 <header class="head">
   <div class="wrap">
-    <div class="ey">今夜，為自己留一點光</div>
-    <h1>指名・點餐</h1>
-    <div class="sub">水晶庭 · La Crystalline</div>
+    <div class="head-mark">
+      <img src="assets/icon_order.png" alt="點餐圖示">
+      <div class="head-copy">
+        <div class="ey">今夜，為自己留一點光</div>
+        <h1>指名・點餐</h1>
+        <div class="sub">水晶庭 · La Crystalline</div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -182,7 +219,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 <div class="summary">
   <div class="row">
     <div class="tot">合計 <span id="total">0</span> <small>Gil</small></div>
-    <button class="btn" id="submitBtn" disabled>送出指名</button>
+    <button class="btn" id="submitBtn" disabled>送出訂單</button>
   </div>
 </div>
 
@@ -217,16 +254,16 @@ const SERVICES = [
   { id:"prom",    name:"同行", en:"Promenade",    price:500000 },
 ];
 const DRINKS = [
-  { id:"crystal", name:"水晶之光", en:"Crystal",      price:20000 },
-  { id:"lapis",   name:"深邃青金", en:"Lapis Lazuli", price:15000 },
-  { id:"ruby",    name:"熾焰紅寶", en:"Ruby",         price:15000 },
-  { id:"ame",     name:"迷夢紫晶", en:"Amethyst",     price:15000 },
-  { id:"topaz",   name:"曦光黃玉", en:"Topaz",        price:15000 },
+  { id:"crystal", name:"水晶之光", en:"Crystal",      price:20000, img:"assets/drink_crystal.png", desc:"清冽微氣泡，冰晶般澄透。" },
+  { id:"lapis",   name:"深邃青金", en:"Lapis Lazuli", price:15000, img:"assets/drink_lapis.png", desc:"深藍莓果與細碎金箔。" },
+  { id:"ruby",    name:"熾焰紅寶", en:"Ruby",         price:15000, img:"assets/drink_ruby.png", desc:"玫瑰與莓果的濃烈暖意。" },
+  { id:"ame",     name:"迷夢紫晶", en:"Amethyst",     price:15000, img:"assets/drink_amethyst.png", desc:"葡萄薰衣草，柔霧般圓潤。" },
+  { id:"topaz",   name:"曦光黃玉", en:"Topaz",        price:15000, img:"assets/drink_topaz.png", desc:"柑橘白葡萄，暖金色晨光。" },
 ];
 const BITES = [
-  { id:"stardust", name:"星屑", en:"Stardust",      price:25000 },
-  { id:"geode",    name:"熔晶", en:"Molten Geode",  price:25000 },
-  { id:"moonfall", name:"月落", en:"Moonfall",      price:25000 },
+  { id:"stardust", name:"星屑", en:"Stardust",      price:25000, img:"assets/bite_stardust.png", desc:"灑滿糖晶的星形手工餅乾。" },
+  { id:"geode",    name:"熔晶", en:"Molten Geode",  price:25000, img:"assets/bite_geode.png", desc:"金脆表層與熔岩般牽絲內餡。" },
+  { id:"moonfall", name:"月落", en:"Moonfall",      price:25000, img:"assets/bite_moonfall.png", desc:"月華般濃郁的暖白海鮮濃湯。" },
 ];
 
 // ---- 狀態 ----
@@ -292,19 +329,24 @@ function renderServices(){
 // ---- 渲染菜單（數量）----
 function renderMenu(listId, items){
   $(listId).innerHTML = items.map(it=>`
-    <div class="opt" data-id="${it.id}">
-      <div class="nm">${it.name}<span class="en">${it.en}</span></div>
+    <div class="opt menu-item" data-id="${it.id}">
+      <img class="thumb" src="${it.img}" alt="${it.name}">
+      <div class="meta">
+        <div class="nm">${it.name}<span class="en">${it.en}</span></div>
+        <div class="subtxt">${it.desc||''}</div>
+      </div>
       <div class="qty">
         <span class="pr">${fmt(it.price)}<small>Gil</small></span>
-        <button class="qbtn" data-act="minus">−</button>
+        <button class="qbtn" type="button" data-act="minus">−</button>
         <span class="qn" id="qn-${it.id}">0</span>
-        <button class="qbtn" data-act="plus">＋</button>
+        <button class="qbtn" type="button" data-act="plus">＋</button>
       </div>
     </div>`).join('');
   $(listId).querySelectorAll('.opt').forEach(el=>{
     const id=el.dataset.id;
     el.querySelectorAll('.qbtn').forEach(b=>{
-      b.addEventListener('click',()=>{
+      b.addEventListener('click',(ev)=>{
+        ev.stopPropagation();
         state.qty[id] = (state.qty[id]||0) + (b.dataset.act==='plus'?1:-1);
         if(state.qty[id]<0) state.qty[id]=0;
         $("qn-"+id).textContent = state.qty[id];
@@ -377,11 +419,11 @@ $("submitBtn").addEventListener('click', async ()=>{
   try{
     if(!sb){ // 尚未接上資料庫：先本地展示（測試模式）
       console.log("測試模式・訂單內容：", order);
-      toast(`（測試模式）已收到您的指名。<br>請保存取件碼：`, order.code);
+      toast(`（測試模式）已收到您的訂單。<br>請保存取件碼：`, order.code);
     }else{
       const { error } = await sb.from('orders').insert([order]);
       if(error) throw error;
-      toast(`指名已送出，店長會為您安排。<br>請保存取件碼：`, order.code);
+      toast(`訂單已送出，店長會在營業時間為您安排。<br>請保存取件碼：`, order.code);
       // reset selections (keep name/server)
       state.member=null; state.services.clear(); state.qty={};
       document.querySelectorAll('.member,.opt').forEach(el=>el.classList.remove('sel'));
@@ -393,7 +435,7 @@ $("submitBtn").addEventListener('click', async ()=>{
     console.error(err);
     toast("送出失敗，請稍後再試，或直接私訊店長。", null, true);
   }finally{
-    $("submitBtn").textContent = "送出指名";
+    $("submitBtn").textContent = "送出訂單";
     update();
   }
 });
