@@ -88,6 +88,44 @@ body::before{
 }
 @keyframes shimmer{0%,100%{opacity:.25}50%{opacity:.7}}
 
+
+/* ---------- top nav ---------- */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 26px;
+  background:linear-gradient(to bottom,rgba(7,11,18,.86),rgba(7,11,18,0));
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  transition:background .4s ease, padding .4s ease;
+}
+.nav.solid{background:rgba(8,12,20,.92);padding:10px 26px;border-bottom:1px solid var(--line)}
+.nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none}
+.logo-img-nav{height:30px;width:auto;flex:none;display:block}
+.nav-logo .lt{font-family:var(--serif);font-size:1.15rem;color:var(--mist);letter-spacing:.14em;line-height:1}
+.nav-logo .lt small{display:block;font-family:var(--tc);font-size:.6rem;color:var(--crys-dim);letter-spacing:.3em;margin-top:2px}
+.nav-links{display:flex;gap:26px;align-items:center}
+.nav-links a{
+  color:var(--mute);text-decoration:none;font-size:.9rem;letter-spacing:.14em;
+  position:relative;padding:4px 0;transition:color .3s;
+}
+.nav-links a:hover{color:var(--crys)}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--crys);transition:width .3s}
+.nav-links a:hover::after{width:100%}
+.nav-toggle{display:none;background:none;border:none;color:var(--mist);font-size:1.5rem;cursor:pointer;line-height:1}
+@media(max-width:760px){
+  .nav-links{
+    position:fixed;inset:0;width:100%;z-index:55;
+    flex-direction:column;justify-content:center;align-items:center;gap:34px;
+    background:#070b12;
+    opacity:0;visibility:hidden;transition:opacity .35s ease,visibility .35s ease;padding:40px;
+  }
+  .nav-links.open{opacity:1;visibility:visible}
+  .nav-links a{font-size:1.4rem;color:var(--mist)}
+  .nav-toggle{display:block;z-index:60}
+}
+/* hero logo mark */
+.logo-img-hero{height:84px;width:auto;margin:0 auto 16px;display:block;filter:drop-shadow(0 0 16px rgba(127,211,214,.45))}
+
 /* ---------- hero ---------- */
 .hero{
   position:relative;min-height:100svh;
@@ -276,12 +314,26 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 </head>
 <body>
 <div class="crystal-veil" aria-hidden="true"></div>
+<nav class="nav" id="nav">
+  <a class="nav-logo" href="#top"><img src="assets/emblem_nav.png" alt="水晶庭" class="logo-img-nav"><span class="lt">La Crystalline<small>水晶庭</small></span></a>
+  <button class="nav-toggle" id="navToggle" aria-label="選單">☰</button>
+  </nav>
+<div class="nav-links" id="navLinks">
+    <a href="#about">關於</a>
+    <a href="#drinks">調酒</a>
+    <a href="#bites">餐點</a>
+    <a href="#special">服務</a>
+    <a href="#master">成員</a>
+    <a href="#find">FIND US</a>
+  </div>
+
 
 
 <!-- HERO -->
-<header class="hero">
+<header class="hero" id="top">
   <div class="hero-bg"></div>
   <div class="hero-inner">
+    <div class="hero-mark"><img src="assets/emblem_hero.png" alt="水晶庭" class="logo-img-hero"></div>
     <div class="en">La&nbsp;Crystalline</div>
     <div class="zh">水晶庭</div>
     <p class="slogan">尋找心中那抹被遺忘的水晶之光</p>
@@ -292,7 +344,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 </header>
 
 <!-- ABOUT -->
-<section class="about">
+<section class="about" id="about">
   <div class="wrap">
     <div class="eyebrow">關於此間</div>
     <h2 class="s-title">此間由來<span class="cn">A NODE BETWEEN WORLDS</span></h2>
@@ -315,7 +367,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 <div class="beam"></div>
 
 <!-- DRINKS -->
-<section class="drinks">
+<section class="drinks" id="drinks">
   <div class="wrap">
     <div class="eyebrow menu-head">汲母水晶之光，經寶石釀成</div>
     <h2 class="s-title">特色調酒<span class="cn">SIGNATURES</span></h2>
@@ -379,7 +431,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 <div class="beam"></div>
 
 <!-- BITES -->
-<section class="bites">
+<section class="bites" id="bites">
   <div class="wrap">
     <div class="eyebrow menu-head">佐酒小點</div>
     <h2 class="s-title">精選餐點<span class="cn">BITES</span></h2>
@@ -413,7 +465,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 <div class="beam"></div>
 
 <!-- SPECIAL -->
-<section class="special">
+<section class="special" id="special">
   <div class="wrap">
     <div class="eyebrow menu-head">只給懂的人</div>
     <h2 class="s-title">特殊服務<span class="cn">SPECIAL</span></h2>
@@ -466,15 +518,15 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 <div class="beam"></div>
 
 <!-- MASTER -->
-<section class="master-sec">
+<section class="master-sec" id="master">
   <div class="wrap">
-    <div class="eyebrow">看守此間的人</div>
-    <h2 class="s-title" style="margin-bottom:36px">店主<span class="cn">THE KEEPER</span></h2>
+    <div class="eyebrow">在此間點燈的人</div>
+    <h2 class="s-title" style="margin-bottom:36px">成員<span class="cn">MEMBERS</span></h2>
     <div class="master">
       <div class="portrait" style="padding:0"><img src="assets/master.jpg" alt="店長 北風" style="width:100%;height:100%;object-fit:cover"></div>
       <div>
         <div class="m-name">北風<span class="en">Northern Wind</span></div>
-        <div class="m-role">維埃拉族 · 山林之民（Veena） — 店長</div>
+        <div class="m-role">店長 / Keeper</div>
         <div class="m-body">
           <p>你此刻見到的，是一位來自斯卡提山脈的山林之民——清冷寡言，像山風一樣讓人捉摸不定；可一旦熟了，他健談得驚人，聊書、聊遠方、聊他走過的每一座山。</p>
           <p>但這具身體，並不是他真正的樣子。</p>
@@ -511,7 +563,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 </section>
 
 <!-- FIND US -->
-<section class="find">
+<section class="find" id="find">
   <div class="wrap">
     <div class="eyebrow" style="text-align:center">循光而來</div>
     <h2 class="s-title">FIND US</h2>
@@ -528,5 +580,15 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
   <div class="cr">© 2026 La Crystalline．本站為《FINAL FANTASY XIV》玩家自製 RP 同好內容，與 SQUARE ENIX 無關。</div>
 </footer>
 
+<script>
+(function(){
+  var nav=document.getElementById('nav'),t=document.getElementById('navToggle'),l=document.getElementById('navLinks');
+  t.addEventListener('click',function(){var o=l.classList.toggle('open');t.textContent=o?'\u2715':'\u2630';t.style.zIndex=60});
+  l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');t.textContent='\u2630'})});
+  window.addEventListener('scroll',function(){
+    if(window.scrollY>60)nav.classList.add('solid');else nav.classList.remove('solid');
+  });
+})();
+</script>
 </body>
 </html>
