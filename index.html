@@ -111,6 +111,12 @@ body::before{
 .nav-links a:hover{color:var(--crys)}
 .nav-links a::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--crys);transition:width .3s}
 .nav-links a:hover::after{width:100%}
+.nav-links a.order-link{
+  color:var(--crys);border:1px solid rgba(127,211,214,.45);padding:6px 12px;border-radius:3px;
+  background:rgba(127,211,214,.07);letter-spacing:.1em;
+}
+.nav-links a.order-link::after{display:none}
+.nav-links a.order-link:hover{color:#dff9fa;border-color:var(--crys);background:rgba(127,211,214,.14)}
 .nav-toggle{display:none;background:none;border:none;color:var(--mist);font-size:1.5rem;cursor:pointer;line-height:1}
 @media(max-width:760px){
   .nav-links{
@@ -121,6 +127,7 @@ body::before{
   }
   .nav-links.open{opacity:1;visibility:visible}
   .nav-links a{font-size:1.4rem;color:var(--mist)}
+  .nav-links a.order-link{padding:9px 18px}
   .nav-toggle{display:block;z-index:60}
 }
 /* hero logo mark */
@@ -316,17 +323,17 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 <div class="crystal-veil" aria-hidden="true"></div>
 <nav class="nav" id="nav">
   <a class="nav-logo" href="#top"><img src="assets/emblem_nav.png" alt="水晶庭" class="logo-img-nav"><span class="lt">La Crystalline<small>水晶庭</small></span></a>
-  <button class="nav-toggle" id="navToggle" aria-label="選單">☰</button>
-  </nav>
-<div class="nav-links" id="navLinks">
+  <div class="nav-links" id="navLinks">
     <a href="#about">關於</a>
     <a href="#drinks">調酒</a>
     <a href="#bites">餐點</a>
     <a href="#special">服務</a>
     <a href="#master">成員</a>
     <a href="#find">FIND US</a>
-    <a href="order.html">指名・點餐</a>
+    <a class="order-link" href="order.html">指名・點餐</a>
   </div>
+  <button class="nav-toggle" id="navToggle" aria-label="選單" aria-controls="navLinks" aria-expanded="false">☰</button>
+</nav>
 
 
 
