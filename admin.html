@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>店長後台｜水晶庭 La Crystalline</title>
+<link rel="icon" type="image/png" href="assets/emblem_nav.png">
+<meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -86,7 +88,7 @@ async function syncSession(){
   const {data:{session}}=await sb.auth.getSession();
   const on=!!session;
   $('loginView').classList.toggle('hidden',on);$('adminView').classList.toggle('hidden',!on);$('logoutBtn').classList.toggle('hidden',!on);
-  if(on){$('sessionInfo').textContent='已登入：'+session.user.email;await loadOrders()}else{$('sessionInfo').textContent='';allOrders=[]}
+  if(on){$('sessionInfo').textContent='已登入：'+session.user.email;await loadOrders();subscribeRealtime()}else{$('sessionInfo').textContent='';allOrders=[];unsubscribeRealtime()}
 }
 async function loadOrders(){
   $('orders').innerHTML='<div class="empty">讀取訂單中…</div>';
@@ -131,6 +133,20 @@ function render(){
 async function setStatus(id,status){const {error}=await sb.from('orders').update({status,updated_at:new Date().toISOString()}).eq('id',id);if(error){showToast('狀態更新失敗：'+error.message,true);return}const o=allOrders.find(a=>String(a.id)===String(id));if(o)o.status=status;render();showToast('狀態已更新')}
 async function removeOrder(id){const o=allOrders.find(a=>String(a.id)===String(id));if(!confirm(`確定刪除訂單 ${o?.code||id}？此動作無法復原。`))return;const {error}=await sb.from('orders').delete().eq('id',id);if(error){showToast('刪除失敗：'+error.message,true);return}allOrders=allOrders.filter(a=>String(a.id)!==String(id));render();showToast('訂單已刪除')}
 $('loginBtn').onclick=signIn;$('password').addEventListener('keydown',e=>{if(e.key==='Enter')signIn()});$('logoutBtn').onclick=signOut;$('refreshBtn').onclick=loadOrders;$('search').oninput=render;$('filterStatus').onchange=render;
+let rtChannel=null;
+function subscribeRealtime(){
+  if(rtChannel) return;
+  try{
+    rtChannel=sb.channel('orders-rt')
+      .on('postgres_changes',{event:'*',schema:'public',table:'orders'},payload=>{
+        // reload quietly on any insert/update/delete
+        loadOrders();
+        if(payload.eventType==='INSERT'){ showToast('有新訂單進來了'); }
+      })
+      .subscribe();
+  }catch(e){ console.warn('realtime 訂閱失敗',e); }
+}
+function unsubscribeRealtime(){ if(rtChannel){ sb.removeChannel(rtChannel); rtChannel=null; } }
 sb.auth.onAuthStateChange(()=>syncSession());syncSession();
 </script>
 </body>

@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>水晶庭 · La Crystalline</title>
+<link rel="icon" type="image/png" href="assets/emblem_nav.png">
+<link rel="apple-touch-icon" href="assets/emblem.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="水晶庭 · La Crystalline">
+<meta property="og:description" content="尋找心中那抹被遺忘的水晶之光。一座連接兩個世界的水晶塔特異點。">
+<meta property="og:image" content="assets/emblem_hero.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -309,6 +316,10 @@ section{padding:72px 0}
 .m-name{font-family:var(--serif);font-size:2.1rem;color:var(--mist);letter-spacing:.05em}
 .m-name .en{color:var(--crys-dim);font-style:italic;font-size:1.15rem;display:block;margin-top:.05em}
 .m-role{color:var(--crys);font-size:.85rem;letter-spacing:.14em;margin-top:.6em}
+.m-meta{margin-top:1em;padding:11px 14px;border-left:2px solid var(--crys-dim);background:rgba(127,211,214,.045);display:grid;gap:6px;max-width:36em}
+.m-meta-row{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.m-meta-label{color:var(--crys-dim);font-family:var(--serif);font-size:.76rem;letter-spacing:.16em;min-width:6.2em}
+.m-meta-value{color:#cbd6df;font-size:.9rem;letter-spacing:.06em}
 .m-body p{color:#c3ced9;font-size:1.02rem;margin-top:1.1em;letter-spacing:.02em;max-width:36em}
 .m-quote{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1.2rem;margin-top:1.4em;letter-spacing:.03em}
 .m-foot{color:var(--mute);font-size:.92rem;margin-top:1.1em;padding-top:1.1em;border-top:1px solid var(--line);font-family:var(--serif);font-style:italic}
@@ -339,10 +350,54 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
   .worlds{grid-template-columns:1fr}
   .master{grid-template-columns:1fr;gap:24px}
   .portrait{max-width:210px;margin:0 auto}
-  .drink{grid-template-columns:1fr;gap:8px}
-  .d-thumb{grid-column:auto;grid-row:auto;max-width:130px;margin:0 auto 6px}
-  .d-main,.d-desc,.d-poem,.d-price{grid-column:auto}
-  .d-price{justify-self:start;margin-top:.2em}
+
+  /* Mobile menu: force every drink field back into one real column.
+     d-spec / d-flavor use desktop grid columns, which otherwise create
+     implicit columns and squeeze the description on narrow screens. */
+  .drink{
+    grid-template-columns:minmax(0,1fr);
+    grid-auto-columns:minmax(0,1fr);
+    gap:8px;
+    padding:30px 0;
+  }
+  .drink > *{grid-column:1 / -1 !important}
+  .d-thumb{
+    grid-row:auto !important;
+    width:118px;
+    max-width:118px;
+    margin:0 auto 6px;
+  }
+  .d-main{text-align:center;min-width:0}
+  .d-name{font-size:1.4rem;line-height:1.5}
+  .d-name .en{font-size:.98rem}
+  .d-attr{margin-left:.5em}
+  .d-spec{
+    width:100%;
+    text-align:center;
+    font-size:.82rem;
+    line-height:1.7;
+    overflow-wrap:anywhere;
+  }
+  .d-price{justify-self:center;margin-top:.1em}
+  .d-desc{
+    width:100%;
+    max-width:none;
+    margin-top:.65em;
+    font-size:.94rem;
+    line-height:2;
+  }
+  .d-poem{
+    width:100%;
+    text-align:center;
+    margin-top:.7em;
+    line-height:1.8;
+  }
+  .d-flavor{
+    width:100%;
+    text-align:center;
+    margin-top:.25em;
+    line-height:1.8;
+  }
   .section-mark{flex-direction:column;align-items:flex-start}
   .section-mark img{width:72px;height:72px}
 }
@@ -414,6 +469,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
   <div class="wrap">
     <div class="eyebrow menu-head">汲母水晶之光，經寶石釀成</div>
     <h2 class="s-title">特色調酒<span class="cn">SIGNATURES</span></h2>
+    <div class="menu-note">※ 圖片僅供參考。異界素材在海德林之力下，於店內或會呈現不同模樣；但無論模樣如何，盛入其中的誠摯心意始終如一。</div>
     <div style="margin-top:24px">
 
       <div class="drink" style="--attr:#7fd3d6">
@@ -551,7 +607,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
           <div class="svc-price">999,999<span class='gil'>Gil</span></div>
         </div>
         <div class="svc-desc">店長親手為你量身裁製一身衣裳，針線裡縫進的，是只有熟人才懂的心意。</div>
-        <div class="svc-note">一套 11 件 ｜ 戰職 IL740 ｜ 生產 IL707<br>予有緣之人 · 每週限量 · 敬請預約</div>
+        <div class="svc-note">一套 11 件 ｜ 戰職 IL740 ｜ 生產 IL707<br>予有緣之人 · 每週限量 · 敬請預約 · 預約請洽店長</div>
         <div class="svc-poem">將久遠之光，披在身上。</div>
       </div>
 
@@ -575,6 +631,16 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
         <div class="svc-poem">兩個世界，一起走一段。</div>
       </div>
 
+      <div class="svc">
+        <div class="svc-top">
+          <div class="svc-name">留影<span class="en">Portrait</span></div>
+          <div class="svc-price">500,000<span class='gil'>Gil</span></div>
+        </div>
+        <div class="svc-desc">讓光替你記住今夜。由攝影擔當為你尋景、構圖，留下一張只屬於此刻的影像。</div>
+        <div class="svc-note">基本方案｜一人・一張 ｜ 由提供此服務之成員承接</div>
+        <div class="svc-poem">有些相遇，不該只留在記憶裡。</div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -591,6 +657,10 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <div>
         <div class="m-name">北風<span class="en">Northern Wind</span></div>
         <div class="m-role">店長 / Keeper</div>
+        <div class="m-meta">
+          <div class="m-meta-row"><span class="m-meta-label">RP 擔當</span><span class="m-meta-value">調酒・料理</span></div>
+          <div class="m-meta-row"><span class="m-meta-label">特殊服務</span><span class="m-meta-value">光釀・裁光 <span style="color:var(--crys-dim)">｜洽店長</span></span></div>
+        </div>
         <div class="m-body">
           <p>你此刻見到的，是一位來自斯卡提山脈的山林之民——清冷寡言，像山風一樣讓人捉摸不定；可一旦熟了，他健談得驚人，聊書、聊遠方、聊他走過的每一座山。</p>
           <p>但這具身體，並不是他真正的樣子。</p>
@@ -613,6 +683,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
     <h2 class="s-title" style="margin-bottom:28px">店內規則<span class="cn">HOUSE RULES</span></h2>
     <div class="rules">
       <div class="rule"><div class="rt">氛圍與界線</div><div class="rd">本店提供餐飲、合照與陪伴，嚴禁任何違規、色情或令人不適的言行。</div></div>
+      <div class="rule"><div class="rt">最低消費</div><div class="rd">每位旅者至少點用一杯飲品或一份餐點。</div></div>
       <div class="rule"><div class="rt">空間與動線</div><div class="rd">入店後請協助收起武器，並安置您的隨行寵物。</div></div>
       <div class="rule"><div class="rt">入店模式</div><div class="rd">請切換「走路模式」，並關閉情感動作的聊天欄文字。</div></div>
       <div class="rule"><div class="rt">服裝規範</div><div class="rd">請避免強烈發光、內衣或搞怪等不符合店內氛圍的服飾。</div></div>

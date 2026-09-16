@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>指名・點餐｜水晶庭 La Crystalline</title>
+<link rel="icon" type="image/png" href="assets/emblem_nav.png">
+<link rel="apple-touch-icon" href="assets/emblem.png">
+<meta name="description" content="水晶庭 La Crystalline — FF14 水晶主題 RP 酒吧・指名與點餐">
+<meta property="og:type" content="website">
+<meta property="og:title" content="指名・點餐｜水晶庭 La Crystalline">
+<meta property="og:description" content="尋找心中那抹被遺忘的水晶之光。指名成員、點一杯只屬於今夜的光。">
+<meta property="og:image" content="assets/emblem_hero.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -54,7 +62,8 @@ img{display:block;max-width:100%}
 .member .info .nm{font-family:var(--serif);font-size:1.25rem;color:var(--mist)}
 .member .info .nm .en{color:var(--crys-dim);font-style:italic;font-size:.9rem;margin-left:.4em}
 .member .info .role{color:var(--crys);font-size:.78rem;letter-spacing:.12em;margin-top:.15em}
-.member .info .tags{color:var(--mute);font-size:.82rem;margin-top:.3em}
+.member .info .rp,.member .info .tags{color:var(--mute);font-size:.82rem;margin-top:.25em;line-height:1.55}
+.member .info .mini-label{color:var(--crys-dim);font-family:var(--serif);font-size:.72rem;letter-spacing:.12em;margin-right:.45em}
 .member .pick{margin-left:auto;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--crys-dim);flex:none;position:relative}
 .member.sel .pick{border-color:var(--crys)}
 .member.sel .pick::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--crys)}
@@ -79,6 +88,11 @@ img{display:block;max-width:100%}
 .opt .nm .en{color:var(--crys-dim);font-style:italic;font-size:.82rem;margin-left:.4em}
 .opt .pr{margin-left:auto;color:var(--gold);font-family:var(--serif);font-size:1.02rem;white-space:nowrap}
 .opt .pr small{font-size:.62em;opacity:.75;margin-left:.15em}
+.opt .pr .svc-unit{display:block;margin:2px 0 0;font-family:var(--tc);font-size:.68em;letter-spacing:.06em;color:var(--mute);text-align:right}
+.opt.contact-only{cursor:default;border-style:dashed;background:rgba(17,26,43,.18)}
+.opt.contact-only:hover{border-color:var(--line)}
+.opt.contact-only .contact-mark{width:20px;height:20px;border-radius:50%;border:1px solid var(--crys-dim);color:var(--crys-dim);display:flex;align-items:center;justify-content:center;flex:none;font-size:.72rem}
+.opt.contact-only .pr{color:var(--crys);font-family:var(--tc);font-size:.82rem;letter-spacing:.08em}
 .opt .qty{margin-left:auto;display:flex;align-items:center;gap:10px}
 .opt .qty .pr{margin-left:0}
 .qbtn{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--crys);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
@@ -100,7 +114,9 @@ img{display:block;max-width:100%}
 .member .info{min-width:0}
 .member .nm{color:var(--mist);font-size:1rem}
 .member .nm .en{color:var(--crys-dim);font-style:italic;font-size:.82rem;margin-left:.35em}
-.member .role,.member .tags{color:var(--mute);font-size:.82rem;line-height:1.7}
+.member .role{color:var(--mute);font-size:.82rem;line-height:1.7}
+.member .rp,.member .tags{color:var(--mute);font-size:.8rem;line-height:1.55}
+.member .mini-label{color:var(--crys-dim);font-family:var(--serif);font-size:.7rem;letter-spacing:.1em;margin-right:.4em}
 .member .pick{margin-left:auto;width:18px;height:18px;border-radius:50%;border:1px solid var(--line)}
 .member.sel .pick{background:var(--crys);border-color:var(--crys);box-shadow:0 0 0 2px rgba(127,211,214,.14)}
 
@@ -196,6 +212,8 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   <section class="section">
     <div class="s-h"><span class="no">肆</span><span class="zh">點餐</span><span class="en">Dining</span></div>
     <div class="hint">調酒與餐點可自由選擇數量。</div>
+    <div class="hint" style="margin-top:6px">低消｜每位旅者至少點用一杯飲品或一份餐點。</div>
+    <div class="hint" style="margin-top:6px">※ 圖片僅供參考。異界素材在海德林之力下，於店內或會呈現不同模樣；但無論模樣如何，盛入其中的誠摯心意始終如一。</div>
     <div class="cat">特色調酒 SIGNATURES</div>
     <div class="opts" id="drinks"></div>
     <div class="cat">精選餐點 BITES</div>
@@ -223,7 +241,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" onclick="if(event.target.id==='toast')this.className='toast'"></div>
 
 <footer>
   水晶庭 · La Crystalline ｜ 伊弗利特 - 海霧村 - 10區 45號
@@ -245,13 +263,14 @@ const SUPABASE_ANON_KEY = "sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T"; // �
 
 // ---- 資料：成員 / 服務 / 菜單（改這裡即可增減）----
 const MEMBERS = [
-  { id:"northwind", name:"北風", en:"Northern Wind", role:"店長 / Keeper", tags:"光釀・裁光", av:"assets/master.jpg", services:["custom","tailor"] },
+  { id:"northwind", name:"北風", en:"Northern Wind", role:"店長 / Keeper", rp:"調酒・料理", tags:"光釀・裁光", av:"assets/master.jpg", services:["custom","tailor"], contactServices:["custom","tailor"] },
 ];
 const SERVICES = [
   { id:"custom",  name:"光釀", en:"Custom Blend", price:null, priceLabel:"時價" },
   { id:"tailor",  name:"裁光", en:"Tailored",     price:999999 },
   { id:"confide", name:"密談", en:"Confided",     price:250000 },
   { id:"prom",    name:"同行", en:"Promenade",    price:500000 },
+  { id:"photo",   name:"留影", en:"Portrait",     price:500000, unit:"一人・一張" },
 ];
 const DRINKS = [
   { id:"crystal", name:"水晶之光", en:"Crystal",      price:20000, img:"assets/drink_crystal.png", desc:"琴酒・接骨木花・檸檬・氣泡｜清爽花香。" },
@@ -280,7 +299,8 @@ function renderMembers(){
       <div class="info">
         <div class="nm">${m.name}<span class="en">${m.en}</span></div>
         <div class="role">${m.role}</div>
-        <div class="tags">${m.tags}</div>
+        <div class="rp"><span class="mini-label">RP</span>${m.rp}</div>
+        <div class="tags"><span class="mini-label">特殊服務</span>${m.tags}${(m.contactServices&&m.contactServices.length)?'｜洽店長':''}</div>
       </div>
       <div class="pick"></div>
     </div>`).join('');
@@ -309,14 +329,21 @@ function renderServices(){
     return;
   }
   const avail = SERVICES.filter(s=>member.services.includes(s.id));
-  hint.textContent = `${member.name} 可提供以下服務（可複選）。光釀為時價，實際費用由店長依故事而定。`;
-  box.innerHTML = avail.map(s=>`
-    <div class="opt${state.services.has(s.id)?' sel':''}" data-id="${s.id}">
-      <div class="box"></div>
+  const contactOnly = new Set(member.contactServices || []);
+  [...state.services].forEach(sid=>{ if(contactOnly.has(sid)) state.services.delete(sid); });
+  hint.textContent = contactOnly.size
+    ? `${member.name} 的特殊服務可於此查看；如需預約，請洽店長。`
+    : `${member.name} 可提供以下服務（可複選）。`;
+  box.innerHTML = avail.map(s=>{
+    const isContact = contactOnly.has(s.id);
+    return `
+    <div class="opt${isContact?' contact-only':(state.services.has(s.id)?' sel':'')}" data-id="${s.id}" aria-disabled="${isContact?'true':'false'}">
+      ${isContact?'<div class="contact-mark">◇</div>':'<div class="box"></div>'}
       <div class="nm">${s.name}<span class="en">${s.en}</span></div>
-      <div class="pr">${s.price===null?s.priceLabel:fmt(s.price)+'<small>Gil</small>'}</div>
-    </div>`).join('');
-  box.querySelectorAll('.opt').forEach(el=>{
+      <div class="pr">${isContact?'洽店長':(s.price===null?s.priceLabel:fmt(s.price)+'<small>Gil</small>'+(s.unit?'<small class="svc-unit">'+s.unit+'</small>':''))}</div>
+    </div>`;
+  }).join('');
+  box.querySelectorAll('.opt:not(.contact-only)').forEach(el=>{
     el.addEventListener('click',()=>{
       const id=el.dataset.id;
       if(state.services.has(id)){state.services.delete(id);el.classList.remove('sel');}
@@ -347,8 +374,10 @@ function renderMenu(listId, items){
     el.querySelectorAll('.qbtn').forEach(b=>{
       b.addEventListener('click',(ev)=>{
         ev.stopPropagation();
+        const MAXQ=20;
         state.qty[id] = (state.qty[id]||0) + (b.dataset.act==='plus'?1:-1);
         if(state.qty[id]<0) state.qty[id]=0;
+        if(state.qty[id]>MAXQ){ state.qty[id]=MAXQ; }
         $("qn-"+id).textContent = state.qty[id];
         el.classList.toggle('sel', state.qty[id]>0);
         update();
@@ -367,10 +396,50 @@ function calcTotal(){
 function hasAnything(){
   return state.member || state.services.size>0 || Object.values(state.qty).some(q=>q>0);
 }
+// ---- 前端送出節流：同一瀏覽器成功送出後 5 秒內不可再次送出 ----
+const SUBMIT_COOLDOWN_MS = 5000;
+const SUBMIT_COOLDOWN_KEY = "la_crystalline_last_order_submit_at";
+let submitCooldownTimer = null;
+let fallbackLastSubmitAt = 0;
+
+function getLastSubmitAt(){
+  try{
+    return Number(localStorage.getItem(SUBMIT_COOLDOWN_KEY) || 0);
+  }catch(e){
+    return fallbackLastSubmitAt;
+  }
+}
+function setLastSubmitAt(ts){
+  fallbackLastSubmitAt = ts;
+  try{ localStorage.setItem(SUBMIT_COOLDOWN_KEY, String(ts)); }catch(e){}
+}
+function cooldownRemainingMs(){
+  return Math.max(0, SUBMIT_COOLDOWN_MS - (Date.now() - getLastSubmitAt()));
+}
+function startSubmitCooldown(){
+  setLastSubmitAt(Date.now());
+  if(submitCooldownTimer) clearInterval(submitCooldownTimer);
+  update();
+  submitCooldownTimer = setInterval(()=>{
+    update();
+    if(cooldownRemainingMs() <= 0){
+      clearInterval(submitCooldownTimer);
+      submitCooldownTimer = null;
+    }
+  }, 250);
+}
+
 function update(){
   $("total").textContent = fmt(calcTotal());
   const ok = $("guestName").value.trim() && $("guestServer").value && hasAnything();
-  $("submitBtn").disabled = !ok;
+  const remain = cooldownRemainingMs();
+  if(remain > 0){
+    $("submitBtn").disabled = true;
+    $("submitBtn").textContent = `請稍候 ${Math.ceil(remain/1000)} 秒`;
+  }else{
+    $("submitBtn").disabled = !ok;
+    $("submitBtn").textContent = "送出訂單";
+  }
 }
 $("guestName").addEventListener('input',update);
 $("guestServer").addEventListener('change',update);
@@ -378,17 +447,27 @@ $("guestServer").addEventListener('change',update);
 // ---- 組訂單物件 ----
 function buildOrder(){
   const member = MEMBERS.find(m=>m.id===state.member);
-  const services = SERVICES.filter(s=>state.services.has(s.id)).map(s=>({name:s.name,price:s.price}));
+  const services = SERVICES.filter(s=>state.services.has(s.id)).map(s=>({
+    id:s.id,
+    name:s.name,
+    price:s.price
+  }));
   const items = [...DRINKS,...BITES].filter(it=>state.qty[it.id]>0)
-                 .map(it=>({name:it.name,qty:state.qty[it.id],price:it.price}));
+                 .map(it=>({id:it.id,name:it.name,qty:state.qty[it.id],price:it.price}));
+  const diningTotal = items.reduce((sum,it)=>sum + (Number(it.qty)||0) * (Number(it.price)||0), 0);
+  const serviceTotal = services.reduce((sum,s)=>sum + (Number(s.price)||0), 0);
   return {
     code: genCode(),
     guest_name: $("guestName").value.trim(),
     server: $("guestServer").value,
+    // host 目前為「指名對象」，本身不另外收費。
     host: member ? member.name : null,
-    services, items,
+    services,
+    items,
     note: $("note").value.trim() || null,
-    total: calcTotal(),
+    dining_total: diningTotal,
+    service_total: serviceTotal,
+    total: diningTotal + serviceTotal,
     created_at: new Date().toISOString(),
   };
 }
@@ -407,12 +486,28 @@ try{
 
 function toast(msg, code, isErr){
   const t=$("toast");
-  t.innerHTML = msg + (code?`<div class="code">${code}</div>`:'');
+  if(code){
+    t.innerHTML = msg + `<div class="code" id="codeVal">${code}</div>` +
+      `<button type="button" id="copyCode" style="margin-top:10px;background:transparent;border:1px solid var(--crys-dim);color:var(--crys);border-radius:3px;padding:6px 14px;font-family:var(--tc);cursor:pointer;letter-spacing:.1em">複製取件碼</button>`;
+  } else {
+    t.innerHTML = msg;
+  }
   t.className = "toast show" + (isErr?" err":"");
-  setTimeout(()=>{ t.className="toast"+(isErr?" err":""); }, isErr?4000:7000);
+  const cp=document.getElementById('copyCode');
+  if(cp){ cp.addEventListener('click',()=>{
+    navigator.clipboard.writeText(code).then(()=>{cp.textContent='已複製 ✓';}).catch(()=>{cp.textContent='請手動複製';});
+  }); }
+  // success with code stays until user closes; error auto-hides
+  if(isErr){ setTimeout(()=>{ t.className="toast err"; }, 4000); }
 }
 
 $("submitBtn").addEventListener('click', async ()=>{
+  const remain = cooldownRemainingMs();
+  if(remain > 0){
+    toast(`剛剛已送出訂單，請稍候 ${Math.ceil(remain/1000)} 秒再試。`, null, true);
+    update();
+    return;
+  }
   const order = buildOrder();
   $("submitBtn").disabled = true;
   $("submitBtn").textContent = "送出中…";
@@ -420,10 +515,12 @@ $("submitBtn").addEventListener('click', async ()=>{
     if(!sb){ // 尚未接上資料庫：先本地展示（測試模式）
       console.log("測試模式・訂單內容：", order);
       toast(`（測試模式）已收到您的訂單。<br>請保存取件碼：`, order.code);
+      startSubmitCooldown();
     }else{
       const { error } = await sb.from('orders').insert([order]);
       if(error) throw error;
       toast(`訂單已送出，店長會在營業時間為您安排。<br>請保存取件碼：`, order.code);
+      startSubmitCooldown();
       // reset selections (keep name/server)
       state.member=null; state.services.clear(); state.qty={};
       document.querySelectorAll('.member,.opt').forEach(el=>el.classList.remove('sel'));
@@ -432,10 +529,10 @@ $("submitBtn").addEventListener('click', async ()=>{
       $("note").value='';
     }
   }catch(err){
-    console.error(err);
-    toast("送出失敗，請稍後再試，或直接私訊店長。", null, true);
+    console.error("水晶庭訂單送出失敗：", err);
+    const detail = err && (err.message || err.details || err.code) ? `（${err.code || ''}${err.code && err.message ? ' / ' : ''}${err.message || err.details || ''}）` : '';
+    toast(`送出失敗${detail}<br>請稍後再試，或直接私訊店長。`, null, true);
   }finally{
-    $("submitBtn").textContent = "送出訂單";
     update();
   }
 });
