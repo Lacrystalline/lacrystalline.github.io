@@ -119,6 +119,14 @@ img{display:block;max-width:100%}
 .member .mini-label{color:var(--crys-dim);font-family:var(--serif);font-size:.7rem;letter-spacing:.1em;margin-right:.4em}
 .member .pick{margin-left:auto;width:18px;height:18px;border-radius:50%;border:1px solid var(--line)}
 .member.sel .pick{background:var(--crys);border-color:var(--crys);box-shadow:0 0 0 2px rgba(127,211,214,.14)}
+.member.unavailable{cursor:not-allowed;opacity:.58;filter:saturate(.72)}
+.member.unavailable:hover{border-color:var(--line)}
+.member.unavailable .pick{display:none}
+.member .status-badge{display:inline-flex;align-items:center;gap:5px;margin-top:.35em;padding:2px 7px;border:1px solid var(--line);border-radius:999px;font-family:var(--tc);font-size:.7rem;line-height:1.45;letter-spacing:.05em;color:var(--mute)}
+.member .status-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+.member .status-badge.on_duty{color:var(--crys);border-color:rgba(127,211,214,.32)}
+.member .status-badge.away{color:var(--gold);border-color:rgba(216,184,122,.30)}
+.member .status-badge.offline,.member .status-badge.loading,.member .status-badge.error{color:var(--mute)}
 
 .opt.menu-item{display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:12px}
 .opt.menu-item .thumb{width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 0 14px rgba(127,211,214,.12))}
@@ -263,7 +271,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T"; // �
 
 // ---- 資料：成員 / 服務 / 菜單（改這裡即可增減）----
 const MEMBERS = [
-  { id:"northwind", name:"北風", en:"Northern Wind", role:"店長 / Keeper", rp:"調酒・料理", tags:"光釀・裁光", av:"assets/master.jpg", services:["custom","tailor"], contactServices:["custom","tailor"] },
+  { id:"northwind", name:"北風", en:"Northern Wind", role:"店長 / Keeper", rp:"店長・調酒", tags:"光釀・裁光", av:"assets/master.jpg", services:["custom","tailor"], contactServices:["custom","tailor"], status:"loading", selectable:false },
 ];
 const SERVICES = [
   { id:"custom",  name:"光釀", en:"Custom Blend", price:null, priceLabel:"時價" },
@@ -273,7 +281,7 @@ const SERVICES = [
   { id:"photo",   name:"留影", en:"Portrait",     price:500000, unit:"一人・一張" },
 ];
 const DRINKS = [
-  { id:"crystal", name:"水晶之光", en:"Crystal",      price:20000, img:"assets/drink_crystal.png", desc:"琴酒・接骨木花・檸檬・氣泡｜清爽花香。" },
+  { id:"crystal", name:"水晶之光", en:"Crystal",      price:25000, img:"assets/drink_crystal.png", desc:"琴酒・接骨木花・檸檬・氣泡｜清爽花香。" },
   { id:"lapis",   name:"深邃青金", en:"Lapis Lazuli", price:15000, img:"assets/drink_lapis.png", desc:"琴酒・伏特加・藍柑橘・藍莓｜莓果酸甜。" },
   { id:"ruby",    name:"熾焰紅寶", en:"Ruby",         price:15000, img:"assets/drink_ruby.png", desc:"琴酒・覆盆莓・玫瑰・蔓越莓｜明亮酸甜。" },
   { id:"ame",     name:"迷夢紫晶", en:"Amethyst",     price:15000, img:"assets/drink_amethyst.png", desc:"琴酒・紫羅蘭・白葡萄・煎茶｜柔和花香。" },
@@ -291,28 +299,67 @@ const state = { member:null, services:new Set(), qty:{} };
 const fmt = n => n.toLocaleString('en-US');
 const $ = id => document.getElementById(id);
 
+// ---- 店員即時狀態 ----
+function staffStatusLabel(status){
+  if(status === "on_duty") return "當班中・可指名";
+  if(status === "away") return "暫離・目前不可指名";
+  if(status === "offline") return "未當班";
+  if(status === "error") return "狀態暫時無法確認";
+  return "確認狀態中…";
+}
+
+function syncSelectedMemberAvailability(){
+  if(!state.member) return;
+  const member = MEMBERS.find(m=>m.id===state.member);
+  if(member && member.selectable) return;
+  state.member = null;
+  state.services.clear();
+  renderServices();
+  update();
+}
+
 // ---- 渲染成員 ----
 function renderMembers(){
-  $("members").innerHTML = MEMBERS.map(m=>`
-    <div class="member" data-id="${m.id}">
+  $("members").innerHTML = MEMBERS.map(m=>{
+    const selectable = m.selectable === true;
+    const status = m.status || "loading";
+    return `
+    <div class="member${selectable?'':' unavailable'}${state.member===m.id?' sel':''}" data-id="${m.id}" aria-disabled="${selectable?'false':'true'}">
       <img class="av" src="${m.av}" alt="${m.name}" onerror="this.style.opacity=0">
       <div class="info">
         <div class="nm">${m.name}<span class="en">${m.en}</span></div>
         <div class="role">${m.role}</div>
         <div class="rp"><span class="mini-label">RP</span>${m.rp}</div>
         <div class="tags"><span class="mini-label">特殊服務</span>${m.tags}${(m.contactServices&&m.contactServices.length)?'｜洽店長':''}</div>
+        <div class="status-badge ${status}">${staffStatusLabel(status)}</div>
       </div>
-      <div class="pick"></div>
-    </div>`).join('');
+      ${selectable?'<div class="pick"></div>':''}
+    </div>`;
+  }).join('');
+
   document.querySelectorAll('.member').forEach(el=>{
     el.addEventListener('click',()=>{
       const id=el.dataset.id;
-      if(state.member===id){state.member=null;el.classList.remove('sel');}
-      else{state.member=id;document.querySelectorAll('.member').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');}
+      const picked=MEMBERS.find(m=>m.id===id);
+      if(!picked || !picked.selectable) return;
+
+      if(state.member===id){
+        state.member=null;
+      }else{
+        state.member=id;
+      }
+
       // 清掉新成員不提供的服務
       const member=MEMBERS.find(m=>m.id===state.member);
-      if(member){ [...state.services].forEach(sid=>{ if(!member.services.includes(sid)) state.services.delete(sid); }); }
-      else { state.services.clear(); }
+      if(member){
+        [...state.services].forEach(sid=>{
+          if(!member.services.includes(sid)) state.services.delete(sid);
+        });
+      }else{
+        state.services.clear();
+      }
+
+      renderMembers();
       renderServices();
       update();
     });
@@ -484,6 +531,38 @@ try{
   }
 }catch(e){ console.warn('Supabase 初始化失敗',e); }
 
+async function loadPublicStaffStatus(){
+  if(!sb){
+    MEMBERS.forEach(m=>{ m.status="error"; m.selectable=false; });
+    syncSelectedMemberAvailability();
+    renderMembers();
+    return;
+  }
+
+  try{
+    const { data, error } = await sb.rpc('get_public_staff_status');
+    if(error) throw error;
+
+    const byId = new Map((data || []).map(row=>[row.id, row]));
+    MEMBERS.forEach(m=>{
+      const row = byId.get(m.id);
+      if(!row){
+        m.status = "offline";
+        m.selectable = false;
+        return;
+      }
+      m.status = row.status || "offline";
+      m.selectable = row.selectable === true && row.status === "on_duty";
+    });
+  }catch(err){
+    console.warn('店員狀態讀取失敗', err);
+    MEMBERS.forEach(m=>{ m.status="error"; m.selectable=false; });
+  }
+
+  syncSelectedMemberAvailability();
+  renderMembers();
+}
+
 function toast(msg, code, isErr){
   const t=$("toast");
   if(code){
@@ -523,7 +602,8 @@ $("submitBtn").addEventListener('click', async ()=>{
       startSubmitCooldown();
       // reset selections (keep name/server)
       state.member=null; state.services.clear(); state.qty={};
-      document.querySelectorAll('.member,.opt').forEach(el=>el.classList.remove('sel'));
+      document.querySelectorAll('.opt').forEach(el=>el.classList.remove('sel'));
+      renderMembers();
       renderServices();
       document.querySelectorAll('.qn').forEach(el=>el.textContent='0');
       $("note").value='';
@@ -543,6 +623,8 @@ renderServices();
 renderMenu("drinks", DRINKS);
 renderMenu("bites", BITES);
 update();
+loadPublicStaffStatus();
+setInterval(loadPublicStaffStatus, 30000);
 </script>
 </body>
 </html>

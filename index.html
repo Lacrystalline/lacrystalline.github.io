@@ -351,51 +351,86 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
   .master{grid-template-columns:1fr;gap:24px}
   .portrait{max-width:210px;margin:0 auto}
 
-  /* Mobile menu: force every drink field back into one real column.
-     d-spec / d-flavor use desktop grid columns, which otherwise create
-     implicit columns and squeeze the description on narrow screens. */
+  /* Mobile menu: one clear reading flow.
+     Image → Chinese name → English name → attribute → price
+     → ingredients / flavor → story → closing line. */
   .drink{
     grid-template-columns:minmax(0,1fr);
     grid-auto-columns:minmax(0,1fr);
-    gap:8px;
-    padding:30px 0;
+    gap:7px;
+    padding:32px 0;
+    align-items:start;
   }
-  .drink > *{grid-column:1 / -1 !important}
-  .d-thumb{
+  .drink > *{
+    grid-column:1 / -1 !important;
     grid-row:auto !important;
-    width:118px;
-    max-width:118px;
-    margin:0 auto 6px;
+    min-width:0;
   }
-  .d-main{text-align:center;min-width:0}
-  .d-name{font-size:1.4rem;line-height:1.5}
-  .d-name .en{font-size:.98rem}
-  .d-attr{margin-left:.5em}
+  .d-thumb{
+    order:1;
+    width:128px;
+    max-width:128px;
+    margin:0 auto 8px;
+  }
+  .d-main{
+    order:2;
+    text-align:center;
+    min-width:0;
+  }
+  .d-name{
+    font-size:1.48rem;
+    line-height:1.35;
+  }
+  .d-name .cn{
+    display:block;
+  }
+  .d-name .en{
+    display:block;
+    margin:.12em 0 0;
+    font-size:1rem;
+    line-height:1.35;
+  }
+  .d-attr{
+    display:inline-block;
+    margin:.65em 0 0;
+    padding:3px 10px;
+  }
+  .d-price{
+    order:3;
+    justify-self:center;
+    margin:.35em 0 .15em;
+    font-size:1.28rem;
+  }
   .d-spec{
+    order:4;
     width:100%;
     text-align:center;
+    margin-top:.25em;
     font-size:.82rem;
-    line-height:1.7;
+    line-height:1.75;
     overflow-wrap:anywhere;
   }
-  .d-price{justify-self:center;margin-top:.1em}
+  .d-flavor{
+    order:5;
+    width:100%;
+    text-align:center;
+    margin-top:.2em;
+    font-size:.8rem;
+    line-height:1.8;
+  }
   .d-desc{
+    order:6;
     width:100%;
     max-width:none;
-    margin-top:.65em;
+    margin-top:.8em;
     font-size:.94rem;
     line-height:2;
   }
   .d-poem{
+    order:7;
     width:100%;
     text-align:center;
-    margin-top:.7em;
-    line-height:1.8;
-  }
-  .d-flavor{
-    width:100%;
-    text-align:center;
-    margin-top:.25em;
+    margin-top:.75em;
     line-height:1.8;
   }
   .section-mark{flex-direction:column;align-items:flex-start}
@@ -476,7 +511,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
         <img class="d-thumb" src="assets/drink_crystal.png" alt="水晶之光">
         <div class="d-main d-name"><span class="cn">水晶之光</span><span class="en">Crystal</span><span class="d-attr" style="--attr:#7fd3d6">意力 MND</span></div>
         <div class="d-spec">Gin · Elderflower · Lemon · Soda</div>
-        <div class="d-price">20,000<span class='gil'>Gil</span></div>
+        <div class="d-price">25,000<span class='gil'>Gil</span></div>
         <div class="d-desc">澄澈琴酒揉合接骨木花與新鮮檸檬，以細緻氣泡拉出清冽輪廓。中央冰晶隨酒液緩緩融化，香氣也在杯中逐漸展開；入口明亮、乾淨，尾韻留下淡淡花香與柑橘回甘。</div>
         <div class="d-poem">那抹被遺忘的光，原來一直在杯底。</div>
         <div class="d-flavor">風味｜清爽・花香・柑橘・微氣泡　酒感｜★★★☆☆</div>
@@ -658,14 +693,14 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
         <div class="m-name">北風<span class="en">Northern Wind</span></div>
         <div class="m-role">店長 / Keeper</div>
         <div class="m-meta">
-          <div class="m-meta-row"><span class="m-meta-label">RP 擔當</span><span class="m-meta-value">調酒・料理</span></div>
+          <div class="m-meta-row"><span class="m-meta-label">RP 擔當</span><span class="m-meta-value">店長・調酒</span></div>
           <div class="m-meta-row"><span class="m-meta-label">特殊服務</span><span class="m-meta-value">光釀・裁光 <span style="color:var(--crys-dim)">｜洽店長</span></span></div>
         </div>
         <div class="m-body">
-          <p>你此刻見到的，是一位來自斯卡提山脈的山林之民——清冷寡言，像山風一樣讓人捉摸不定；可一旦熟了，他健談得驚人，聊書、聊遠方、聊他走過的每一座山。</p>
-          <p>但這具身體，並不是他真正的樣子。</p>
-          <p>據說他的本體流著古老的亞拉戈皇血——正是這份血脈，讓他有資格喚醒並看守這座水晶塔特異點。魂與記憶渡得過來，肉身卻總隨世界而變；如今這副山林之民的軀殼，不過是特異點為他開啟的、又一種「可能性的身體」。至於他真正的容貌、那雙傳說中的紅瞳，此刻並不在這裡。</p>
-          <p>他愛寫書、愛旅行，店裡的一切幾乎都出自他手：架上的酒、烤爐裡的點心、牆上的擺設。比起刀光劍影，他更願意在爐火與工坊之間，把一件件東西慢慢做好。</p>
+          <p>你此刻見到的，是一位以斯卡提山脈山林之民模樣行走於此的旅者。他舉止文雅而從容，與初識之人總保留幾分恰到好處的距離，因此多少顯得難以看透；但真正熟悉之後，才會發現他其實相當健談。從書、工藝與音樂，到城市、山林與旅途中遇見的人事，他總有不少故事可說。</p>
+          <p>但這具身體，並不是他真正的樣子。據說他的本體流著古老的亞拉戈皇血——正是這份血脈，讓他有資格喚醒並看守這座水晶塔特異點。魂與記憶渡得過來，肉身卻總隨世界而變；如今這副山林之民的軀殼，不過是特異點為他開啟的、又一種「可能性的身體」。至於他真正的容貌、那雙傳說中的紅瞳，此刻並不在這裡。</p>
+          <p>他曾在城市生活，也走過山野與漫長旅途；做過工藝、研究過古老知識，也以冒險者的身分去過不少地方。如今比起刀光劍影，他更喜歡把時間花在酒、料理、書本與工坊裡，把一件件東西慢慢做好。</p>
+          <p>至於為何最後停在水晶庭，他自己也說不清。最初似乎只是循著某種來自水晶的指引走到這裡——他曾以為那是海德林的聲音，如今卻不再急著替它下定論。水晶庭原本只是旅途中的停留之處，最後卻成了他選擇留下、替來客點燈的地方。</p>
         </div>
         <div class="m-quote">「……你也是來躲雨的嗎？坐吧。這裡的光，會等你。」</div>
         <div class="m-foot">有些東西他只給熟人：一身親手裁的衣裳，或一杯只為你而釀的光。</div>
