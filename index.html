@@ -84,16 +84,19 @@ body::before{
   .crystal-veil,.crystal-veil::after{animation:none}
 }
 
-/* ---------- water-light divider ---------- */
+/* ---------- crystal-wrapped classical divider ---------- */
 .beam{
-  width:1px;height:70px;margin:0 auto;
-  background:linear-gradient(to bottom,transparent,var(--crys),transparent);
-  opacity:.5;
+  width:320px;
+  height:30px;
+  margin:0 auto;
+  background:url("assets/ornament_divider_crystal_wrap.svg") center/contain no-repeat;
+  opacity:.96;
+  filter:drop-shadow(0 0 8px rgba(127,211,214,.12));
 }
 @media(prefers-reduced-motion:no-preference){
-  .beam{animation:shimmer 4s ease-in-out infinite}
+  .beam{animation:shimmer 5s ease-in-out infinite}
 }
-@keyframes shimmer{0%,100%{opacity:.25}50%{opacity:.7}}
+@keyframes shimmer{0%,100%{opacity:.86}50%{opacity:1}}
 
 
 /* ---------- top nav ---------- */
@@ -295,30 +298,16 @@ section{padding:72px 0}
   min-width:0;
 }
 .drink:not(:last-child)::after{
-  content:"✦";
+  content:"";
   position:absolute;
   left:50%;
-  bottom:5px;
+  bottom:4px;
   transform:translateX(-50%);
-  width:190px;
-  height:18px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:rgba(183,226,229,.72);
-  font-size:.72rem;
-  line-height:1;
-  text-shadow:0 0 10px rgba(127,211,214,.28);
-  background:
-    linear-gradient(90deg,
-      transparent 0,
-      rgba(127,211,214,.10) 8%,
-      rgba(127,211,214,.34) 39%,
-      transparent 39%,
-      transparent 61%,
-      rgba(127,211,214,.34) 61%,
-      rgba(127,211,214,.10) 92%,
-      transparent 100%);
+  width:236px;
+  height:22px;
+  background:url("assets/ornament_divider_crystal_wrap.svg") center/contain no-repeat;
+  opacity:.94;
+  filter:drop-shadow(0 0 8px rgba(127,211,214,.10));
 }
 .d-thumb{
   order:1;
@@ -479,8 +468,13 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
     padding:32px 0 40px;
   }
   .drink:not(:last-child)::after{
-    bottom:3px;
-    width:150px;
+    bottom:2px;
+    width:188px;
+    height:18px;
+  }
+  .beam{
+    width:224px;
+    height:24px;
   }
   .drink > *{
     grid-column:1 / -1 !important;
