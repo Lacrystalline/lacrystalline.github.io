@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>訂單查詢・水晶憑單｜水晶庭 La Crystalline</title>
+<link rel="icon" type="image/png" href="assets/emblem_nav.png">
+<link rel="apple-touch-icon" href="assets/emblem.png">
+<meta name="description" content="水晶庭 La Crystalline 訂單查詢與水晶憑單">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0e14;--night:#111a2b;--deep:#0d1420;
+  --crys:#7fd3d6;--crys-dim:#4a8f95;--gold:#d8b87a;
+  --mist:#e8edf2;--mute:#9aa7b4;--line:rgba(127,211,214,.18);
+  --serif:"Cormorant Garamond",serif;--tc:"Noto Serif TC",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--mist);font-family:var(--tc);font-weight:300;line-height:1.9;-webkit-font-smoothing:antialiased;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-3;background:radial-gradient(1100px 760px at 80% -6%,rgba(50,90,130,.30),transparent 60%),radial-gradient(950px 700px at 10% 14%,rgba(35,65,110,.26),transparent 58%),radial-gradient(900px 900px at 50% 116%,rgba(22,50,80,.30),transparent 62%),linear-gradient(180deg,#070b12 0%,#0a1120 45%,#080d16 100%)}
+.crystal-veil{position:fixed;inset:0;z-index:-2;pointer-events:none;background-image:url('assets/crystal.svg');background-position:center top;background-repeat:no-repeat;background-size:cover;opacity:.42;mix-blend-mode:screen}
+img{display:block;max-width:100%}.wrap{max-width:820px;margin:0 auto;padding:0 22px}
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(8,12,20,.9);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}.nav-logo img{height:26px;width:auto}.nav-logo .lt{font-family:var(--serif);font-size:1.05rem;color:var(--mist);letter-spacing:.12em;line-height:1}.nav-logo .lt small{display:block;font-family:var(--tc);font-size:.58rem;color:var(--crys-dim);letter-spacing:.28em;margin-top:2px}.nav-actions{display:flex;gap:16px;align-items:center}.nav-actions a{color:var(--mute);text-decoration:none;font-size:.85rem;letter-spacing:.08em}.nav-actions a:hover{color:var(--crys)}
+.head{padding:104px 0 28px;text-align:center}.head img{width:88px;height:88px;object-fit:contain;margin:0 auto 12px;filter:drop-shadow(0 0 18px rgba(127,211,214,.22))}.head .ey{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1.05rem}.head h1{font-family:var(--serif);font-size:clamp(2rem,7vw,3.2rem);font-weight:500;letter-spacing:.1em;margin-top:.1em}.head .sub{color:var(--mute);font-size:.9rem;margin-top:.5em;letter-spacing:.05em}
+.card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(17,26,43,.50),rgba(13,20,32,.38));border-radius:5px;backdrop-filter:blur(10px);box-shadow:0 22px 60px rgba(0,0,0,.28)}
+.lookup{padding:22px;margin-bottom:24px}.lookup-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field label{display:block;color:var(--crys);font-size:.82rem;letter-spacing:.1em;margin-bottom:.4em}.field input{width:100%;background:rgba(13,20,32,.75);border:1px solid var(--line);border-radius:3px;color:var(--mist);font-family:var(--tc);font-size:.95rem;padding:11px 13px;outline:none;transition:.2s}.field input:focus{border-color:var(--crys-dim)}
+.lookup-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}.btn{border:none;border-radius:3px;font-family:var(--tc);font-weight:500;font-size:.94rem;letter-spacing:.1em;padding:10px 20px;cursor:pointer;transition:.2s}.btn.primary{background:linear-gradient(135deg,#7fd3d6,#4a8f95);color:#06121a}.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--mute)}.btn:hover{filter:brightness(1.1)}.btn:disabled{opacity:.5;cursor:not-allowed}.hint{color:var(--mute);font-size:.78rem;line-height:1.7}
+.notice{display:none;margin-top:14px;padding:10px 12px;border:1px solid var(--line);background:rgba(13,20,32,.45);color:var(--mute);font-size:.82rem;border-radius:3px}.notice.show{display:block}.notice.err{border-color:rgba(216,122,143,.45);color:#e8b8c3}
+.receipt{display:none;overflow:hidden}.receipt.show{display:block}.receipt-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,rgba(127,211,214,.05),rgba(216,184,122,.04))}.brand{display:flex;align-items:center;gap:14px}.brand img{width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 0 14px rgba(127,211,214,.22))}.brand .en{font-family:var(--serif);font-size:1.25rem;color:var(--mist);letter-spacing:.08em}.brand .zh{font-size:.8rem;color:var(--crys-dim);letter-spacing:.2em}.status{padding:6px 12px;border:1px solid rgba(216,184,122,.45);border-radius:999px;color:var(--gold);font-size:.78rem;letter-spacing:.06em;white-space:nowrap}
+.receipt-body{padding:22px}.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.meta{border:1px solid var(--line);background:rgba(8,12,20,.24);padding:14px;border-radius:4px}.meta .k{color:var(--crys-dim);font-size:.72rem;letter-spacing:.13em}.meta .v{color:var(--mist);font-size:.95rem;margin-top:2px;word-break:break-word}
+.block{margin-top:18px;border:1px solid var(--line);border-radius:4px;overflow:hidden}.block-h{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid var(--line);background:rgba(127,211,214,.04)}.block-h .t{font-family:var(--serif);font-size:1.2rem;letter-spacing:.06em}.block-h .en{color:var(--crys-dim);font-size:.75rem;font-style:italic}.line{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 14px;border-bottom:1px dashed rgba(127,211,214,.12)}.line:last-child{border-bottom:none}.line .name{color:var(--mist);font-size:.92rem}.line .sub{color:var(--mute);font-size:.76rem}.line .price{color:var(--gold);font-family:var(--serif);white-space:nowrap}.empty{padding:14px;color:var(--mute);font-size:.8rem}
+.totals{margin-top:18px;border:1px solid rgba(216,184,122,.28);background:linear-gradient(180deg,rgba(216,184,122,.055),rgba(127,211,214,.035));padding:14px;border-radius:4px}.tot-row{display:flex;justify-content:space-between;gap:12px;color:var(--mute);font-size:.87rem;padding:4px 0}.tot-row strong{color:var(--mist);font-weight:400}.grand{display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding-top:11px;border-top:1px solid rgba(216,184,122,.22)}.grand .k{font-family:var(--serif);color:var(--gold);letter-spacing:.12em}.grand .v{font-family:var(--serif);font-size:1.7rem;color:#f1d9aa}
+.footnote{margin-top:18px;color:var(--mute);font-size:.76rem;line-height:1.8;text-align:center}.print-row{display:flex;justify-content:center;margin-top:16px;padding-bottom:4px}footer{text-align:center;padding:30px 24px 40px;color:var(--mute);font-size:.76rem;letter-spacing:.05em}.warn{color:var(--crys-dim);margin-top:.5em}
+@media(max-width:640px){.lookup-grid,.meta-grid{grid-template-columns:1fr}.receipt-head{align-items:flex-start;flex-direction:column}.nav{padding:11px 14px}.nav-actions{gap:10px}.nav-actions a{font-size:.75rem}.head{padding-top:96px}.receipt-body,.receipt-head,.lookup{padding-left:16px;padding-right:16px}.line{grid-template-columns:1fr}.line .price{white-space:normal}}
+@media print{body::before,.crystal-veil,.nav,.head,.lookup,.print-row,footer{display:none!important}.receipt{display:block!important;border:1px solid #999;background:#fff;color:#111;box-shadow:none}.receipt *{color:#111!important}.receipt-body,.receipt-head{background:#fff}.block,.meta,.totals{border-color:#bbb}.line{border-color:#ddd}}
+</style>
+</head>
+<body>
+<div class="crystal-veil" aria-hidden="true"></div>
+<nav class="nav">
+  <a class="nav-logo" href="index.html"><img src="assets/emblem_nav.png" alt="水晶庭"><span class="lt">La Crystalline<small>水晶庭</small></span></a>
+  <div class="nav-actions"><a href="order.html">指名・點餐</a><a href="index.html">← 返回主頁</a></div>
+</nav>
+<header class="head">
+  <div class="wrap">
+    <img src="assets/emblem.png" alt="水晶庭">
+    <div class="ey">A trace of light, kept for you.</div>
+    <h1>訂單查詢・水晶憑單</h1>
+    <div class="sub">以旅者名稱與取件碼查詢自己的訂單</div>
+  </div>
+</header>
+<main class="wrap">
+  <section class="lookup card">
+    <div class="lookup-grid">
+      <div class="field"><label for="guestName">旅者名稱</label><input id="guestName" type="text" maxlength="40" placeholder="下單時填寫的名稱"></div>
+      <div class="field"><label for="orderCode">取件碼</label><input id="orderCode" type="text" maxlength="12" placeholder="例如 LC-A9TY"></div>
+    </div>
+    <div class="lookup-actions">
+      <button class="btn primary" id="lookupBtn">查詢</button>
+      <button class="btn ghost" id="clearBtn" type="button">清除</button>
+      <span class="hint">需同時符合旅者名稱與取件碼才會顯示。</span>
+    </div>
+    <div class="notice" id="notice"></div>
+  </section>
+
+  <section class="receipt card" id="receipt">
+    <div class="receipt-head">
+      <div class="brand"><img src="assets/emblem.png" alt="水晶庭"><div><div class="en">La Crystalline</div><div class="zh">水晶庭・CRYSTAL VOUCHER</div></div></div>
+      <div class="status" id="status">—</div>
+    </div>
+    <div class="receipt-body">
+      <div class="meta-grid">
+        <div class="meta"><div class="k">ORDER CODE</div><div class="v" id="mCode">—</div></div>
+        <div class="meta"><div class="k">ORDER TIME</div><div class="v" id="mTime">—</div></div>
+        <div class="meta"><div class="k">TRAVELER</div><div class="v" id="mGuest">—</div></div>
+        <div class="meta"><div class="k">SERVER</div><div class="v" id="mServer">—</div></div>
+        <div class="meta"><div class="k">HOST</div><div class="v" id="mHost">未指名</div></div>
+        <div class="meta"><div class="k">NOTE</div><div class="v" id="mNote">無</div></div>
+      </div>
+
+      <div class="block">
+        <div class="block-h"><span class="t">餐飲明細</span><span class="en">Dining</span></div>
+        <div id="items"></div>
+      </div>
+
+      <div class="block">
+        <div class="block-h"><span class="t">特殊服務</span><span class="en">Special Service</span></div>
+        <div id="services"></div>
+      </div>
+
+      <div class="totals">
+        <div class="tot-row"><span>餐飲合計</span><strong id="diningTotal">0 Gil</strong></div>
+        <div class="tot-row"><span>特殊服務合計</span><strong id="serviceTotal">0 Gil</strong></div>
+        <div class="grand"><span class="k">TOTAL</span><span class="v" id="grandTotal">0 Gil</span></div>
+      </div>
+
+      <div class="footnote">此頁僅顯示旅者可查閱的訂單內容，不包含店內薪資、分潤與後台結算資料。</div>
+      <div class="print-row"><button class="btn ghost" type="button" onclick="window.print()">列印憑單</button></div>
+    </div>
+  </section>
+</main>
+<footer>水晶庭 · La Crystalline ｜ 伊弗利特 - 海霧村 - 10區 45號<div class="warn">未滿十八歲禁止飲酒 ｜ 飲酒過量有害健康</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://idqysanzhafayovieqig.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n||0).toLocaleString('en-US')+' Gil';
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function notice(msg,err=false){const el=$('notice');el.textContent=msg;el.className='notice show'+(err?' err':'');}
+function clearNotice(){$('notice').className='notice';$('notice').textContent='';}
+function dt(v){if(!v)return '—';const d=new Date(v);return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(d);}
+function renderLines(id,rows,empty){const el=$(id);if(!Array.isArray(rows)||!rows.length){el.innerHTML=`<div class="empty">${empty}</div>`;return;}el.innerHTML=rows.map(x=>{const provider=x.provider_name?`｜提供：${esc(x.provider_name)}`:'';const sub=`數量 × ${Number(x.qty||1)}${provider}`;const price=x.amount==null?'時價・依現場結算':fmt(x.amount);return `<div class="line"><div><div class="name">${esc(x.name||'未命名項目')}</div><div class="sub">${sub}</div></div><div class="price">${price}</div></div>`;}).join('');}
+function render(data){$('receipt').classList.add('show');$('status').textContent=data.status_label||data.status||'—';$('mCode').textContent=data.code||'—';$('mTime').textContent=dt(data.created_at);$('mGuest').textContent=data.guest_name||'—';$('mServer').textContent=data.server||'—';$('mHost').textContent=data.host||'未指名';$('mNote').textContent=data.note||'無';renderLines('items',data.items,'本次沒有餐飲項目。');renderLines('services',data.services,'本次沒有特殊服務。');$('diningTotal').textContent=fmt(data.dining_total);$('serviceTotal').textContent=fmt(data.service_total);$('grandTotal').textContent=fmt(data.total);}
+function hideReceipt(){$('receipt').classList.remove('show');}
+async function lookup(){const guest=$('guestName').value.trim();const code=$('orderCode').value.trim().toUpperCase();if(!guest||!code){hideReceipt();notice('請輸入旅者名稱與取件碼。',true);return;}clearNotice();$('lookupBtn').disabled=true;$('lookupBtn').textContent='查詢中…';try{const {data,error}=await sb.rpc('lookup_order_receipt',{p_code:code,p_guest_name:guest});if(error)throw error;if(!data){hideReceipt();notice('查無符合的訂單，請確認名稱與取件碼。',true);return;}render(data);notice('已載入水晶憑單。');const u=new URL(location.href);u.searchParams.set('guest',guest);u.searchParams.set('code',code);history.replaceState({},'',u);}catch(e){console.error(e);hideReceipt();notice('查詢暫時失敗，請稍後再試。',true);}finally{$('lookupBtn').disabled=false;$('lookupBtn').textContent='查詢';}}
+$('lookupBtn').addEventListener('click',lookup);$('clearBtn').addEventListener('click',()=>{$('guestName').value='';$('orderCode').value='';clearNotice();hideReceipt();const u=new URL(location.href);u.search='';history.replaceState({},'',u);});['guestName','orderCode'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')lookup();}));
+window.addEventListener('load',()=>{const u=new URL(location.href);const guest=u.searchParams.get('guest');const code=u.searchParams.get('code');if(guest)$('guestName').value=guest;if(code)$('orderCode').value=code;if(guest&&code)lookup();});
+</script>
+</body>
+</html>

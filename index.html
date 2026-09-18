@@ -276,19 +276,141 @@ section{padding:72px 0}
 .section-mark .mini{color:var(--crys-dim);font-size:.82rem;letter-spacing:.26em;text-transform:uppercase}
 .section-mark .mini-en{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1rem;letter-spacing:.04em;margin-top:.25em}
 
+/* Desktop menu follows the same vertical reading flow as mobile:
+   image → Chinese → English → attribute → price → ingredients / flavor
+   → description → closing line. */
 .drink{
-  display:grid;grid-template-columns:112px 1fr auto;gap:10px 20px;
-  padding:26px 0;border-bottom:1px solid var(--line);align-items:start;
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  grid-auto-columns:minmax(0,1fr);
+  gap:7px;
+  padding:42px 0 48px;
+  border-bottom:none;
+  align-items:start;
 }
-.drink:last-child{border-bottom:none}
-.d-thumb{grid-column:1/2;grid-row:1/4;align-self:center;width:100%;max-width:112px;aspect-ratio:1/1;object-fit:contain;filter:drop-shadow(0 0 18px rgba(127,211,214,.14))}
-.d-main{grid-column:2/3}
-.d-price{grid-column:3/4;grid-row:1/2;justify-self:end}
-.d-spec{grid-column:2/4;color:var(--crys);font-family:var(--serif);font-size:.88rem;letter-spacing:.04em;margin-top:.1em}
-.d-desc{grid-column:2/3;color:var(--mute);font-size:.96rem;margin-top:.5em;max-width:34em;letter-spacing:.02em}
-.d-flavor{grid-column:2/4;color:#aeb9c4;font-size:.8rem;letter-spacing:.08em;margin-top:.2em}
-.d-poem{grid-column:2/4;font-family:var(--serif);font-style:italic;color:var(--crys-dim);font-size:1rem;margin-top:.5em;letter-spacing:.04em}
+.drink > *{
+  grid-column:1 / -1 !important;
+  grid-row:auto !important;
+  min-width:0;
+}
+.drink:not(:last-child)::after{
+  content:"✦";
+  position:absolute;
+  left:50%;
+  bottom:5px;
+  transform:translateX(-50%);
+  width:190px;
+  height:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(183,226,229,.72);
+  font-size:.72rem;
+  line-height:1;
+  text-shadow:0 0 10px rgba(127,211,214,.28);
+  background:
+    linear-gradient(90deg,
+      transparent 0,
+      rgba(127,211,214,.10) 8%,
+      rgba(127,211,214,.34) 39%,
+      transparent 39%,
+      transparent 61%,
+      rgba(127,211,214,.34) 61%,
+      rgba(127,211,214,.10) 92%,
+      transparent 100%);
+}
+.d-thumb{
+  order:1;
+  align-self:center;
+  width:154px;
+  max-width:154px;
+  aspect-ratio:1/1;
+  object-fit:contain;
+  margin:0 auto 10px;
+  filter:drop-shadow(0 0 20px rgba(127,211,214,.16));
+}
+.d-main{
+  order:2;
+  text-align:center;
+}
+.d-name{
+  font-size:1.56rem;
+  line-height:1.35;
+}
+.d-name .cn{display:block}
+.d-name .en{
+  display:block;
+  margin:.12em 0 0;
+  font-size:1.02rem;
+  line-height:1.35;
+}
+.d-attr{
+  display:inline-block;
+  margin:.7em 0 0;
+  padding:3px 10px;
+}
+.d-price{
+  order:3;
+  justify-self:center;
+  margin:.38em 0 .14em;
+  font-size:1.3rem;
+}
+.d-spec{
+  order:4;
+  width:min(100%,720px);
+  justify-self:center;
+  text-align:center;
+  color:var(--crys);
+  font-family:var(--serif);
+  font-size:.9rem;
+  line-height:1.75;
+  letter-spacing:.04em;
+  margin-top:.25em;
+  overflow-wrap:anywhere;
+}
+.d-flavor{
+  order:5;
+  width:min(100%,720px);
+  justify-self:center;
+  text-align:center;
+  color:#aeb9c4;
+  font-size:.82rem;
+  line-height:1.8;
+  letter-spacing:.08em;
+  margin-top:.2em;
+}
+.d-desc{
+  order:6;
+  width:min(100%,720px);
+  max-width:none;
+  justify-self:center;
+  color:var(--mute);
+  font-size:.96rem;
+  line-height:2;
+  letter-spacing:.02em;
+  margin-top:.85em;
+}
+.d-poem{
+  order:7;
+  width:min(100%,720px);
+  justify-self:center;
+  text-align:center;
+  font-family:var(--serif);
+  font-style:italic;
+  color:var(--crys-dim);
+  font-size:1rem;
+  line-height:1.8;
+  letter-spacing:.04em;
+  margin-top:.75em;
+}
 .menu-note{margin-top:18px;color:var(--mute);font-size:.92rem}
+.drinks .wrap > div[style="margin-top:24px"],
+.bites .wrap > div[style="margin-top:24px"]{
+  width:min(100%,820px);
+  margin-left:auto;
+  margin-right:auto;
+}
 .order-cta{margin-top:34px;display:flex;justify-content:center}
 .order-btn{display:inline-flex;align-items:center;gap:12px;padding:11px 18px;border:1px solid rgba(127,211,214,.35);border-radius:4px;background:rgba(127,211,214,.07);color:var(--mist);text-decoration:none;letter-spacing:.14em;transition:.24s}
 .order-btn img{width:32px;height:32px;object-fit:contain}
@@ -351,15 +473,14 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
   .master{grid-template-columns:1fr;gap:24px}
   .portrait{max-width:210px;margin:0 auto}
 
-  /* Mobile menu: one clear reading flow.
-     Image → Chinese name → English name → attribute → price
-     → ingredients / flavor → story → closing line. */
+  /* Mobile keeps the same vertical menu flow, with tighter spacing. */
   .drink{
-    grid-template-columns:minmax(0,1fr);
-    grid-auto-columns:minmax(0,1fr);
     gap:7px;
-    padding:32px 0;
-    align-items:start;
+    padding:32px 0 40px;
+  }
+  .drink:not(:last-child)::after{
+    bottom:3px;
+    width:150px;
   }
   .drink > *{
     grid-column:1 / -1 !important;
@@ -449,6 +570,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
     <a href="#special">服務</a>
     <a href="#master">成員</a>
     <a href="#find">FIND US</a>
+    <a href="receipt.html">訂單查詢</a>
     <a class="order-link" href="order.html">指名・點餐</a>
   </div>
   <button class="nav-toggle" id="navToggle" aria-label="選單" aria-controls="navLinks" aria-expanded="false">☰</button>

@@ -167,7 +167,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 
 <nav class="nav">
   <a class="nav-logo" href="index.html"><img src="assets/emblem_nav.png" alt="水晶庭"><span class="lt">La Crystalline<small>水晶庭</small></span></a>
-  <a class="back" href="index.html">← 返回主頁</a>
+  <div style="display:flex;gap:16px;align-items:center"><a class="back" href="receipt.html">訂單查詢</a><a class="back" href="index.html">← 返回主頁</a></div>
 </nav>
 
 <header class="head">
@@ -566,8 +566,13 @@ async function loadPublicStaffStatus(){
 function toast(msg, code, isErr){
   const t=$("toast");
   if(code){
+    const guest = encodeURIComponent($("guestName").value.trim());
+    const receiptUrl = `receipt.html?guest=${guest}&code=${encodeURIComponent(code)}`;
     t.innerHTML = msg + `<div class="code" id="codeVal">${code}</div>` +
-      `<button type="button" id="copyCode" style="margin-top:10px;background:transparent;border:1px solid var(--crys-dim);color:var(--crys);border-radius:3px;padding:6px 14px;font-family:var(--tc);cursor:pointer;letter-spacing:.1em">複製取件碼</button>`;
+      `<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px">` +
+      `<button type="button" id="copyCode" style="background:transparent;border:1px solid var(--crys-dim);color:var(--crys);border-radius:3px;padding:6px 14px;font-family:var(--tc);cursor:pointer;letter-spacing:.1em">複製取件碼</button>` +
+      `<a href="${receiptUrl}" style="text-decoration:none;border:1px solid rgba(216,184,122,.55);color:var(--gold);border-radius:3px;padding:6px 14px;font-family:var(--tc);letter-spacing:.08em">查看水晶憑單</a>` +
+      `</div>`;
   } else {
     t.innerHTML = msg;
   }
