@@ -117,13 +117,13 @@ img{display:block;max-width:100%}.wrap{max-width:820px;margin:0 auto;padding:0 2
 
       <div class="receipt-visit-phrase" id="receiptVisitPhrase"></div>
       <div class="receipt-token-note" id="receiptTokenNote"></div>
-      <div class="footnote">此頁僅顯示旅者可查閱的訂單內容，不包含店內薪資、分潤與後台結算資料。</div>
-      <div class="print-row"><button class="btn ghost" type="button" onclick="window.print()">列印憑單</button></div>
+      <div class="print-row" data-html2canvas-ignore="true"><button class="btn ghost" id="imageReceiptBtn" type="button">產生圖片憑單</button></div>
     </div>
   </section>
 </main>
 <footer>水晶庭 · La Crystalline ｜ 伊弗利特 - 海霧村 - 10區 45號<div class="warn">未滿十八歲禁止飲酒 ｜ 飲酒過量有害健康</div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 const SUPABASE_URL="https://idqysanzhafayovieqig.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T";
@@ -141,6 +141,51 @@ function render(data){$('receipt').classList.add('show');$('status').textContent
 function hideReceipt(){$('receipt').classList.remove('show','receipt-len-md','receipt-len-lg','receipt-len-xl');}
 async function loadByToken(token){clearNotice();try{const {data,error}=await sb.rpc('lookup_dining_receipt_token',{p_receipt_token:token});if(error)throw error;if(!data){hideReceipt();notice('找不到這張收據，或 7 天紀念保留期限已結束。',true);return;}render(data);notice('已載入正式水晶憑單。');}catch(e){console.error(e);hideReceipt();notice('收據載入失敗，請稍後再試。',true);}}
 async function lookup(){const guest=$('guestName').value.trim();const code=$('orderCode').value.trim().toUpperCase();if(!guest||!/^[A-Z][0-9]{3}$/.test(code)){hideReceipt();notice('請輸入旅者名稱與 1 個英文字母＋3 位數的水晶號碼牌。',true);return;}clearNotice();$('lookupBtn').disabled=true;$('lookupBtn').textContent='查詢中…';try{const {data,error}=await sb.rpc('lookup_dining_receipt',{p_ticket_code:code,p_guest_name:guest});if(error)throw error;if(!data){hideReceipt();notice('目前查不到正式收據；可能本次來店尚未完成，或 7 天紀念保留期限已結束。',true);return;}render(data);notice('已載入正式水晶憑單。');const u=new URL(location.href);u.searchParams.delete('r');u.searchParams.set('guest',guest);u.searchParams.set('ticket',code);history.replaceState({},'',u);}catch(e){console.error(e);hideReceipt();notice('查詢暫時失敗，請稍後再試。',true);}finally{$('lookupBtn').disabled=false;$('lookupBtn').textContent='查詢';}}
+
+async function saveReceiptImage(){
+  const receipt=$('receipt');
+  const btn=$('imageReceiptBtn');
+  if(!receipt.classList.contains('show')){notice('請先載入一張紀念收據。',true);return;}
+  if(!window.html2canvas){notice('圖片產生工具尚未載入，請稍後再試。',true);return;}
+  const oldText=btn.textContent;
+  btn.disabled=true;
+  btn.textContent='圖片產生中…';
+  clearNotice();
+  try{
+    if(document.fonts?.ready) await document.fonts.ready;
+    const canvas=await html2canvas(receipt,{
+      backgroundColor:null,
+      scale:Math.min(2,window.devicePixelRatio||1.5),
+      useCORS:true,
+      allowTaint:false,
+      logging:false,
+      scrollX:0,
+      scrollY:-window.scrollY,
+      windowWidth:document.documentElement.scrollWidth,
+      windowHeight:document.documentElement.scrollHeight
+    });
+    const ticket=($('mTicket').textContent||'receipt').trim().replace(/[^A-Za-z0-9_-]+/g,'_');
+    canvas.toBlob(blob=>{
+      if(!blob){notice('圖片產生失敗，請稍後再試。',true);return;}
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`LaCrystalline_${ticket}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      notice('圖片憑單已產生，可直接保存。');
+    },'image/png');
+  }catch(e){
+    console.error(e);
+    notice('圖片憑單產生失敗，請稍後再試。',true);
+  }finally{
+    btn.disabled=false;
+    btn.textContent=oldText;
+  }
+}
+$('imageReceiptBtn').addEventListener('click',saveReceiptImage);
 $('lookupBtn').addEventListener('click',lookup);$('clearBtn').addEventListener('click',()=>{$('guestName').value='';$('orderCode').value='';clearNotice();hideReceipt();const u=new URL(location.href);u.search='';history.replaceState({},'',u);});['guestName','orderCode'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')lookup();}));
 window.addEventListener('load',()=>{const u=new URL(location.href);const token=u.searchParams.get('r');const guest=u.searchParams.get('guest');const ticket=u.searchParams.get('ticket');if(guest)$('guestName').value=guest;if(ticket)$('orderCode').value=ticket;if(token){loadByToken(token);}else if(guest&&ticket){lookup();}});
 </script>
