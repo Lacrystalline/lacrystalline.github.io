@@ -195,18 +195,27 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 </nav>
 
 
+<button class="visit-launcher" id="visitLauncher" type="button" aria-label="開啟本次來店憑單">
+  <img class="vl-mark" src="assets/emblem_nav.png" alt="">
+  <span class="vl-copy"><small>本次來店</small><strong id="vlTicket">—</strong></span>
+</button>
 <div class="visit-card" id="visitCard" aria-live="polite">
-  <section class="vc-shell visit-card-surface" role="dialog" aria-modal="true" aria-label="本次來店憑單">
+  <section class="vc-shell visit-card-surface" role="dialog" aria-modal="false" aria-label="本次來店憑單">
     <div class="vc-inner">
-      <button class="vc-dismiss" id="vcDismiss" type="button" title="只清除此裝置上的本次來店紀錄">× 隱藏</button>
+      <div class="vc-tools">
+        <button class="vc-tool" id="vcCollapse" type="button" title="收起本次來店憑單">— 收起</button>
+        <button class="vc-tool danger" id="vcDismiss" type="button" title="清除此裝置保存的本次來店紀錄">× 清除</button>
+      </div>
       <div class="vc-brand">
         <img src="assets/emblem_nav.png" alt="">
         <div class="vc-brand-name">La Crystalline<small>VISIT VOUCHER · 本次來店憑單</small></div>
       </div>
       <div class="vc-main">
         <div class="vc-ey">CRYSTAL TAG</div>
-        <div class="vc-ticket" id="vcTicket">—</div>
-        <div class="vc-status" id="vcStatus">—</div>
+        <div class="vc-ticket-row">
+          <div class="vc-ticket" id="vcTicket">—</div>
+          <div class="vc-status" id="vcStatus">—</div>
+        </div>
         <div class="vc-owner" id="vcOwner">—</div>
         <div class="vc-state-line" id="vcStateLine">—</div>
       </div>
@@ -733,15 +742,76 @@ try{
 
 
 const VISIT_STORAGE_KEY="la_crystalline_active_visit_v1";
+const VISIT_COLLAPSE_KEY="la_crystalline_visit_collapsed_v1";
 function readVisit(){try{return JSON.parse(localStorage.getItem(VISIT_STORAGE_KEY)||'null')}catch(e){return null}}
 function writeVisit(v){try{localStorage.setItem(VISIT_STORAGE_KEY,JSON.stringify(v))}catch(e){}}
-function clearVisit(){try{localStorage.removeItem(VISIT_STORAGE_KEY)}catch(e){}}
-function dismissVisitCard(){
-  if(!confirm('隱藏本次來店卡？\n\n只會清除這台裝置保存的本次來店紀錄，不會刪除訂單、號碼牌或收據。'))return;
-  clearVisit();
+function clearVisit(){try{localStorage.removeItem(VISIT_STORAGE_KEY);sessionStorage.removeItem(VISIT_COLLAPSE_KEY)}catch(e){}}
+function isVisitCollapsed(v){try{return !!v?.join_token && sessionStorage.getItem(VISIT_COLLAPSE_KEY)===String(v.join_token)}catch(e){return false}}
+function setVisitCollapsed(v,on){try{if(on&&v?.join_token)sessionStorage.setItem(VISIT_COLLAPSE_KEY,String(v.join_token));else sessionStorage.removeItem(VISIT_COLLAPSE_KEY)}catch(e){}}
+function setVisitUi(open){
   const card=document.getElementById('visitCard');
+  const launcher=document.getElementById('visitLauncher');
+  const v=readVisit();
+  if(card)card.classList.toggle('show',!!open);
+  if(launcher)launcher.classList.toggle('show',!!v?.join_token&&!open);
+}
+function collapseVisitCard(){const v=readVisit();setVisitCollapsed(v,true);setVisitUi(false)}
+function openVisitCard(){const v=readVisit();if(!v?.join_token)return;setVisitCollapsed(v,false);setVisitUi(true)}
+function dismissVisitCard(){
+  if(!confirm('清除這台裝置上的本次來店卡？\n\n只會移除本機保存的來店捷徑，不會刪除訂單、號碼牌或收據。'))return;
+  clearVisit();
+  const card=document.getElementById('visitCard'),launcher=document.getElementById('visitLauncher');
   if(card)card.classList.remove('show');
-  document.documentElement.classList.remove('visit-voucher-open');
+  if(launcher)launcher.classList.remove('show');
+}
+function visitStatusLabel(s){return s==='waiting'?'等待帶位':s==='seated'?'已帶位':s==='closed'?'已結帳':s==='cleared'?'已清台':s==='cancelled'?'已取消':'處理中'}
+function visitDate(v){if(!v)return '';try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v))}catch(e){return ''}}
+function visitOrderUrl(token,continueMode=false){const u=new URL('order.html',location.href);if(token)u.searchParams.set('join',token);if(continueMode)u.searchParams.set('continue','1');return u.toString()}
+function visitReceiptUrl(v,data){if(data?.receipt_available&&data?.receipt_token){const u=new URL('receipt.html',location.href);u.searchParams.set('r',data.receipt_token);return u.toString()}const u=new URL('receipt.html',location.href);if(v?.guest_name)u.searchParams.set('guest',v.guest_name);if(data?.ticket_code||v?.ticket_code)u.searchParams.set('ticket',data?.ticket_code||v.ticket_code);return u.toString()}
+async function refreshVisitCard(forceOpen=false){
+  const card=document.getElementById('visitCard'),launcher=document.getElementById('visitLauncher'); if(!card||!window.sb)return;
+  const v=readVisit(); if(!v?.join_token){card.classList.remove('show');launcher?.classList.remove('show');return;}
+  try{
+    const {data,error}=await sb.rpc('get_dining_session_public',{p_join_token:v.join_token});
+    if(error)throw error;
+    if(!data){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
+    if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
+    v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; writeVisit(v);
+    card.classList.toggle('receipt-ready',!!data.receipt_available);
+    document.getElementById('vcTicket').textContent=data.ticket_code||v.ticket_code||'—';
+    const vl=document.getElementById('vlTicket');if(vl)vl.textContent=`${data.ticket_code||v.ticket_code||'—'} · ${visitStatusLabel(data.status)}`;
+    document.getElementById('vcStatus').textContent=visitStatusLabel(data.status);
+    const stateLine=document.getElementById('vcStateLine'); if(stateLine)stateLine.textContent=visitStatusLabel(data.status);
+    const phrase=document.getElementById('vcPhrase'); if(phrase)phrase.textContent=data.visit_phrase||'願今夜的微光，留在你的記憶裡。';
+    const owner=document.getElementById('vcOwner'); if(owner)owner.textContent=(v.guest_name&&v.server)?`${v.guest_name} · ${v.server}`:(v.guest_name||'本次旅者');
+    const sub=document.getElementById('vcSub');
+    if(data.receipt_available){sub.textContent=`今夜已結帳 · 紀念收據保留至 ${visitDate(data.receipt_expires_at)}。`;}
+    else if(data.status==='waiting'){sub.textContent=`來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size} · 請等待夥伴帶位。`;}
+    else if(data.status==='seated'){sub.textContent=`已完成帶位 · 可繼續追加點餐${data.pending_count?` · 尚有 ${data.pending_count} 位同行待加入`:''}。`;}
+    else if(data.status==='cancelled'){sub.textContent='本次來店已取消。';}
+    else{sub.textContent=`來店 ${data.party_size} 人 · ${visitStatusLabel(data.status)}。`;}
+    const order=document.getElementById('vcOrder'),share=document.getElementById('vcShare'),receipt=document.getElementById('vcReceipt');
+    
+    order.href=visitOrderUrl(v.join_token,true);
+    order.style.display=data.can_order?'inline-flex':'none';
+    order.onclick=(ev)=>{
+      if(!data.can_order)return;
+      setVisitCollapsed(v,true);
+      if(location.pathname.endsWith('/order.html') || location.pathname.endsWith('order.html')){
+        ev.preventDefault();
+        collapseVisitCard();
+        const target=document.getElementById('services')?.closest('section') || document.querySelector('main.wrap');
+        setTimeout(()=>target?.scrollIntoView({behavior:'smooth',block:'start'}),40);
+      }
+    };
+    share.style.display=(data.can_order&&Number(data.party_size)>1)?'inline-flex':'none';
+    share.onclick=()=>{const url=visitOrderUrl(v.join_token,false);navigator.clipboard?.writeText(url).then(()=>{share.textContent='同行連結已複製 ✓';setTimeout(()=>share.textContent='分享同行',1800)}).catch(()=>{});};
+    receipt.href=visitReceiptUrl(v,data); receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true'); receipt.textContent=data.receipt_available?'查看紀念收據':'收據（結帳後）';
+    document.getElementById('vcCollapse').onclick=collapseVisitCard;
+    document.getElementById('vcDismiss').onclick=dismissVisitCard;
+    if(launcher)launcher.onclick=openVisitCard;
+    if(forceOpen){setVisitCollapsed(v,false);setVisitUi(true)}else{setVisitUi(!isVisitCollapsed(v))}
+  }catch(e){console.warn('本次來店卡更新失敗',e)}
 }
 function syncIdentityUI(){
   const v=readVisit();
@@ -768,42 +838,7 @@ function releaseVisitIdentity(){
   $("guestName").value=''; $("guestServer").value='';
   syncIdentityUI(); $("guestName").focus();
 }
-function visitStatusLabel(s){return s==='waiting'?'等待帶位':s==='seated'?'已帶位':s==='closed'?'已結帳':s==='cleared'?'已清台':s==='cancelled'?'已取消':'處理中'}
-function visitDate(v){if(!v)return '';try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v))}catch(e){return ''}}
-function visitOrderUrl(token){const u=new URL('order.html',location.href);if(token)u.searchParams.set('join',token);return u.toString()}
-function visitReceiptUrl(v,data){if(data?.receipt_available&&data?.receipt_token){const u=new URL('receipt.html',location.href);u.searchParams.set('r',data.receipt_token);return u.toString()}const u=new URL('receipt.html',location.href);if(v?.guest_name)u.searchParams.set('guest',v.guest_name);if(data?.ticket_code||v?.ticket_code)u.searchParams.set('ticket',data?.ticket_code||v.ticket_code);return u.toString()}
-async function refreshVisitCard(){
-  const card=document.getElementById('visitCard'); if(!card||!window.sb)return;
-  const v=readVisit(); if(!v?.join_token){card.classList.remove('show');document.documentElement.classList.remove('visit-voucher-open');return;}
-  try{
-    const {data,error}=await sb.rpc('get_dining_session_public',{p_join_token:v.join_token});
-    if(error)throw error;
-    if(!data){clearVisit();card.classList.remove('show');document.documentElement.classList.remove('visit-voucher-open');return;}
-    if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');document.documentElement.classList.remove('visit-voucher-open');return;}
-    v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; writeVisit(v);
-    card.classList.add('show'); document.documentElement.classList.add('visit-voucher-open'); card.classList.toggle('receipt-ready',!!data.receipt_available);
-    document.getElementById('vcTicket').textContent=data.ticket_code||v.ticket_code||'—';
-    document.getElementById('vcStatus').textContent=visitStatusLabel(data.status);
-    const stateLine=document.getElementById('vcStateLine'); if(stateLine)stateLine.textContent=visitStatusLabel(data.status);
-    const phrase=document.getElementById('vcPhrase'); if(phrase)phrase.textContent=data.visit_phrase||'願今夜的微光，留在你的記憶裡。';
-    const owner=document.getElementById('vcOwner'); if(owner)owner.textContent=(v.guest_name&&v.server)?`${v.guest_name} · ${v.server}`:'—';
-    const sub=document.getElementById('vcSub');
-    if(data.receipt_available){sub.textContent=`今夜已結帳。紀念收據保留至 ${visitDate(data.receipt_expires_at)}。`;}
-    else if(data.status==='waiting'){sub.textContent=`來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size} · 請等待夥伴帶位。`;}
-    else if(data.status==='seated'){sub.textContent=`已完成帶位 · 可繼續追加點餐${data.pending_count?` · 尚有 ${data.pending_count} 位同行待加入`:''}。`;}
-    else if(data.status==='cancelled'){sub.textContent='本次來店已取消。';}
-    else{sub.textContent=`來店 ${data.party_size} 人 · ${visitStatusLabel(data.status)}。`;}
-    const order=document.getElementById('vcOrder'),share=document.getElementById('vcShare'),receipt=document.getElementById('vcReceipt');
-    const dismiss=document.getElementById('vcDismiss'); if(dismiss)dismiss.onclick=dismissVisitCard;
-    order.href=visitOrderUrl(v.join_token); order.style.display=data.can_order?'inline-flex':'none';
-    share.style.display=(data.can_order&&Number(data.party_size)>1)?'inline-flex':'none';
-    share.onclick=()=>{const url=visitOrderUrl(v.join_token);navigator.clipboard?.writeText(url).then(()=>{share.textContent='同行連結已複製 ✓';setTimeout(()=>share.textContent='分享同行',1800)}).catch(()=>{});};
-    receipt.href=visitReceiptUrl(v,data); receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true'); receipt.textContent=data.receipt_available?'查看紀念收據':'收據（結帳後）';
-  }catch(e){console.warn('本次來店卡更新失敗',e)}
-}
-function rememberVisit(result,order){if(!result?.join_token)return;writeVisit({join_token:String(result.join_token),ticket_code:String(result.ticket_code||''),guest_name:String(order?.guest_name||''),server:String(order?.server||''),member_id:result.member_id??null,last_status:String(result.session_status||''),saved_at:new Date().toISOString()});refreshVisitCard();}
-
-const vcDismissInit=document.getElementById('vcDismiss'); if(vcDismissInit)vcDismissInit.onclick=dismissVisitCard;
+function rememberVisit(result,order){if(!result?.join_token)return;writeVisit({join_token:String(result.join_token),ticket_code:String(result.ticket_code||''),guest_name:String(order?.guest_name||''),server:String(order?.server||''),member_id:result.member_id??null,last_status:String(result.session_status||''),saved_at:new Date().toISOString()});}
 
 async function loadPublicStaffStatus(){
   if(!sb){
@@ -902,6 +937,7 @@ $("submitBtn").addEventListener('click', async ()=>{
       state.joinSession.identified_count = data.identified_count;
       state.joinSession.pending_count = data.pending_count;
     }
+    await refreshVisitCard(true);
     toast(
       wasJoin
         ? `已加入 ${esc(data.ticket_code)} 並送出本次點餐。`
@@ -935,7 +971,16 @@ renderCompanions();
 update();
 loadPublicStaffStatus();
 loadJoinSession();
-setTimeout(refreshVisitCard,250);
+const continueIntent=new URL(location.href).searchParams.get('continue')==='1';
+if(continueIntent){
+  const v=readVisit();if(v?.join_token)setVisitCollapsed(v,true);
+  setTimeout(()=>{
+    const target=document.getElementById('services')?.closest('section')||document.querySelector('main.wrap');
+    target?.scrollIntoView({behavior:'smooth',block:'start'});
+    const u=new URL(location.href);u.searchParams.delete('continue');history.replaceState(null,'',u);
+  },420);
+}
+setTimeout(()=>refreshVisitCard(false),250);
 setInterval(refreshVisitCard,10000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshVisitCard();});
 setInterval(loadPublicStaffStatus, 30000);
