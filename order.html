@@ -181,24 +181,61 @@ img{display:block;max-width:100%}
 footer{text-align:center;padding:30px 24px 40px;border-top:1px solid var(--line);color:var(--mute);font-size:.78rem;letter-spacing:.05em}
 footer .warn{color:var(--crys-dim);margin-top:.6em}
 
-/* persistent visit card */
-.visit-card{position:fixed;top:72px;right:18px;z-index:46;width:min(338px,calc(100vw - 28px));display:none;border:1px solid rgba(127,211,214,.34);border-radius:7px;background:linear-gradient(155deg,rgba(13,20,32,.97),rgba(9,14,24,.96));box-shadow:0 18px 50px rgba(0,0,0,.36),inset 0 0 34px rgba(127,211,214,.035);backdrop-filter:blur(12px);overflow:hidden}
+/* persistent visit card · compact voucher */
+.visit-card{
+  position:fixed;top:70px;right:18px;z-index:46;
+  width:min(352px,calc(100vw - 28px));display:none;
+  border:1px solid rgba(127,211,214,.30);border-radius:8px;
+  background:
+    radial-gradient(420px 180px at 8% 0%,rgba(127,211,214,.075),transparent 58%),
+    linear-gradient(155deg,rgba(15,24,39,.985),rgba(7,12,21,.98));
+  box-shadow:0 22px 58px rgba(0,0,0,.42),inset 0 0 38px rgba(127,211,214,.025);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);overflow:hidden;
+}
+.visit-card::before{content:"";position:absolute;inset:7px;border:1px solid rgba(127,211,214,.08);border-radius:5px;pointer-events:none}
+.visit-card::after{content:"";position:absolute;left:22px;right:22px;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(216,184,122,.48),rgba(127,211,214,.48),transparent);opacity:.68}
 .visit-card.show{display:block}
-.visit-card.receipt-ready{border-color:rgba(216,184,122,.5);box-shadow:0 18px 50px rgba(0,0,0,.36),inset 0 0 34px rgba(216,184,122,.045)}
-.visit-card .vc-inner{padding:14px 15px 13px}
-.visit-card .vc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.visit-card .vc-ey{font-family:var(--serif);font-size:.72rem;letter-spacing:.18em;color:var(--crys-dim)}
-.visit-card .vc-ticket{font-family:var(--serif);font-size:2rem;line-height:1;color:var(--crys);letter-spacing:.14em;margin-top:2px;text-shadow:0 0 18px rgba(127,211,214,.12)}
-.visit-card.receipt-ready .vc-ticket{color:var(--gold)}
-.visit-card .vc-status{white-space:nowrap;padding:4px 9px;border:1px solid rgba(127,211,214,.28);border-radius:999px;color:var(--crys);font-size:.7rem;letter-spacing:.06em}
-.visit-card.receipt-ready .vc-status{border-color:rgba(216,184,122,.35);color:var(--gold)}
-.visit-card .vc-sub{margin-top:9px;color:var(--mute);font-size:.76rem;line-height:1.65}
-.visit-card .vc-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
-.visit-card .vc-btn{appearance:none;text-decoration:none;border:1px solid var(--line);background:rgba(127,211,214,.04);color:var(--mist);border-radius:3px;padding:6px 9px;font-family:var(--tc);font-size:.72rem;letter-spacing:.04em;cursor:pointer;line-height:1.4}
-.visit-card .vc-btn:hover{border-color:var(--crys-dim);color:var(--crys)}
-.visit-card .vc-btn.gold{border-color:rgba(216,184,122,.55);color:var(--gold);background:rgba(216,184,122,.06)}
-.visit-card .vc-btn[aria-disabled="true"]{opacity:.46;pointer-events:none}
-@media(max-width:640px){.visit-card{top:60px;right:9px;width:calc(100vw - 18px)}.visit-card .vc-inner{padding:11px 12px}.visit-card .vc-ticket{font-size:1.65rem}.visit-card .vc-sub{font-size:.72rem}}
+.visit-card.receipt-ready{border-color:rgba(216,184,122,.46);box-shadow:0 22px 58px rgba(0,0,0,.42),inset 0 0 40px rgba(216,184,122,.035)}
+.visit-card.receipt-ready::before{border-color:rgba(216,184,122,.10)}
+.visit-card .vc-inner{position:relative;padding:15px 16px 14px}
+.visit-card .vc-brand{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(127,211,214,.11)}
+.visit-card .vc-brand img{width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 0 9px rgba(127,211,214,.16))}
+.visit-card .vc-brand-name{font-family:var(--serif);font-size:.91rem;letter-spacing:.12em;color:#dfe8ee;line-height:1}
+.visit-card .vc-brand-name small{display:block;margin-top:4px;font-family:var(--tc);font-size:.52rem;letter-spacing:.22em;color:var(--crys-dim)}
+.visit-card .vc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-top:12px}
+.visit-card .vc-ey{font-family:var(--serif);font-size:.64rem;letter-spacing:.22em;color:var(--crys-dim);text-transform:uppercase}
+.visit-card .vc-ticket{font-family:var(--serif);font-size:2.45rem;line-height:.95;color:var(--crys);letter-spacing:.13em;margin-top:4px;text-shadow:0 0 20px rgba(127,211,214,.13)}
+.visit-card.receipt-ready .vc-ticket{color:var(--gold);text-shadow:0 0 20px rgba(216,184,122,.10)}
+.visit-card .vc-status{white-space:nowrap;margin-top:2px;padding:5px 10px;border:1px solid rgba(127,211,214,.26);border-radius:999px;color:var(--crys);font-size:.68rem;letter-spacing:.08em;background:rgba(127,211,214,.025)}
+.visit-card.receipt-ready .vc-status{border-color:rgba(216,184,122,.34);color:var(--gold);background:rgba(216,184,122,.025)}
+.visit-card .vc-owner{margin-top:10px;color:#c8d3dc;font-size:.72rem;letter-spacing:.04em}
+.visit-card .vc-sub{margin-top:5px;color:var(--mute);font-size:.73rem;line-height:1.72}
+.visit-card .vc-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px solid rgba(127,211,214,.10)}
+.visit-card .vc-btn{appearance:none;text-decoration:none;border:1px solid rgba(127,211,214,.18);background:rgba(127,211,214,.025);color:#d9e1e7;border-radius:3px;padding:7px 10px;font-family:var(--tc);font-size:.70rem;letter-spacing:.055em;cursor:pointer;line-height:1.4;transition:.2s}
+.visit-card .vc-btn:hover{border-color:rgba(127,211,214,.48);color:var(--crys);background:rgba(127,211,214,.06)}
+.visit-card .vc-btn.primary{border-color:rgba(127,211,214,.38);color:var(--crys);background:rgba(127,211,214,.055)}
+.visit-card .vc-btn.gold{border-color:rgba(216,184,122,.48);color:var(--gold);background:rgba(216,184,122,.045)}
+.visit-card .vc-btn[aria-disabled="true"]{opacity:.38;pointer-events:none}
+@media(max-width:640px){
+  .visit-card{top:58px;right:9px;width:calc(100vw - 18px)}
+  .visit-card .vc-inner{padding:12px 13px}
+  .visit-card .vc-brand{padding-bottom:8px}
+  .visit-card .vc-ticket{font-size:2rem}
+  .visit-card .vc-sub{font-size:.69rem}
+  .visit-card .vc-owner{font-size:.69rem}
+}
+
+
+/* bound identity for repeat orders */
+.identity-bound{display:none;margin:2px 0 16px;border:1px solid rgba(127,211,214,.17);background:linear-gradient(135deg,rgba(127,211,214,.035),rgba(8,12,20,.20));border-radius:5px;padding:13px 14px}
+.identity-bound.show{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.identity-bound .ib-k{font-family:var(--serif);font-size:.69rem;letter-spacing:.18em;color:var(--crys-dim)}
+.identity-bound .ib-v{margin-top:3px;color:var(--mist);font-size:.98rem;letter-spacing:.04em}
+.identity-bound .ib-note{margin-top:2px;color:var(--mute);font-size:.70rem}
+.identity-bound .ib-switch{appearance:none;border:0;border-bottom:1px solid rgba(127,211,214,.24);background:transparent;color:var(--crys-dim);padding:3px 0;font:inherit;font-size:.68rem;cursor:pointer;white-space:nowrap}
+.identity-bound .ib-switch:hover{color:var(--crys);border-color:var(--crys)}
+.identity-fields.hidden-for-visit{display:none}
+@media(max-width:640px){.identity-bound.show{align-items:flex-start}.identity-bound .ib-v{font-size:.91rem}}
 
 </style>
 </head>
@@ -213,13 +250,18 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 
 <div class="visit-card" id="visitCard" aria-live="polite">
   <div class="vc-inner">
+    <div class="vc-brand">
+      <img src="assets/emblem_nav.png" alt="">
+      <div class="vc-brand-name">La Crystalline<small>VISIT VOUCHER · 本次來店</small></div>
+    </div>
     <div class="vc-top">
-      <div><div class="vc-ey">CURRENT VISIT · 本次來店</div><div class="vc-ticket" id="vcTicket">—</div></div>
+      <div><div class="vc-ey">CRYSTAL TAG</div><div class="vc-ticket" id="vcTicket">—</div></div>
       <div class="vc-status" id="vcStatus">—</div>
     </div>
+    <div class="vc-owner" id="vcOwner"></div>
     <div class="vc-sub" id="vcSub">—</div>
     <div class="vc-actions">
-      <a class="vc-btn" id="vcOrder" href="order.html">追加點餐</a>
+      <a class="vc-btn primary" id="vcOrder" href="order.html">追加點餐</a>
       <button class="vc-btn" id="vcShare" type="button">分享同行</button>
       <a class="vc-btn gold" id="vcReceipt" href="receipt.html" aria-disabled="true">收據（結帳後）</a>
     </div>
@@ -244,17 +286,27 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   <!-- STEP 1: 客人資料 -->
   <section class="section">
     <div class="s-h"><span class="no">壹</span><span class="zh">您的身分</span><span class="en">Who Are You</span></div>
-    <div class="field">
-      <label>旅者名稱 <span class="req">*</span></label>
-      <input id="guestName" type="text" placeholder="您在艾歐澤亞的名字" maxlength="40">
+    <div id="identityBound" class="identity-bound">
+      <div>
+        <div class="ib-k">YOUR IDENTITY · 本次旅者</div>
+        <div class="ib-v" id="identityBoundValue">—</div>
+        <div class="ib-note">本次來店期間會沿用此身份，追加點餐不需再次填寫。</div>
+      </div>
+      <button class="ib-switch" id="identitySwitch" type="button">改用其他同行者</button>
     </div>
-    <div class="field">
-      <label>所屬伺服器 <span class="req">*</span></label>
-      <select id="guestServer">
-        <option value="">請選擇繁中服伺服器</option>
-        <option>伊弗利特</option><option>利維坦</option><option>巴哈姆特</option>
-        <option>泰坦</option><option>迦樓羅</option><option>鳳凰</option><option>奧汀</option>
-      </select>
+    <div id="identityFields" class="identity-fields">
+      <div class="field">
+        <label>旅者名稱 <span class="req">*</span></label>
+        <input id="guestName" type="text" placeholder="您在艾歐澤亞的名字" maxlength="40">
+      </div>
+      <div class="field">
+        <label>所屬伺服器 <span class="req">*</span></label>
+        <select id="guestServer">
+          <option value="">請選擇繁中服伺服器</option>
+          <option>伊弗利特</option><option>利維坦</option><option>巴哈姆特</option>
+          <option>泰坦</option><option>迦樓羅</option><option>鳳凰</option><option>奧汀</option>
+        </select>
+      </div>
     </div>
     <div id="joinBanner" class="join-banner"></div>
     <div id="partySetup">
@@ -365,7 +417,7 @@ const BITES = [
 ];
 
 // ---- 狀態 ----
-const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null };
+const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null, identityBound:false };
 
 const fmt = n => n.toLocaleString('en-US');
 const $ = id => document.getElementById(id);
@@ -464,6 +516,7 @@ async function loadJoinSession(){
   const token=new URLSearchParams(location.search).get('join') || storedActive;
   if(!token) return;
   state.joinToken=token;
+  syncIdentityUI();
   $("partySetup").style.display='none';
   const banner=$("joinBanner");
   banner.classList.add('show');
@@ -474,7 +527,14 @@ async function loadJoinSession(){
     if(error) throw error;
     state.joinSession=data;
     if(!data?.can_order) throw new Error('這個號碼牌目前不能再點餐');
-    banner.innerHTML=`<div>加入同行號碼牌</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size}${data.pending_count?` · 尚有 ${data.pending_count} 位待加入`:''}</div>`;
+    const saved=readVisit();
+    if(!state.identityBound && saved?.join_token===token && saved?.guest_name && !saved?.server){
+      const {data:resolved,error:resolveError}=await sb.rpc('resolve_dining_session_saved_identity',{p_join_token:token,p_guest_name:saved.guest_name});
+      if(!resolveError && resolved?.guest_name && resolved?.server){
+        saved.guest_name=resolved.guest_name; saved.server=resolved.server; saved.member_id=resolved.member_id??null; writeVisit(saved); syncIdentityUI();
+      }
+    }
+    banner.innerHTML=`<div>${state.identityBound?'本次來店已綁定':'加入同行號碼牌'}</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">${state.identityBound?'可直接追加點餐，不需再次輸入旅者資料 · ':''}來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size}${data.pending_count?` · 尚有 ${data.pending_count} 位待加入`:''}</div>`;
   }catch(err){
     banner.innerHTML=`<div style="color:#dca0ad">號碼牌無效：${esc(err.message||err)}</div>`;
     state.joinSession={can_order:false};
@@ -723,6 +783,31 @@ const VISIT_STORAGE_KEY="la_crystalline_active_visit_v1";
 function readVisit(){try{return JSON.parse(localStorage.getItem(VISIT_STORAGE_KEY)||'null')}catch(e){return null}}
 function writeVisit(v){try{localStorage.setItem(VISIT_STORAGE_KEY,JSON.stringify(v))}catch(e){}}
 function clearVisit(){try{localStorage.removeItem(VISIT_STORAGE_KEY)}catch(e){}}
+function syncIdentityUI(){
+  const v=readVisit();
+  const sameVisit=!!(state.joinToken&&v?.join_token===state.joinToken&&v?.guest_name&&v?.server);
+  state.identityBound=sameVisit;
+  const bound=$("identityBound"), fields=$("identityFields");
+  if(sameVisit){
+    $("guestName").value=v.guest_name;
+    $("guestServer").value=v.server;
+    $("identityBoundValue").textContent=`${v.guest_name} · ${v.server}`;
+    bound.classList.add('show'); fields.classList.add('hidden-for-visit');
+  }else{
+    bound.classList.remove('show'); fields.classList.remove('hidden-for-visit');
+  }
+  update();
+}
+function releaseVisitIdentity(){
+  const v=readVisit();
+  if(v&&v.join_token===state.joinToken){
+    delete v.guest_name; delete v.server; delete v.member_id;
+    writeVisit(v);
+  }
+  state.identityBound=false;
+  $("guestName").value=''; $("guestServer").value='';
+  syncIdentityUI(); $("guestName").focus();
+}
 function visitStatusLabel(s){return s==='waiting'?'等待帶位':s==='seated'?'已帶位':s==='closed'?'已結帳':s==='cleared'?'已清台':s==='cancelled'?'已取消':'處理中'}
 function visitDate(v){if(!v)return '';try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v))}catch(e){return ''}}
 function visitOrderUrl(token){const u=new URL('order.html',location.href);if(token)u.searchParams.set('join',token);return u.toString()}
@@ -739,6 +824,7 @@ async function refreshVisitCard(){
     card.classList.add('show'); card.classList.toggle('receipt-ready',!!data.receipt_available);
     document.getElementById('vcTicket').textContent=data.ticket_code||v.ticket_code||'—';
     document.getElementById('vcStatus').textContent=visitStatusLabel(data.status);
+    const owner=document.getElementById('vcOwner'); if(owner)owner.textContent=(v.guest_name&&v.server)?`旅者 · ${v.guest_name} · ${v.server}`:'';
     const sub=document.getElementById('vcSub');
     if(data.receipt_available){sub.textContent=`今夜已結帳。紀念收據保留至 ${visitDate(data.receipt_expires_at)}。`;}
     else if(data.status==='waiting'){sub.textContent=`來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size} · 請等待夥伴帶位。`;}
@@ -752,7 +838,7 @@ async function refreshVisitCard(){
     receipt.href=visitReceiptUrl(v,data); receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true'); receipt.textContent=data.receipt_available?'查看紀念收據':'收據（結帳後）';
   }catch(e){console.warn('本次來店卡更新失敗',e)}
 }
-function rememberVisit(result,guestName){if(!result?.join_token)return;writeVisit({join_token:String(result.join_token),ticket_code:String(result.ticket_code||''),guest_name:String(guestName||''),saved_at:new Date().toISOString()});refreshVisitCard();}
+function rememberVisit(result,order){if(!result?.join_token)return;writeVisit({join_token:String(result.join_token),ticket_code:String(result.ticket_code||''),guest_name:String(order?.guest_name||''),server:String(order?.server||''),member_id:result.member_id??null,last_status:String(result.session_status||''),saved_at:new Date().toISOString()});refreshVisitCard();}
 
 async function loadPublicStaffStatus(){
   if(!sb){
@@ -826,7 +912,7 @@ $("submitBtn").addEventListener('click', async ()=>{
     };
     const {data,error}=await sb.rpc('submit_dining_order',args);
     if(error) throw error;
-    rememberVisit(data, order.guest_name);
+    rememberVisit(data, order);
     const wasJoin = !!state.joinToken;
     if(!state.joinToken && data?.join_token){
       state.joinToken = String(data.join_token);
@@ -845,7 +931,9 @@ $("submitBtn").addEventListener('click', async ()=>{
       const url=new URL(location.href);
       url.searchParams.set('join',state.joinToken);
       history.replaceState(null,'',url);
+      syncIdentityUI();
     }else if(state.joinSession){
+      syncIdentityUI();
       state.joinSession.identified_count = data.identified_count;
       state.joinSession.pending_count = data.pending_count;
     }
@@ -870,6 +958,8 @@ $("submitBtn").addEventListener('click', async ()=>{
     update();
   }
 });
+
+$("identitySwitch").addEventListener('click',releaseVisitIdentity);
 
 // init
 renderMembers();
