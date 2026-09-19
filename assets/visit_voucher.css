@@ -272,10 +272,13 @@
   margin:0 auto!important;
   overflow:hidden!important;
   display:none;
-  background-image:url("crystal_receipt_base_tall.png")!important;
+  background-image:url("crystal_receipt_base_md.png")!important;
   background-size:100% 100%!important;
 }
 .receipt.visit-card-surface.show{display:flex!important;flex-direction:column}
+.receipt.visit-card-surface.receipt-len-md{background-image:url("crystal_receipt_base_md.png")!important;height:min(90vh,900px)!important;min-height:720px}
+.receipt.visit-card-surface.receipt-len-lg{background-image:url("crystal_receipt_base_lg.png")!important;height:min(92vh,1100px)!important;min-height:860px}
+.receipt.visit-card-surface.receipt-len-xl{background-image:url("crystal_receipt_base_xl.png")!important;height:min(94vh,1280px)!important;min-height:1040px}
 .receipt.visit-card-surface .receipt-head{
   flex:0 0 auto;
   margin:7.4% 10.5% 0;
@@ -344,15 +347,23 @@
   .visit-card .vc-sub{font-size:.52rem;line-height:1.45;padding-bottom:.5%}
   .visit-card .vc-actions{gap:6px;padding-top:1%}
   .visit-card .vc-btn{min-width:0;flex:1 1 0;padding:7px 6px;font-size:.56rem;letter-spacing:.03em}
-  .receipt.visit-card-surface{width:96vw!important;height:calc(100svh - 76px)!important;min-height:0;background-image:url("crystal_receipt_base_tall.png")!important}
+  .receipt.visit-card-surface{width:96vw!important;height:calc(100svh - 76px)!important;min-height:0;background-image:url("crystal_receipt_base_md.png")!important}
   .receipt.visit-card-surface .receipt-head{margin:7% 8.5% 0;padding-bottom:10px!important}
   .receipt.visit-card-surface .receipt-body{margin:0 8.5% 7%;padding:12px 4px 20px!important}
 }
 
 @media print{
+  @page{size:auto;margin:8mm}
+  html,body{background:#07101a!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .receipt.visit-card-surface{
-    width:100%!important;height:auto!important;min-height:0!important;display:block!important;
-    background:#fff!important;box-shadow:none!important;color:#111!important;overflow:visible!important;
+    width:100%!important;height:auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;
+    background-size:100% 100%!important;background-repeat:no-repeat!important;box-shadow:none!important;overflow:visible!important;
+    -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;page-break-inside:avoid!important;
   }
-  .receipt.visit-card-surface .receipt-head,.receipt.visit-card-surface .receipt-body{margin:0!important;background:#fff!important;overflow:visible!important}
+  .receipt.visit-card-surface.receipt-len-md{background-image:url("crystal_receipt_base_md.png")!important}
+  .receipt.visit-card-surface.receipt-len-lg{background-image:url("crystal_receipt_base_lg.png")!important}
+  .receipt.visit-card-surface.receipt-len-xl{background-image:url("crystal_receipt_base_xl.png")!important}
+  .receipt.visit-card-surface .receipt-head,.receipt.visit-card-surface .receipt-body{margin:0 7.5%!important;background:transparent!important;overflow:visible!important}
+  .receipt.visit-card-surface .receipt-head{margin-top:6.5%!important}
+  .receipt.visit-card-surface .receipt-body{padding-bottom:8%!important}
 }
