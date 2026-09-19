@@ -372,6 +372,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T"; // �
 const MEMBERS = [
   { id:"northwind", name:"北風", en:"Northern Wind", role:"店長 / Keeper", rp:"店長・調酒", tags:"光釀・裁光", av:"assets/master.jpg", services:["custom","tailor"], contactServices:["custom","tailor"], status:"loading", selectable:false },
   { id:"dc_324828765547003904", name:"混分", en:"Hunfen", role:"夥伴 / Staff", rp:"接待・調酒・陪聊・表演・攝影", tags:"密談・留影", av:"assets/hunfen_avatar.jpg", services:["confide","photo"], contactServices:[], status:"loading", selectable:false },
+  { id:"dc_339046999171137536", name:"阿木", en:"Amu", role:"夥伴 / Staff", rp:"接待・陪聊", tags:"—", av:"assets/amu_avatar.jpg", services:[], contactServices:[], status:"loading", selectable:false },
 ];
 const SERVICES = [
   { id:"custom",  name:"光釀", en:"Custom Blend", price:null, priceLabel:"時價" },
@@ -598,6 +599,12 @@ function renderServices(){
   const avail = SERVICES.filter(s=>member.services.includes(s.id));
   const contactOnly = new Set(member.contactServices || []);
   [...state.services].forEach(sid=>{ if(contactOnly.has(sid)) state.services.delete(sid); });
+  if(!avail.length){
+    state.services.clear();
+    box.innerHTML='';
+    hint.textContent=`${member.name} 目前沒有設定特殊服務；仍可直接指名接待／陪聊。`;
+    return;
+  }
   hint.textContent = contactOnly.size
     ? `${member.name} 的特殊服務可於此查看；如需預約，請洽店長。`
     : `${member.name} 可提供以下服務（可複選）。`;
