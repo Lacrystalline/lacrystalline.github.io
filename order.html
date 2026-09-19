@@ -766,10 +766,32 @@ $("submitBtn").addEventListener('click', async ()=>{
     };
     const {data,error}=await sb.rpc('submit_dining_order',args);
     if(error) throw error;
+    const wasJoin = !!state.joinToken;
+    if(!state.joinToken && data?.join_token){
+      state.joinToken = String(data.join_token);
+      state.joinSession = {
+        ticket_code: data.ticket_code,
+        party_size: data.party_size,
+        identified_count: data.identified_count,
+        pending_count: data.pending_count,
+        can_order: true,
+        status: data.session_status
+      };
+      $("partySetup").style.display='none';
+      const banner=$("joinBanner");
+      banner.classList.add('show');
+      banner.innerHTML=`<div>本頁已綁定本次水晶號碼牌</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">可繼續追加點餐 · 已登錄 ${data.identified_count}/${data.party_size}${data.pending_count?` · 尚有 ${data.pending_count} 位待加入`:''}</div>`;
+      const url=new URL(location.href);
+      url.searchParams.set('join',state.joinToken);
+      history.replaceState(null,'',url);
+    }else if(state.joinSession){
+      state.joinSession.identified_count = data.identified_count;
+      state.joinSession.pending_count = data.pending_count;
+    }
     toast(
-      state.joinToken
+      wasJoin
         ? `已加入 ${esc(data.ticket_code)} 並送出本次點餐。`
-        : `已建立本次來店號碼牌。請保留號碼牌，同行者可使用分享連結加入。`,
+        : `已建立本次來店號碼牌。請保留號碼牌，同行者可使用分享連結加入；本頁也可直接繼續追加點餐。`,
       data,
       false
     );
