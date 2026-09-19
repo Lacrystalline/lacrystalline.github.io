@@ -91,6 +91,20 @@ img{display:block;max-width:100%}
 .join-banner.show{display:block}
 .join-banner .ticket{font-family:var(--serif);font-size:1.55rem;color:var(--crys);letter-spacing:.16em}
 .join-banner .subline{color:var(--mute);font-size:.82rem;margin-top:3px}
+.identity-bound{display:none;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border:1px solid rgba(127,211,214,.18);border-radius:4px;background:rgba(17,26,43,.18);margin-bottom:12px}
+.identity-bound.show{display:flex}
+.identity-fields.hidden-for-visit .field:first-child,.identity-fields.hidden-for-visit .field:nth-child(2){display:none}
+.ib-k{color:var(--crys-dim);font-family:var(--serif);font-size:.8rem;letter-spacing:.08em}
+.ib-v{color:var(--mist);font-size:1.15rem;line-height:1.5;margin-top:2px}
+.ib-note{color:var(--mute);font-size:.82rem;line-height:1.65;margin-top:2px}
+.ib-switch{display:none;padding:7px 14px;border:1px solid rgba(127,211,214,.34);border-radius:999px;background:rgba(127,211,214,.05);color:var(--crys);font-family:var(--tc);font-size:.8rem;letter-spacing:.06em;cursor:pointer;transition:.18s ease;white-space:nowrap}
+.ib-switch.show{display:inline-flex;align-items:center;justify-content:center}
+.ib-switch:hover{border-color:rgba(127,211,214,.62);background:rgba(127,211,214,.11);color:#d8fbfd}
+@media(max-width:640px){
+  .identity-bound{display:none;flex-direction:column;align-items:flex-start}
+  .identity-bound.show{display:flex}
+  .ib-switch{width:100%}
+}
 @media(max-width:640px){
   .party-grid,.companion-fields{grid-template-columns:1fr}
   .pending-toggle{white-space:normal}
@@ -203,7 +217,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   <section class="vc-shell visit-card-surface" role="dialog" aria-modal="false" aria-label="本次來店憑單">
     <div class="vc-inner">
       <div class="vc-tools">
-        <button class="vc-tool" id="vcCollapse" type="button" title="收起本次來店憑單">— 收起</button>
+        <button class="vc-tool" id="vcCollapse" type="button" title="隱藏本次來店憑單">隱藏此卡</button>
         <button class="vc-tool danger" id="vcDismiss" type="button" title="清除此裝置保存的本次來店紀錄">× 清除</button>
       </div>
       <div class="vc-brand">
@@ -254,7 +268,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
         <div class="ib-v" id="identityBoundValue">—</div>
         <div class="ib-note">本次來店期間會沿用此身份，追加點餐不需再次填寫。</div>
       </div>
-      <button class="ib-switch" id="identitySwitch" type="button">改用其他同行者</button>
+      <button class="ib-switch" id="identitySwitch" type="button">切換同行旅者</button>
     </div>
     <div id="identityFields" class="identity-fields">
       <div class="field">
@@ -817,14 +831,24 @@ function syncIdentityUI(){
   const v=readVisit();
   const sameVisit=!!(state.joinToken&&v?.join_token===state.joinToken&&v?.guest_name&&v?.server);
   state.identityBound=sameVisit;
-  const bound=$("identityBound"), fields=$("identityFields");
+  const bound=$("identityBound"), fields=$("identityFields"), switchBtn=$("identitySwitch");
+  const partySize=Number(state.joinSession?.party_size||0);
   if(sameVisit){
     $("guestName").value=v.guest_name;
     $("guestServer").value=v.server;
     $("identityBoundValue").textContent=`${v.guest_name} · ${v.server}`;
     bound.classList.add('show'); fields.classList.add('hidden-for-visit');
+    if(switchBtn){
+      if(partySize>1){
+        switchBtn.textContent='切換同行旅者';
+        switchBtn.classList.add('show');
+      }else{
+        switchBtn.classList.remove('show');
+      }
+    }
   }else{
     bound.classList.remove('show'); fields.classList.remove('hidden-for-visit');
+    switchBtn?.classList.remove('show');
   }
   update();
 }
