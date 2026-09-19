@@ -722,7 +722,7 @@ function toast(msg, result, isErr){
       `<div style="color:var(--mute);font-size:.78rem;margin-top:4px">訂單 ${esc(result.order_code)}</div>` +
       `<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px">` +
       (joinUrl && Number(result.party_size||1)>1 ? `<button type="button" id="copyJoin" style="background:transparent;border:1px solid var(--crys-dim);color:var(--crys);border-radius:3px;padding:6px 14px;font-family:var(--tc);cursor:pointer;letter-spacing:.08em">分享同行點餐連結</button>` : '') +
-      `<a href="receipt.html?guest=${encodeURIComponent($("guestName").value.trim())}&code=${encodeURIComponent(result.order_code)}" style="text-decoration:none;border:1px solid rgba(216,184,122,.55);color:var(--gold);border-radius:3px;padding:6px 14px;font-family:var(--tc);letter-spacing:.08em">查看訂單</a>` +
+      `<a href="receipt.html?guest=${encodeURIComponent($("guestName").value.trim())}&ticket=${encodeURIComponent(result.ticket_code||'')}" style="text-decoration:none;border:1px solid rgba(216,184,122,.55);color:var(--gold);border-radius:3px;padding:6px 14px;font-family:var(--tc);letter-spacing:.08em">收據（結帳後可查）</a>` +
       `</div>`;
     const cp=t.querySelector('#copyJoin');
     if(cp){ cp.addEventListener('click',()=>{
