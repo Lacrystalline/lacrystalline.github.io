@@ -551,6 +551,26 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
   .section-mark{flex-direction:column;align-items:flex-start}
   .section-mark img{width:72px;height:72px}
 }
+
+/* persistent visit card */
+.visit-card{position:fixed;top:72px;right:18px;z-index:46;width:min(338px,calc(100vw - 28px));display:none;border:1px solid rgba(127,211,214,.34);border-radius:7px;background:linear-gradient(155deg,rgba(13,20,32,.97),rgba(9,14,24,.96));box-shadow:0 18px 50px rgba(0,0,0,.36),inset 0 0 34px rgba(127,211,214,.035);backdrop-filter:blur(12px);overflow:hidden}
+.visit-card.show{display:block}
+.visit-card.receipt-ready{border-color:rgba(216,184,122,.5);box-shadow:0 18px 50px rgba(0,0,0,.36),inset 0 0 34px rgba(216,184,122,.045)}
+.visit-card .vc-inner{padding:14px 15px 13px}
+.visit-card .vc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.visit-card .vc-ey{font-family:var(--serif);font-size:.72rem;letter-spacing:.18em;color:var(--crys-dim)}
+.visit-card .vc-ticket{font-family:var(--serif);font-size:2rem;line-height:1;color:var(--crys);letter-spacing:.14em;margin-top:2px;text-shadow:0 0 18px rgba(127,211,214,.12)}
+.visit-card.receipt-ready .vc-ticket{color:var(--gold)}
+.visit-card .vc-status{white-space:nowrap;padding:4px 9px;border:1px solid rgba(127,211,214,.28);border-radius:999px;color:var(--crys);font-size:.7rem;letter-spacing:.06em}
+.visit-card.receipt-ready .vc-status{border-color:rgba(216,184,122,.35);color:var(--gold)}
+.visit-card .vc-sub{margin-top:9px;color:var(--mute);font-size:.76rem;line-height:1.65}
+.visit-card .vc-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.visit-card .vc-btn{appearance:none;text-decoration:none;border:1px solid var(--line);background:rgba(127,211,214,.04);color:var(--mist);border-radius:3px;padding:6px 9px;font-family:var(--tc);font-size:.72rem;letter-spacing:.04em;cursor:pointer;line-height:1.4}
+.visit-card .vc-btn:hover{border-color:var(--crys-dim);color:var(--crys)}
+.visit-card .vc-btn.gold{border-color:rgba(216,184,122,.55);color:var(--gold);background:rgba(216,184,122,.06)}
+.visit-card .vc-btn[aria-disabled="true"]{opacity:.46;pointer-events:none}
+@media(max-width:640px){.visit-card{top:60px;right:9px;width:calc(100vw - 18px)}.visit-card .vc-inner{padding:11px 12px}.visit-card .vc-ticket{font-size:1.65rem}.visit-card .vc-sub{font-size:.72rem}}
+
 </style>
 </head>
 <body>
@@ -569,6 +589,22 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
   </div>
   <button class="nav-toggle" id="navToggle" aria-label="選單" aria-controls="navLinks" aria-expanded="false">☰</button>
 </nav>
+
+<div class="visit-card" id="visitCard" aria-live="polite">
+  <div class="vc-inner">
+    <div class="vc-top">
+      <div><div class="vc-ey">CURRENT VISIT · 本次來店</div><div class="vc-ticket" id="vcTicket">—</div></div>
+      <div class="vc-status" id="vcStatus">—</div>
+    </div>
+    <div class="vc-sub" id="vcSub">—</div>
+    <div class="vc-actions">
+      <a class="vc-btn" id="vcOrder" href="order.html">追加點餐</a>
+      <button class="vc-btn" id="vcShare" type="button">分享同行</button>
+      <a class="vc-btn gold" id="vcReceipt" href="receipt.html" aria-disabled="true">收據（結帳後）</a>
+    </div>
+  </div>
+</div>
+
 
 
 
@@ -866,7 +902,47 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
   <div class="cr">© 2026 La Crystalline．本站為《FINAL FANTASY XIV》玩家自製 RP 同好內容，與 SQUARE ENIX 無關。</div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL="https://idqysanzhafayovieqig.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T";
+window.sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
+const VISIT_STORAGE_KEY="la_crystalline_active_visit_v1";
+function readVisit(){try{return JSON.parse(localStorage.getItem(VISIT_STORAGE_KEY)||'null')}catch(e){return null}}
+function writeVisit(v){try{localStorage.setItem(VISIT_STORAGE_KEY,JSON.stringify(v))}catch(e){}}
+function clearVisit(){try{localStorage.removeItem(VISIT_STORAGE_KEY)}catch(e){}}
+function visitStatusLabel(s){return s==='waiting'?'等待帶位':s==='seated'?'已帶位':s==='closed'?'已結帳':s==='cleared'?'已清台':s==='cancelled'?'已取消':'處理中'}
+function visitDate(v){if(!v)return '';try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v))}catch(e){return ''}}
+function visitOrderUrl(token){const u=new URL('order.html',location.href);if(token)u.searchParams.set('join',token);return u.toString()}
+function visitReceiptUrl(v,data){if(data?.receipt_available&&data?.receipt_token){const u=new URL('receipt.html',location.href);u.searchParams.set('r',data.receipt_token);return u.toString()}const u=new URL('receipt.html',location.href);if(v?.guest_name)u.searchParams.set('guest',v.guest_name);if(data?.ticket_code||v?.ticket_code)u.searchParams.set('ticket',data?.ticket_code||v.ticket_code);return u.toString()}
+async function refreshVisitCard(){
+  const card=document.getElementById('visitCard'); if(!card||!window.sb)return;
+  const v=readVisit(); if(!v?.join_token){card.classList.remove('show');return;}
+  try{
+    const {data,error}=await sb.rpc('get_dining_session_public',{p_join_token:v.join_token});
+    if(error)throw error;
+    if(!data){clearVisit();card.classList.remove('show');return;}
+    if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');return;}
+    v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; writeVisit(v);
+    card.classList.add('show'); card.classList.toggle('receipt-ready',!!data.receipt_available);
+    document.getElementById('vcTicket').textContent=data.ticket_code||v.ticket_code||'—';
+    document.getElementById('vcStatus').textContent=visitStatusLabel(data.status);
+    const sub=document.getElementById('vcSub');
+    if(data.receipt_available){sub.textContent=`今夜已結帳。紀念收據保留至 ${visitDate(data.receipt_expires_at)}。`;}
+    else if(data.status==='waiting'){sub.textContent=`來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size} · 請等待夥伴帶位。`;}
+    else if(data.status==='seated'){sub.textContent=`已完成帶位 · 可繼續追加點餐${data.pending_count?` · 尚有 ${data.pending_count} 位同行待加入`:''}。`;}
+    else if(data.status==='cancelled'){sub.textContent='本次來店已取消。';}
+    else{sub.textContent=`來店 ${data.party_size} 人 · ${visitStatusLabel(data.status)}。`;}
+    const order=document.getElementById('vcOrder'),share=document.getElementById('vcShare'),receipt=document.getElementById('vcReceipt');
+    order.href=visitOrderUrl(v.join_token); order.style.display=data.can_order?'inline-flex':'none';
+    share.style.display=(data.can_order&&Number(data.party_size)>1)?'inline-flex':'none';
+    share.onclick=()=>{const url=visitOrderUrl(v.join_token);navigator.clipboard?.writeText(url).then(()=>{share.textContent='同行連結已複製 ✓';setTimeout(()=>share.textContent='分享同行',1800)}).catch(()=>{});};
+    receipt.href=visitReceiptUrl(v,data); receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true'); receipt.textContent=data.receipt_available?'查看紀念收據':'收據（結帳後）';
+  }catch(e){console.warn('本次來店卡更新失敗',e)}
+}
+function rememberVisit(result,guestName){if(!result?.join_token)return;writeVisit({join_token:String(result.join_token),ticket_code:String(result.ticket_code||''),guest_name:String(guestName||''),saved_at:new Date().toISOString()});refreshVisitCard();}
+
 (function(){
   var nav=document.getElementById('nav'),t=document.getElementById('navToggle'),l=document.getElementById('navLinks');
   t.addEventListener('click',function(){var o=l.classList.toggle('open');t.textContent=o?'\u2715':'\u2630';t.style.zIndex=60});
@@ -875,6 +951,9 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
     if(window.scrollY>60)nav.classList.add('solid');else nav.classList.remove('solid');
   });
 })();
+refreshVisitCard();
+setInterval(refreshVisitCard,10000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshVisitCard();});
 </script>
 </body>
 </html>

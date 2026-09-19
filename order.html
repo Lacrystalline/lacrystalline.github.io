@@ -180,6 +180,26 @@ img{display:block;max-width:100%}
 
 footer{text-align:center;padding:30px 24px 40px;border-top:1px solid var(--line);color:var(--mute);font-size:.78rem;letter-spacing:.05em}
 footer .warn{color:var(--crys-dim);margin-top:.6em}
+
+/* persistent visit card */
+.visit-card{position:fixed;top:72px;right:18px;z-index:46;width:min(338px,calc(100vw - 28px));display:none;border:1px solid rgba(127,211,214,.34);border-radius:7px;background:linear-gradient(155deg,rgba(13,20,32,.97),rgba(9,14,24,.96));box-shadow:0 18px 50px rgba(0,0,0,.36),inset 0 0 34px rgba(127,211,214,.035);backdrop-filter:blur(12px);overflow:hidden}
+.visit-card.show{display:block}
+.visit-card.receipt-ready{border-color:rgba(216,184,122,.5);box-shadow:0 18px 50px rgba(0,0,0,.36),inset 0 0 34px rgba(216,184,122,.045)}
+.visit-card .vc-inner{padding:14px 15px 13px}
+.visit-card .vc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.visit-card .vc-ey{font-family:var(--serif);font-size:.72rem;letter-spacing:.18em;color:var(--crys-dim)}
+.visit-card .vc-ticket{font-family:var(--serif);font-size:2rem;line-height:1;color:var(--crys);letter-spacing:.14em;margin-top:2px;text-shadow:0 0 18px rgba(127,211,214,.12)}
+.visit-card.receipt-ready .vc-ticket{color:var(--gold)}
+.visit-card .vc-status{white-space:nowrap;padding:4px 9px;border:1px solid rgba(127,211,214,.28);border-radius:999px;color:var(--crys);font-size:.7rem;letter-spacing:.06em}
+.visit-card.receipt-ready .vc-status{border-color:rgba(216,184,122,.35);color:var(--gold)}
+.visit-card .vc-sub{margin-top:9px;color:var(--mute);font-size:.76rem;line-height:1.65}
+.visit-card .vc-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.visit-card .vc-btn{appearance:none;text-decoration:none;border:1px solid var(--line);background:rgba(127,211,214,.04);color:var(--mist);border-radius:3px;padding:6px 9px;font-family:var(--tc);font-size:.72rem;letter-spacing:.04em;cursor:pointer;line-height:1.4}
+.visit-card .vc-btn:hover{border-color:var(--crys-dim);color:var(--crys)}
+.visit-card .vc-btn.gold{border-color:rgba(216,184,122,.55);color:var(--gold);background:rgba(216,184,122,.06)}
+.visit-card .vc-btn[aria-disabled="true"]{opacity:.46;pointer-events:none}
+@media(max-width:640px){.visit-card{top:60px;right:9px;width:calc(100vw - 18px)}.visit-card .vc-inner{padding:11px 12px}.visit-card .vc-ticket{font-size:1.65rem}.visit-card .vc-sub{font-size:.72rem}}
+
 </style>
 </head>
 <body>
@@ -189,6 +209,22 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   <a class="nav-logo" href="index.html"><img src="assets/emblem_nav.png" alt="水晶庭"><span class="lt">La Crystalline<small>水晶庭</small></span></a>
   <div style="display:flex;gap:16px;align-items:center"><a class="back" href="receipt.html">訂單查詢</a><a class="back" href="index.html">← 返回主頁</a></div>
 </nav>
+
+
+<div class="visit-card" id="visitCard" aria-live="polite">
+  <div class="vc-inner">
+    <div class="vc-top">
+      <div><div class="vc-ey">CURRENT VISIT · 本次來店</div><div class="vc-ticket" id="vcTicket">—</div></div>
+      <div class="vc-status" id="vcStatus">—</div>
+    </div>
+    <div class="vc-sub" id="vcSub">—</div>
+    <div class="vc-actions">
+      <a class="vc-btn" id="vcOrder" href="order.html">追加點餐</a>
+      <button class="vc-btn" id="vcShare" type="button">分享同行</button>
+      <a class="vc-btn gold" id="vcReceipt" href="receipt.html" aria-disabled="true">收據（結帳後）</a>
+    </div>
+  </div>
+</div>
 
 <header class="head">
   <div class="wrap">
@@ -423,7 +459,9 @@ function updatePartyStatus(){
 }
 
 async function loadJoinSession(){
-  const token=new URLSearchParams(location.search).get('join');
+  const stored=readVisit();
+  const storedActive=(stored?.last_status==='waiting'||stored?.last_status==='seated')?stored.join_token:null;
+  const token=new URLSearchParams(location.search).get('join') || storedActive;
   if(!token) return;
   state.joinToken=token;
   $("partySetup").style.display='none';
@@ -673,11 +711,48 @@ function genCode(){
 
 // ---- 送出（Supabase）----
 let sb=null;
+window.sb=null;
 try{
   if(SUPABASE_URL!=="YOUR_SUPABASE_URL" && window.supabase){
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); window.sb=sb;
   }
 }catch(e){ console.warn('Supabase 初始化失敗',e); }
+
+
+const VISIT_STORAGE_KEY="la_crystalline_active_visit_v1";
+function readVisit(){try{return JSON.parse(localStorage.getItem(VISIT_STORAGE_KEY)||'null')}catch(e){return null}}
+function writeVisit(v){try{localStorage.setItem(VISIT_STORAGE_KEY,JSON.stringify(v))}catch(e){}}
+function clearVisit(){try{localStorage.removeItem(VISIT_STORAGE_KEY)}catch(e){}}
+function visitStatusLabel(s){return s==='waiting'?'等待帶位':s==='seated'?'已帶位':s==='closed'?'已結帳':s==='cleared'?'已清台':s==='cancelled'?'已取消':'處理中'}
+function visitDate(v){if(!v)return '';try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v))}catch(e){return ''}}
+function visitOrderUrl(token){const u=new URL('order.html',location.href);if(token)u.searchParams.set('join',token);return u.toString()}
+function visitReceiptUrl(v,data){if(data?.receipt_available&&data?.receipt_token){const u=new URL('receipt.html',location.href);u.searchParams.set('r',data.receipt_token);return u.toString()}const u=new URL('receipt.html',location.href);if(v?.guest_name)u.searchParams.set('guest',v.guest_name);if(data?.ticket_code||v?.ticket_code)u.searchParams.set('ticket',data?.ticket_code||v.ticket_code);return u.toString()}
+async function refreshVisitCard(){
+  const card=document.getElementById('visitCard'); if(!card||!window.sb)return;
+  const v=readVisit(); if(!v?.join_token){card.classList.remove('show');return;}
+  try{
+    const {data,error}=await sb.rpc('get_dining_session_public',{p_join_token:v.join_token});
+    if(error)throw error;
+    if(!data){clearVisit();card.classList.remove('show');return;}
+    if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');return;}
+    v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; writeVisit(v);
+    card.classList.add('show'); card.classList.toggle('receipt-ready',!!data.receipt_available);
+    document.getElementById('vcTicket').textContent=data.ticket_code||v.ticket_code||'—';
+    document.getElementById('vcStatus').textContent=visitStatusLabel(data.status);
+    const sub=document.getElementById('vcSub');
+    if(data.receipt_available){sub.textContent=`今夜已結帳。紀念收據保留至 ${visitDate(data.receipt_expires_at)}。`;}
+    else if(data.status==='waiting'){sub.textContent=`來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size} · 請等待夥伴帶位。`;}
+    else if(data.status==='seated'){sub.textContent=`已完成帶位 · 可繼續追加點餐${data.pending_count?` · 尚有 ${data.pending_count} 位同行待加入`:''}。`;}
+    else if(data.status==='cancelled'){sub.textContent='本次來店已取消。';}
+    else{sub.textContent=`來店 ${data.party_size} 人 · ${visitStatusLabel(data.status)}。`;}
+    const order=document.getElementById('vcOrder'),share=document.getElementById('vcShare'),receipt=document.getElementById('vcReceipt');
+    order.href=visitOrderUrl(v.join_token); order.style.display=data.can_order?'inline-flex':'none';
+    share.style.display=(data.can_order&&Number(data.party_size)>1)?'inline-flex':'none';
+    share.onclick=()=>{const url=visitOrderUrl(v.join_token);navigator.clipboard?.writeText(url).then(()=>{share.textContent='同行連結已複製 ✓';setTimeout(()=>share.textContent='分享同行',1800)}).catch(()=>{});};
+    receipt.href=visitReceiptUrl(v,data); receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true'); receipt.textContent=data.receipt_available?'查看紀念收據':'收據（結帳後）';
+  }catch(e){console.warn('本次來店卡更新失敗',e)}
+}
+function rememberVisit(result,guestName){if(!result?.join_token)return;writeVisit({join_token:String(result.join_token),ticket_code:String(result.ticket_code||''),guest_name:String(guestName||''),saved_at:new Date().toISOString()});refreshVisitCard();}
 
 async function loadPublicStaffStatus(){
   if(!sb){
@@ -714,25 +789,10 @@ async function loadPublicStaffStatus(){
 function toast(msg, result, isErr){
   const t=$("toast");
   if(result?.order_code){
-    const token=result.join_token ? String(result.join_token) : '';
-    const joinUrl=token ? `${location.origin}${location.pathname}?join=${encodeURIComponent(token)}` : '';
-    t.innerHTML = msg +
-      `<div style="margin-top:10px;color:var(--mute);font-size:.78rem;letter-spacing:.08em">水晶號碼牌</div>` +
-      `<div class="code">${esc(result.ticket_code||'-')}</div>` +
-      `<div style="color:var(--mute);font-size:.78rem;margin-top:4px">訂單 ${esc(result.order_code)}</div>` +
-      `<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px">` +
-      (joinUrl && Number(result.party_size||1)>1 ? `<button type="button" id="copyJoin" style="background:transparent;border:1px solid var(--crys-dim);color:var(--crys);border-radius:3px;padding:6px 14px;font-family:var(--tc);cursor:pointer;letter-spacing:.08em">分享同行點餐連結</button>` : '') +
-      `<a href="receipt.html?guest=${encodeURIComponent($("guestName").value.trim())}&ticket=${encodeURIComponent(result.ticket_code||'')}" style="text-decoration:none;border:1px solid rgba(216,184,122,.55);color:var(--gold);border-radius:3px;padding:6px 14px;font-family:var(--tc);letter-spacing:.08em">收據（結帳後可查）</a>` +
-      `</div>`;
-    const cp=t.querySelector('#copyJoin');
-    if(cp){ cp.addEventListener('click',()=>{
-      navigator.clipboard.writeText(joinUrl).then(()=>{cp.textContent='同行連結已複製 ✓';}).catch(()=>{cp.textContent='請手動分享網址';});
-    }); }
-  } else {
-    t.innerHTML = msg;
-  }
-  t.className = "toast show" + (isErr?" err":"");
-  if(isErr){ setTimeout(()=>{ t.className="toast err"; }, 4000); }
+    t.innerHTML=`${msg}<div style="margin-top:7px;color:var(--crys);font-size:.82rem">訂單 ${esc(result.order_code)} 已送出</div><div style="margin-top:3px;color:var(--mute);font-size:.74rem">號碼牌與目前狀態已保留在「本次來店卡」。</div>`;
+  }else{t.innerHTML=msg;}
+  t.className="toast show"+(isErr?" err":"");
+  if(!isErr){setTimeout(()=>{t.className="toast";},2600)}else{setTimeout(()=>{t.className="toast err";},4000)}
 }
 
 $("submitBtn").addEventListener('click', async ()=>{
@@ -766,6 +826,7 @@ $("submitBtn").addEventListener('click', async ()=>{
     };
     const {data,error}=await sb.rpc('submit_dining_order',args);
     if(error) throw error;
+    rememberVisit(data, order.guest_name);
     const wasJoin = !!state.joinToken;
     if(!state.joinToken && data?.join_token){
       state.joinToken = String(data.join_token);
@@ -819,6 +880,9 @@ renderCompanions();
 update();
 loadPublicStaffStatus();
 loadJoinSession();
+setTimeout(refreshVisitCard,250);
+setInterval(refreshVisitCard,10000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshVisitCard();});
 setInterval(loadPublicStaffStatus, 30000);
 </script>
 </body>
