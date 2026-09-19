@@ -83,21 +83,31 @@
 }
 .visit-card .vc-tools{
   position:absolute;
-  top:5.3%;
-  right:6.2%;
+  top:4.9%;
+  right:5.6%;
   z-index:5;
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 .visit-card .vc-tool{
-  border:0;
-  background:transparent;
-  color:rgba(247,244,236,.90);
-  padding:4px 7px;
-  font:300 .76rem/1 var(--tc,"Noto Serif TC",serif);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:34px;
+  border:1px solid rgba(243,236,220,.28);
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(10,24,38,.42), rgba(7,18,29,.28));
+  box-shadow:0 8px 18px rgba(0,0,0,.16), inset 0 0 0 1px rgba(255,255,255,.03);
+  backdrop-filter:blur(6px);
+  color:rgba(249,244,234,.96);
+  padding:7px 14px;
+  font:400 .78rem/1 var(--tc,"Noto Serif TC",serif);
   letter-spacing:.08em;
   cursor:pointer;
-  text-shadow:0 1px 8px rgba(0,0,0,.38);
+  text-shadow:0 1px 10px rgba(0,0,0,.32);
 }
-.visit-card .vc-tool:hover{color:#fff}
+.visit-card .vc-tool:hover{color:#fff;border-color:rgba(252,246,230,.42);background:linear-gradient(180deg, rgba(14,31,47,.52), rgba(9,21,34,.34))}
 .visit-card .vc-tool.danger{display:none}
 
 .visit-card .vc-brand{
@@ -256,12 +266,14 @@
    Outer shell keeps the same approved base; order detail scrolls inside it.
    ========================================================= */
 .receipt.visit-card-surface{
-  width:min(92vw,980px)!important;
-  height:min(78vh,735px)!important;
-  min-height:620px;
+  width:min(92vw,1040px)!important;
+  height:min(90vh,900px)!important;
+  min-height:720px;
   margin:0 auto!important;
   overflow:hidden!important;
   display:none;
+  background-image:url("crystal_receipt_base_tall.png")!important;
+  background-size:100% 100%!important;
 }
 .receipt.visit-card-surface.show{display:flex!important;flex-direction:column}
 .receipt.visit-card-surface .receipt-head{
@@ -278,9 +290,9 @@
   z-index:2;
   flex:1 1 auto;
   overflow:auto;
-  margin:0 10.5% 7.2%;
-  padding:16px 8px 24px!important;
-  background:rgba(5,18,30,.18)!important;
+  margin:0 9.2% 7.6%;
+  padding:18px 10px 28px!important;
+  background:rgba(5,18,30,.14)!important;
   scrollbar-width:thin;
   scrollbar-color:rgba(170,220,229,.34) transparent;
 }
@@ -314,8 +326,8 @@
   .visit-launcher{top:auto;right:10px;bottom:12px}
   .visit-card .vc-shell{width:96vw;aspect-ratio:4/3;max-height:none}
   .visit-card .vc-inner{padding:7.5% 8.6% 7%}
-  .visit-card .vc-tools{top:5%;right:6%}
-  .visit-card .vc-tool{font-size:.62rem}
+  .visit-card .vc-tools{top:4.8%;right:5.8%;gap:6px}
+  .visit-card .vc-tool{min-height:28px;padding:5px 10px;font-size:.62rem}
   .visit-card .vc-brand img{width:30px;height:30px;margin-bottom:3px}
   .visit-card .vc-brand-name{font-size:1.35rem}
   .visit-card .vc-brand-name small{font-size:.46rem;letter-spacing:.18em;margin-top:4px}
@@ -332,7 +344,7 @@
   .visit-card .vc-sub{font-size:.52rem;line-height:1.45;padding-bottom:.5%}
   .visit-card .vc-actions{gap:6px;padding-top:1%}
   .visit-card .vc-btn{min-width:0;flex:1 1 0;padding:7px 6px;font-size:.56rem;letter-spacing:.03em}
-  .receipt.visit-card-surface{width:96vw!important;height:calc(100svh - 92px)!important;min-height:0}
+  .receipt.visit-card-surface{width:96vw!important;height:calc(100svh - 76px)!important;min-height:0;background-image:url("crystal_receipt_base_tall.png")!important}
   .receipt.visit-card-surface .receipt-head{margin:7% 8.5% 0;padding-bottom:10px!important}
   .receipt.visit-card-surface .receipt-body{margin:0 8.5% 7%;padding:12px 4px 20px!important}
 }
