@@ -184,7 +184,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 /* persistent visit card · compact voucher */
 .visit-card{
   position:fixed;top:70px;right:18px;z-index:46;
-  width:min(352px,calc(100vw - 28px));display:none;
+  width:min(468px,calc(100vw - 32px));display:none;
   border:1px solid rgba(127,211,214,.30);border-radius:8px;
   background:
     radial-gradient(420px 180px at 8% 0%,rgba(127,211,214,.075),transparent 58%),
@@ -197,21 +197,21 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 .visit-card.show{display:block}
 .visit-card.receipt-ready{border-color:rgba(216,184,122,.46);box-shadow:0 22px 58px rgba(0,0,0,.42),inset 0 0 40px rgba(216,184,122,.035)}
 .visit-card.receipt-ready::before{border-color:rgba(216,184,122,.10)}
-.visit-card .vc-inner{position:relative;padding:15px 16px 14px}
-.visit-card .vc-brand{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(127,211,214,.11)}
-.visit-card .vc-brand img{width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 0 9px rgba(127,211,214,.16))}
-.visit-card .vc-brand-name{font-family:var(--serif);font-size:.91rem;letter-spacing:.12em;color:#dfe8ee;line-height:1}
-.visit-card .vc-brand-name small{display:block;margin-top:4px;font-family:var(--tc);font-size:.52rem;letter-spacing:.22em;color:var(--crys-dim)}
-.visit-card .vc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-top:12px}
-.visit-card .vc-ey{font-family:var(--serif);font-size:.64rem;letter-spacing:.22em;color:var(--crys-dim);text-transform:uppercase}
-.visit-card .vc-ticket{font-family:var(--serif);font-size:2.45rem;line-height:.95;color:var(--crys);letter-spacing:.13em;margin-top:4px;text-shadow:0 0 20px rgba(127,211,214,.13)}
+.visit-card .vc-inner{position:relative;padding:22px 24px 20px}
+.visit-card .vc-brand{display:flex;align-items:center;gap:13px;padding-bottom:15px;border-bottom:1px solid rgba(127,211,214,.11)}
+.visit-card .vc-brand img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 9px rgba(127,211,214,.16))}
+.visit-card .vc-brand-name{font-family:var(--serif);font-size:1.08rem;letter-spacing:.12em;color:#dfe8ee;line-height:1}
+.visit-card .vc-brand-name small{display:block;margin-top:4px;font-family:var(--tc);font-size:.60rem;letter-spacing:.22em;color:var(--crys-dim)}
+.visit-card .vc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding-top:18px}
+.visit-card .vc-ey{font-family:var(--serif);font-size:.72rem;letter-spacing:.24em;color:var(--crys-dim);text-transform:uppercase}
+.visit-card .vc-ticket{font-family:var(--serif);font-size:3.35rem;line-height:.92;color:var(--crys);letter-spacing:.13em;margin-top:4px;text-shadow:0 0 20px rgba(127,211,214,.13)}
 .visit-card.receipt-ready .vc-ticket{color:var(--gold);text-shadow:0 0 20px rgba(216,184,122,.10)}
-.visit-card .vc-status{white-space:nowrap;margin-top:2px;padding:5px 10px;border:1px solid rgba(127,211,214,.26);border-radius:999px;color:var(--crys);font-size:.68rem;letter-spacing:.08em;background:rgba(127,211,214,.025)}
+.visit-card .vc-status{white-space:nowrap;margin-top:2px;padding:8px 14px;border:1px solid rgba(127,211,214,.26);border-radius:999px;color:var(--crys);font-size:.78rem;letter-spacing:.08em;background:rgba(127,211,214,.025)}
 .visit-card.receipt-ready .vc-status{border-color:rgba(216,184,122,.34);color:var(--gold);background:rgba(216,184,122,.025)}
-.visit-card .vc-owner{margin-top:10px;color:#c8d3dc;font-size:.72rem;letter-spacing:.04em}
-.visit-card .vc-sub{margin-top:5px;color:var(--mute);font-size:.73rem;line-height:1.72}
-.visit-card .vc-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px solid rgba(127,211,214,.10)}
-.visit-card .vc-btn{appearance:none;text-decoration:none;border:1px solid rgba(127,211,214,.18);background:rgba(127,211,214,.025);color:#d9e1e7;border-radius:3px;padding:7px 10px;font-family:var(--tc);font-size:.70rem;letter-spacing:.055em;cursor:pointer;line-height:1.4;transition:.2s}
+.visit-card .vc-owner{margin-top:15px;color:#c8d3dc;font-size:.86rem;letter-spacing:.04em}
+.visit-card .vc-sub{margin-top:7px;color:var(--mute);font-size:.86rem;line-height:1.75}
+.visit-card .vc-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px;padding-top:15px;border-top:1px solid rgba(127,211,214,.10)}
+.visit-card .vc-btn{appearance:none;text-decoration:none;border:1px solid rgba(127,211,214,.18);background:rgba(127,211,214,.025);color:#d9e1e7;border-radius:3px;padding:9px 13px;font-family:var(--tc);font-size:.78rem;letter-spacing:.055em;cursor:pointer;line-height:1.4;transition:.2s}
 .visit-card .vc-btn:hover{border-color:rgba(127,211,214,.48);color:var(--crys);background:rgba(127,211,214,.06)}
 .visit-card .vc-btn.primary{border-color:rgba(127,211,214,.38);color:var(--crys);background:rgba(127,211,214,.055)}
 .visit-card .vc-btn.gold{border-color:rgba(216,184,122,.48);color:var(--gold);background:rgba(216,184,122,.045)}
@@ -220,11 +220,11 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 .visit-card .vc-btn.dismiss:hover{border-color:rgba(216,184,122,.18);background:rgba(216,184,122,.025);color:var(--gold)}
 @media(max-width:640px){
   .visit-card{top:58px;right:9px;width:calc(100vw - 18px)}
-  .visit-card .vc-inner{padding:12px 13px}
-  .visit-card .vc-brand{padding-bottom:8px}
-  .visit-card .vc-ticket{font-size:2rem}
-  .visit-card .vc-sub{font-size:.69rem}
-  .visit-card .vc-owner{font-size:.69rem}
+  .visit-card .vc-inner{padding:16px 17px 15px}
+  .visit-card .vc-brand{padding-bottom:11px}
+  .visit-card .vc-ticket{font-size:2.65rem}
+  .visit-card .vc-sub{font-size:.76rem}
+  .visit-card .vc-owner{font-size:.76rem}
 }
 
 
