@@ -260,6 +260,23 @@
 .visit-card .vc-btn.gold,.visit-card .vc-btn.primary{color:#f7f2e8}
 .visit-card .vc-btn[aria-disabled="true"]{opacity:.42;pointer-events:none}
 .visit-card.receipt-ready .vc-ticket{color:#fff0c9}
+.visit-card .vc-checkout-signature{
+  position:absolute;
+  right:2.5%;
+  bottom:-2%;
+  z-index:4;
+  width:35%;
+  max-width:310px;
+  height:auto;
+  display:none;
+  transform:rotate(-15deg);
+  transform-origin:center;
+  opacity:.88;
+  pointer-events:none;
+  user-select:none;
+  filter:drop-shadow(0 1px 2px rgba(3,10,18,.52)) drop-shadow(0 0 5px rgba(239,220,181,.10));
+}
+.visit-card.receipt-ready .vc-checkout-signature{display:block}
 
 /* =========================================================
    Receipt = expanded state of the SAME crystal voucher.
@@ -335,6 +352,7 @@
   .visit-card .vc-ey{font-size:.56rem}
   .visit-card .vc-ticket-row{min-height:82px;padding:0 9%}
   .visit-card .vc-ticket{font-size:3.9rem}
+  .visit-card .vc-checkout-signature{right:0;bottom:-7%;width:38%;max-width:190px}
   .visit-card .vc-status{right:-1%;min-width:80px;padding:7px 10px;font-size:.62rem}
   .visit-card .vc-owner{font-size:.72rem;letter-spacing:.08em}
   .visit-card .vc-state-line{font-size:.62rem;margin-top:2px}

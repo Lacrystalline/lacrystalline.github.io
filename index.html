@@ -423,6 +423,14 @@ section{padding:72px 0}
 .member-card.active{border-color:rgba(127,211,214,.64);box-shadow:0 0 0 1px rgba(127,211,214,.08),0 18px 38px rgba(0,0,0,.24)}
 .member-card .portrait{aspect-ratio:3/4;border:0;border-bottom:1px solid rgba(127,211,214,.12);border-radius:0;padding:0;margin:0;max-width:none}
 .member-card img{width:100%;height:100%;object-fit:cover;object-position:center center;display:block}
+.member-card .northwind-portrait{position:relative;overflow:hidden}
+.member-card .northwind-portrait .member-signature{
+  position:absolute;right:-3%;bottom:3.5%;z-index:3;
+  width:76%;height:auto;object-fit:contain;object-position:center;
+  transform:rotate(-10deg);transform-origin:center;
+  opacity:.90;pointer-events:none;user-select:none;
+  filter:drop-shadow(0 1px 2px rgba(3,10,18,.48)) drop-shadow(0 0 5px rgba(239,220,181,.10));
+}
 .member-card-copy{padding:13px 15px 0}
 .member-card-name{font-family:var(--serif);font-size:1.45rem;color:var(--mist);letter-spacing:.05em}
 .member-card-en{display:block;color:var(--crys-dim);font-family:var(--serif);font-style:italic;font-size:.9rem;margin-top:.05em}
@@ -614,6 +622,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
         <div class="vc-ey">CRYSTAL TAG</div>
         <div class="vc-ticket-row">
           <div class="vc-ticket" id="vcTicket">—</div>
+          <img class="vc-checkout-signature" src="assets/northern_wind_signature_champagne.png" alt="" aria-hidden="true">
           <div class="vc-status" id="vcStatus">—</div>
         </div>
         <div class="vc-owner" id="vcOwner">—</div>
@@ -866,7 +875,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <button class="member-arrow prev" id="memberPrev" type="button" aria-label="上一位成員">‹</button>
       <div class="member-carousel" id="memberCarousel">
         <button class="member-card active" type="button" data-member="0" aria-pressed="true">
-          <div class="portrait"><img src="assets/master.jpg" alt="店長 北風"></div>
+          <div class="portrait northwind-portrait"><img src="assets/master.jpg" alt="店長 北風"><img class="member-signature" src="assets/northern_wind_signature_champagne.png" alt="" aria-hidden="true"></div>
           <div class="member-card-copy">
             <div class="member-card-name">北風<span class="member-card-en">Northern Wind</span></div>
             <div class="member-card-role">店長 / Keeper</div>
