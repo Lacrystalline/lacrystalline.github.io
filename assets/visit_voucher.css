@@ -1,0 +1,387 @@
+:root{
+  --vc-text:#f7f3e8;
+  --vc-muted:#c9d6de;
+  --vc-gold:#ead6ac;
+  --vc-aqua:#9fe7ee;
+}
+
+/* =========================================================
+   La Crystalline Crystal Voucher
+   SINGLE APPROVED MASTER SURFACE:
+   assets/crystal_voucher_base.webp
+   ========================================================= */
+.visit-card{
+  position:fixed;
+  inset:0;
+  z-index:85;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:74px 14px 18px;
+  pointer-events:none;
+  background:rgba(3,8,14,.12);
+}
+.visit-card.show{display:flex}
+.visit-card .vc-shell{pointer-events:auto}
+
+.visit-launcher{
+  position:fixed;
+  top:86px;
+  right:18px;
+  z-index:84;
+  display:none;
+  align-items:center;
+  gap:9px;
+  padding:8px 11px;
+  border:1px solid rgba(223,239,245,.34);
+  border-radius:10px;
+  color:#f5fafb;
+  background:rgba(7,18,30,.94);
+  box-shadow:0 10px 28px rgba(0,0,0,.34);
+  cursor:pointer;
+  font-family:var(--tc,"Noto Serif TC",serif);
+}
+.visit-launcher.show{display:flex}
+.visit-launcher .vl-mark{width:23px;height:23px;object-fit:contain}
+.visit-launcher .vl-copy{display:grid;line-height:1.15}
+.visit-launcher .vl-copy small{font-size:.52rem;letter-spacing:.22em;color:rgba(184,225,232,.76)}
+.visit-launcher .vl-copy strong{font-family:"Cormorant Garamond",serif;font-size:1.05rem;letter-spacing:.06em;color:#f6e9cb}
+
+/* Exact approved crystal base. No synthetic frame, no replacement texture. */
+.visit-card-surface{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  color:var(--vc-text);
+  border:0!important;
+  border-radius:0!important;
+  clip-path:none!important;
+  background-color:transparent!important;
+  background-image:url("crystal_voucher_base.webp")!important;
+  background-repeat:no-repeat!important;
+  background-position:center!important;
+  background-size:100% 100%!important;
+  box-shadow:0 24px 72px rgba(0,0,0,.46),0 0 30px rgba(118,207,223,.10)!important;
+}
+.visit-card-surface::before,.visit-card-surface::after{display:none!important}
+
+/* Active visit card stays the same 4:3 physical card as the approved asset. */
+.visit-card .vc-shell{
+  width:min(90vw,980px);
+  aspect-ratio:4/3;
+  max-height:calc(100vh - 100px);
+  overflow:hidden;
+}
+.visit-card .vc-inner{
+  position:relative;
+  z-index:2;
+  width:100%;
+  height:100%;
+  padding:7.8% 10.5% 7.2%;
+  display:flex;
+  flex-direction:column;
+}
+.visit-card .vc-tools{
+  position:absolute;
+  top:4.9%;
+  right:5.6%;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.visit-card .vc-tool{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:34px;
+  border:1px solid rgba(243,236,220,.28);
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(10,24,38,.42), rgba(7,18,29,.28));
+  box-shadow:0 8px 18px rgba(0,0,0,.16), inset 0 0 0 1px rgba(255,255,255,.03);
+  backdrop-filter:blur(6px);
+  color:rgba(249,244,234,.96);
+  padding:7px 14px;
+  font:400 .78rem/1 var(--tc,"Noto Serif TC",serif);
+  letter-spacing:.08em;
+  cursor:pointer;
+  text-shadow:0 1px 10px rgba(0,0,0,.32);
+}
+.visit-card .vc-tool:hover{color:#fff;border-color:rgba(252,246,230,.42);background:linear-gradient(180deg, rgba(14,31,47,.52), rgba(9,21,34,.34))}
+.visit-card .vc-tool.danger{display:none}
+
+.visit-card .vc-brand{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:0;
+  border:0;
+}
+.visit-card .vc-brand img{
+  width:44px;
+  height:44px;
+  object-fit:contain;
+  margin-bottom:5px;
+  filter:drop-shadow(0 0 10px rgba(196,239,245,.26));
+}
+.visit-card .vc-brand-name{
+  font-family:var(--serif,"Cormorant Garamond",serif);
+  font-size:clamp(1.55rem,3.0vw,2.45rem);
+  line-height:.95;
+  letter-spacing:.035em;
+  color:#f9f2e4;
+  text-shadow:0 2px 12px rgba(0,0,0,.36);
+}
+.visit-card .vc-brand-name small{
+  display:block;
+  margin-top:8px;
+  color:rgba(244,239,230,.88);
+  font-family:var(--tc,"Noto Serif TC",serif);
+  font-size:.58rem;
+  letter-spacing:.34em;
+}
+
+.visit-card .vc-main{text-align:center;padding-top:1.5%}
+.visit-card .vc-ey{
+  color:rgba(245,239,229,.92);
+  font-family:var(--serif,"Cormorant Garamond",serif);
+  font-size:.75rem;
+  letter-spacing:.18em;
+}
+.visit-card .vc-ticket-row{
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:17vh;
+  padding:0 16%;
+  margin-top:-.5%;
+}
+.visit-card .vc-ticket{
+  margin:0 auto;
+  font-family:"Great Vibes","Cormorant Garamond",cursive;
+  font-size:clamp(5.2rem,9.6vw,7.3rem);
+  line-height:.82;
+  letter-spacing:.01em;
+  color:#fff4dd;
+  text-shadow:0 0 16px rgba(255,246,220,.14),0 3px 15px rgba(5,22,34,.46);
+}
+.visit-card .vc-status{
+  position:absolute;
+  right:1%;
+  top:50%;
+  transform:translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:118px;
+  padding:11px 18px;
+  border:1px solid rgba(244,234,215,.55);
+  border-radius:999px;
+  background:rgba(10,28,42,.18);
+  color:#f5ead5;
+  font-size:.82rem;
+  letter-spacing:.10em;
+}
+.visit-card .vc-owner{
+  margin-top:0;
+  color:#f7f2ea;
+  font-size:1rem;
+  letter-spacing:.14em;
+}
+.visit-card .vc-state-line{
+  margin-top:5px;
+  color:rgba(246,240,232,.88);
+  font-size:.78rem;
+  letter-spacing:.06em;
+}
+.visit-card .vc-phrase-wrap{
+  flex:1;
+  min-height:86px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1.5% 4% 0;
+}
+.visit-card .vc-phrase{
+  max-width:670px;
+  color:#f8f3e9;
+  font-family:var(--tc,"Noto Serif TC",serif);
+  font-size:clamp(.84rem,1.45vw,1.02rem);
+  line-height:1.85;
+  letter-spacing:.07em;
+  text-align:center;
+  text-shadow:0 1px 10px rgba(3,22,32,.42);
+}
+.visit-card .vc-phrase::before,.visit-card .vc-phrase::after{
+  content:"✦";
+  color:var(--vc-gold);
+  opacity:.82;
+  font-size:.64em;
+  margin:0 10px;
+  vertical-align:.12em;
+}
+.visit-card .vc-sub{
+  color:rgba(243,239,232,.80);
+  font-size:.72rem;
+  letter-spacing:.05em;
+  line-height:1.65;
+  padding:0 0 1.5%;
+  text-align:center;
+}
+.visit-card .vc-actions{
+  display:flex;
+  gap:14px;
+  justify-content:center;
+  flex-wrap:nowrap;
+  padding:1.6% 3% 0;
+}
+.visit-card .vc-btn{
+  min-width:168px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  border:1px solid rgba(245,241,232,.58);
+  background:rgba(18,45,64,.42);
+  color:#f7f3ea;
+  padding:10px 16px;
+  clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,10px 100%,0 50%);
+  font-family:var(--tc,"Noto Serif TC",serif);
+  font-size:.78rem;
+  letter-spacing:.08em;
+  cursor:pointer;
+  transition:.18s ease;
+  box-shadow:inset 0 0 12px rgba(255,255,255,.025);
+}
+.visit-card .vc-btn:hover{transform:translateY(-1px);background:rgba(24,58,79,.58);border-color:rgba(255,255,255,.80)}
+.visit-card .vc-btn.gold,.visit-card .vc-btn.primary{color:#f7f2e8}
+.visit-card .vc-btn[aria-disabled="true"]{opacity:.42;pointer-events:none}
+.visit-card.receipt-ready .vc-ticket{color:#fff0c9}
+.visit-card .vc-checkout-signature{
+  position:absolute;
+  right:1%;
+  bottom:-2%;
+  z-index:4;
+  width:42%;
+  max-width:370px;
+  height:auto;
+  display:none;
+  transform:translateY(48%) rotate(-15deg);
+  transform-origin:center;
+  opacity:.88;
+  pointer-events:none;
+  user-select:none;
+  filter:drop-shadow(0 1px 2px rgba(3,10,18,.52)) drop-shadow(0 0 5px rgba(239,220,181,.10));
+}
+.visit-card.receipt-ready .vc-checkout-signature{display:block}
+
+/* =========================================================
+   Receipt = expanded state of the SAME crystal voucher.
+   Outer shell itself must elongate with content; no inner scroll area.
+   ========================================================= */
+.receipt.visit-card-surface{
+  width:min(92vw,1040px)!important;
+  height:auto!important;
+  min-height:720px;
+  margin:0 auto!important;
+  overflow:visible!important;
+  display:none;
+  background-image:url("crystal_receipt_base_md.webp")!important;
+  background-size:100% 100%!important;
+  background-repeat:no-repeat!important;
+}
+.receipt.visit-card-surface.show{display:block!important}
+.receipt.visit-card-surface.receipt-len-md{background-image:url("crystal_receipt_base_md.webp")!important;min-height:900px}
+.receipt.visit-card-surface.receipt-len-lg{background-image:url("crystal_receipt_base_lg.webp")!important;min-height:1220px}
+.receipt.visit-card-surface.receipt-len-xl{background-image:url("crystal_receipt_base_xl.webp")!important;min-height:1680px}
+.receipt.visit-card-surface .receipt-head{
+  margin:7.4% 10.5% 0;
+  padding:0 0 14px!important;
+  border-bottom:1px solid rgba(238,242,241,.24)!important;
+  background:transparent!important;
+  position:relative;
+  z-index:2;
+}
+.receipt.visit-card-surface .receipt-body{
+  position:relative;
+  z-index:2;
+  overflow:visible!important;
+  margin:0 9.2% 7.6%;
+  padding:18px 10px 44px!important;
+  background:rgba(5,18,30,.14)!important;
+}
+.receipt.visit-card-surface .brand img{width:44px;height:44px}
+.receipt.visit-card-surface .brand .en{font-family:"Cormorant Garamond",serif;font-size:1.4rem;color:#f8f1e4;letter-spacing:.08em}
+.receipt.visit-card-surface .brand .zh{color:rgba(230,238,240,.78);font-size:.68rem;letter-spacing:.20em}
+.receipt.visit-card-surface .status{border-color:rgba(240,221,179,.48);color:#efd8aa;background:rgba(7,24,36,.18)}
+.receipt.visit-card-surface .ticket-hero{border-bottom-color:rgba(235,242,243,.18)!important}
+.receipt.visit-card-surface .ticket-hero .lab{color:rgba(228,239,242,.78)!important}
+.receipt.visit-card-surface .ticket-hero .ticket{
+  font-family:"Great Vibes","Cormorant Garamond",cursive!important;
+  color:#fff0ca!important;
+  letter-spacing:.01em!important;
+  line-height:.84!important;
+  font-size:clamp(4.3rem,9vw,6.7rem)!important;
+}
+.receipt.visit-card-surface .ticket-hero .issued{color:rgba(225,235,239,.72)!important}
+.receipt.visit-card-surface .meta,
+.receipt.visit-card-surface .block,
+.receipt.visit-card-surface .totals{
+  background:rgba(4,17,29,.42)!important;
+  border-color:rgba(218,239,243,.18)!important;
+}
+.receipt.visit-card-surface .block-h{background:rgba(94,176,194,.04)!important;border-bottom-color:rgba(218,239,243,.16)!important}
+.receipt.visit-card-surface .member-chip{background:rgba(8,30,43,.44)!important;border-color:rgba(214,239,243,.20)!important}
+.receipt.visit-card-surface .line{border-bottom-color:rgba(212,235,239,.10)!important}
+.receipt.visit-card-surface .receipt-visit-phrase{color:#f4f1e9!important;border-color:rgba(235,227,210,.18)!important}
+
+@media(max-width:720px){
+  .visit-card{padding:62px 8px 10px;align-items:flex-start}
+  .visit-launcher{top:auto;right:10px;bottom:12px}
+  .visit-card .vc-shell{width:96vw;aspect-ratio:4/3;max-height:none}
+  .visit-card .vc-inner{padding:7.5% 8.6% 7%}
+  .visit-card .vc-tools{top:4.8%;right:5.8%;gap:6px}
+  .visit-card .vc-tool{min-height:28px;padding:5px 10px;font-size:.62rem}
+  .visit-card .vc-brand img{width:30px;height:30px;margin-bottom:3px}
+  .visit-card .vc-brand-name{font-size:1.35rem}
+  .visit-card .vc-brand-name small{font-size:.46rem;letter-spacing:.18em;margin-top:4px}
+  .visit-card .vc-main{padding-top:0}
+  .visit-card .vc-ey{font-size:.56rem}
+  .visit-card .vc-ticket-row{min-height:82px;padding:0 9%}
+  .visit-card .vc-ticket{font-size:3.9rem}
+  .visit-card .vc-checkout-signature{right:-1%;bottom:-5%;width:46%;max-width:225px;transform:translateY(42%) rotate(-15deg)}
+  .visit-card .vc-status{right:-1%;min-width:80px;padding:7px 10px;font-size:.62rem}
+  .visit-card .vc-owner{font-size:.72rem;letter-spacing:.08em}
+  .visit-card .vc-state-line{font-size:.62rem;margin-top:2px}
+  .visit-card .vc-phrase-wrap{min-height:52px;padding:1% 2% 0}
+  .visit-card .vc-phrase{font-size:.62rem;line-height:1.65;letter-spacing:.03em}
+  .visit-card .vc-phrase::before,.visit-card .vc-phrase::after{margin:0 5px}
+  .visit-card .vc-sub{font-size:.52rem;line-height:1.45;padding-bottom:.5%}
+  .visit-card .vc-actions{gap:6px;padding-top:1%}
+  .visit-card .vc-btn{min-width:0;flex:1 1 0;padding:7px 6px;font-size:.56rem;letter-spacing:.03em}
+  .receipt.visit-card-surface{width:96vw!important;height:auto!important;min-height:720px;background-image:url("crystal_receipt_base_md.webp")!important}
+  .receipt.visit-card-surface.receipt-len-md{min-height:820px}
+  .receipt.visit-card-surface.receipt-len-lg{min-height:1080px}
+  .receipt.visit-card-surface.receipt-len-xl{min-height:1460px}
+  .receipt.visit-card-surface .receipt-head{margin:7% 8.5% 0;padding-bottom:10px!important}
+  .receipt.visit-card-surface .receipt-body{margin:0 8.5% 7%;padding:12px 4px 24px!important}
+}
+
+@media print{
+  @page{size:auto;margin:8mm}
+  html,body{background:#07101a!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .receipt.visit-card-surface{
+    width:100%!important;height:auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;
+    background-size:100% 100%!important;background-repeat:no-repeat!important;box-shadow:none!important;overflow:visible!important;
+    -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;page-break-inside:avoid!important;
+  }
+  .receipt.visit-card-surface.receipt-len-md{background-image:url("crystal_receipt_base_md.webp")!important}
+  .receipt.visit-card-surface.receipt-len-lg{background-image:url("crystal_receipt_base_lg.webp")!important}
+  .receipt.visit-card-surface.receipt-len-xl{background-image:url("crystal_receipt_base_xl.webp")!important}
+  .receipt.visit-card-surface .receipt-head,.receipt.visit-card-surface .receipt-body{margin:0 7.5%!important;background:transparent!important;overflow:visible!important}
+  .receipt.visit-card-surface .receipt-head{margin-top:6.5%!important}
+  .receipt.visit-card-surface .receipt-body{padding-bottom:8%!important}
+}
