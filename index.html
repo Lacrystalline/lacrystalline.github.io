@@ -405,34 +405,50 @@ section{padding:72px 0}
 .order-btn img{width:32px;height:32px;object-fit:contain}
 .order-btn:hover{border-color:var(--crys);background:rgba(127,211,214,.14);transform:translateY(-1px)}
 
-/* ---------- master ---------- */
-.master{
-  display:grid;grid-template-columns:230px 1fr;gap:40px;align-items:start;
+/* ---------- members ---------- */
+.member-carousel-shell{position:relative;margin-top:4px}
+.member-carousel{
+  display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;
+  scrollbar-width:none;padding:8px 54px 14px;scroll-behavior:smooth;
 }
-.master + .master{margin-top:64px;padding-top:64px;border-top:1px solid var(--line)}
-.portrait{
-  aspect-ratio:3/4;border:1px solid var(--line);border-radius:2px;
-  background:linear-gradient(160deg,rgba(17,26,43,.8),rgba(10,14,20,.9));
-  display:flex;align-items:center;justify-content:center;text-align:center;
-  color:var(--crys-dim);font-family:var(--serif);font-style:italic;font-size:.95rem;
-  padding:20px;position:relative;overflow:hidden;
+.member-carousel::-webkit-scrollbar{display:none}
+.member-card{
+  flex:0 0 clamp(220px,26vw,270px);scroll-snap-align:center;
+  border:1px solid rgba(127,211,214,.16);border-radius:4px;
+  background:rgba(14,22,34,.48);padding:0 0 14px;color:inherit;
+  text-align:left;cursor:pointer;transition:.24s ease;overflow:hidden;
+  box-shadow:0 12px 30px rgba(0,0,0,.14)
 }
-.portrait:has(img)::before{display:none}
-.portrait::before{
-  content:"";position:absolute;top:50%;left:50%;width:2px;height:60%;
-  transform:translate(-50%,-50%);
-  background:linear-gradient(to bottom,transparent,var(--crys-dim),transparent);
-  opacity:.4;
+.member-card:hover{border-color:rgba(127,211,214,.38);transform:translateY(-2px)}
+.member-card.active{border-color:rgba(127,211,214,.64);box-shadow:0 0 0 1px rgba(127,211,214,.08),0 18px 38px rgba(0,0,0,.24)}
+.member-card .portrait{aspect-ratio:3/4;border:0;border-bottom:1px solid rgba(127,211,214,.12);border-radius:0;padding:0;margin:0;max-width:none}
+.member-card img{width:100%;height:100%;object-fit:cover;object-position:center center;display:block}
+.member-card-copy{padding:13px 15px 0}
+.member-card-name{font-family:var(--serif);font-size:1.45rem;color:var(--mist);letter-spacing:.05em}
+.member-card-en{display:block;color:var(--crys-dim);font-family:var(--serif);font-style:italic;font-size:.9rem;margin-top:.05em}
+.member-card-role{color:var(--crys);font-size:.72rem;letter-spacing:.13em;margin-top:.55em}
+.member-card-rp{color:var(--mute);font-size:.78rem;line-height:1.55;margin-top:.55em}
+.member-arrow{
+  position:absolute;top:42%;transform:translateY(-50%);z-index:3;width:36px;height:36px;
+  border:1px solid rgba(127,211,214,.28);border-radius:50%;background:rgba(8,16,26,.78);
+  color:var(--mist);font-family:var(--serif);font-size:1.45rem;line-height:1;cursor:pointer;
+  display:grid;place-items:center;backdrop-filter:blur(6px);transition:.2s ease
 }
-.portrait span{position:relative;z-index:1;line-height:1.8}
+.member-arrow:hover{border-color:rgba(127,211,214,.62);background:rgba(20,39,53,.9)}
+.member-arrow.prev{left:4px}.member-arrow.next{right:4px}
+.member-dots{display:flex;justify-content:center;gap:8px;margin:3px 0 30px}
+.member-dot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(127,211,214,.45);background:transparent;padding:0;cursor:pointer;transition:.2s}
+.member-dot.active{background:var(--crys);box-shadow:0 0 10px rgba(127,211,214,.38)}
+.member-detail{max-width:850px;margin:0 auto;padding-top:6px;animation:memberFade .26s ease}
+@keyframes memberFade{from{opacity:.25;transform:translateY(4px)}to{opacity:1;transform:none}}
 .m-name{font-family:var(--serif);font-size:2.1rem;color:var(--mist);letter-spacing:.05em}
 .m-name .en{color:var(--crys-dim);font-style:italic;font-size:1.15rem;display:block;margin-top:.05em}
 .m-role{color:var(--crys);font-size:.85rem;letter-spacing:.14em;margin-top:.6em}
-.m-meta{margin-top:1em;padding:11px 14px;border-left:2px solid var(--crys-dim);background:rgba(127,211,214,.045);display:grid;gap:6px;max-width:36em}
+.m-meta{margin-top:1em;padding:11px 14px;border-left:2px solid var(--crys-dim);background:rgba(127,211,214,.045);display:grid;gap:6px;max-width:42em}
 .m-meta-row{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
 .m-meta-label{color:var(--crys-dim);font-family:var(--serif);font-size:.76rem;letter-spacing:.16em;min-width:6.2em}
 .m-meta-value{color:#cbd6df;font-size:.9rem;letter-spacing:.06em}
-.m-body p{color:#c3ced9;font-size:1.02rem;margin-top:1.1em;letter-spacing:.02em;max-width:36em}
+.m-body p{color:#c3ced9;font-size:1.02rem;margin-top:1.1em;letter-spacing:.02em;max-width:50em}
 .m-quote{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1.2rem;margin-top:1.4em;letter-spacing:.03em}
 .m-foot{color:var(--mute);font-size:.92rem;margin-top:1.1em;padding-top:1.1em;border-top:1px solid var(--line);font-family:var(--serif);font-style:italic}
 
@@ -460,8 +476,12 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 @media(max-width:680px){
   section{padding:56px 0}
   .worlds{grid-template-columns:1fr}
-  .master{grid-template-columns:1fr;gap:24px}
-  .portrait{max-width:210px;margin:0 auto}
+  .member-carousel{gap:12px;padding:6px 38px 12px 14px;scroll-padding-inline:14px}
+  .member-card{flex-basis:min(72vw,245px)}
+  .member-arrow{width:32px;height:32px;font-size:1.25rem;top:40%}
+  .member-arrow.prev{left:2px}.member-arrow.next{right:2px}
+  .member-detail{padding:0 2px}
+  .m-name{font-size:1.8rem}
 
   /* Mobile keeps the same vertical menu flow, with tighter spacing. */
   .drink{
@@ -840,68 +860,46 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 <section class="master-sec" id="master">
   <div class="wrap">
     <div class="eyebrow">在此間點燈的人</div>
-    <h2 class="s-title" style="margin-bottom:36px">成員<span class="cn">MEMBERS</span></h2>
-    <div class="master">
-      <div class="portrait" style="padding:0"><img src="assets/master.jpg" alt="店長 北風" style="width:100%;height:100%;object-fit:cover"></div>
-      <div>
-        <div class="m-name">北風<span class="en">Northern Wind</span></div>
-        <div class="m-role">店長 / Keeper</div>
-        <div class="m-meta">
-          <div class="m-meta-row"><span class="m-meta-label">RP 擔當</span><span class="m-meta-value">店長・調酒</span></div>
-          <div class="m-meta-row"><span class="m-meta-label">特殊服務</span><span class="m-meta-value">光釀・裁光 <span style="color:var(--crys-dim)">｜洽店長</span></span></div>
-        </div>
-        <div class="m-body">
-          <p>你此刻見到的，是一位以斯卡提山脈山林之民模樣行走於此的旅者。他舉止文雅而從容，與初識之人總保留幾分恰到好處的距離，因此多少顯得難以看透；但真正熟悉之後，才會發現他其實相當健談。從書、工藝與音樂，到城市、山林與旅途中遇見的人事，他總有不少故事可說。</p>
-          <p>但這具身體，並不是他真正的樣子。據說他的本體流著古老的亞拉戈皇血——正是這份血脈，讓他有資格喚醒並看守這座水晶塔特異點。魂與記憶渡得過來，肉身卻總隨世界而變；如今這副山林之民的軀殼，不過是特異點為他開啟的、又一種「可能性的身體」。至於他真正的容貌、那雙傳說中的紅瞳，此刻並不在這裡。</p>
-          <p>他曾在城市生活，也走過山野與漫長旅途；做過工藝、研究過古老知識，也以冒險者的身分去過不少地方。如今比起刀光劍影，他更喜歡把時間花在酒、料理、書本與工坊裡，把一件件東西慢慢做好。</p>
-          <p>至於為何最後停在水晶庭，他自己也說不清。最初似乎只是循著某種來自水晶的指引走到這裡——他曾以為那是海德林的聲音，如今卻不再急著替它下定論。水晶庭原本只是旅途中的停留之處，最後卻成了他選擇留下、替來客點燈的地方。</p>
-        </div>
-        <div class="m-quote">「……你也是來躲雨的嗎？坐吧。這裡的光，會等你。」</div>
-        <div class="m-foot">有些東西他只給熟人：一身親手裁的衣裳，或一杯只為你而釀的光。</div>
+    <h2 class="s-title" style="margin-bottom:28px">成員<span class="cn">MEMBERS</span></h2>
+
+    <div class="member-carousel-shell">
+      <button class="member-arrow prev" id="memberPrev" type="button" aria-label="上一位成員">‹</button>
+      <div class="member-carousel" id="memberCarousel">
+        <button class="member-card active" type="button" data-member="0" aria-pressed="true">
+          <div class="portrait"><img src="assets/master.jpg" alt="店長 北風"></div>
+          <div class="member-card-copy">
+            <div class="member-card-name">北風<span class="member-card-en">Northern Wind</span></div>
+            <div class="member-card-role">店長 / Keeper</div>
+            <div class="member-card-rp">店長・調酒</div>
+          </div>
+        </button>
+        <button class="member-card" type="button" data-member="1" aria-pressed="false">
+          <div class="portrait"><img src="assets/hunfen_profile.jpg" alt="水晶庭成員 混分"></div>
+          <div class="member-card-copy">
+            <div class="member-card-name">混分<span class="member-card-en">Hunfen</span></div>
+            <div class="member-card-role">夥伴 / Staff</div>
+            <div class="member-card-rp">接待・調酒・陪聊・表演・攝影</div>
+          </div>
+        </button>
+        <button class="member-card" type="button" data-member="2" aria-pressed="false">
+          <div class="portrait"><img src="assets/amu_profile.jpg" alt="水晶庭成員 阿木"></div>
+          <div class="member-card-copy">
+            <div class="member-card-name">阿木<span class="member-card-en">Amu</span></div>
+            <div class="member-card-role">夥伴 / Staff</div>
+            <div class="member-card-rp">接待・陪聊</div>
+          </div>
+        </button>
       </div>
+      <button class="member-arrow next" id="memberNext" type="button" aria-label="下一位成員">›</button>
     </div>
 
-    <div class="master">
-      <div class="portrait" style="padding:0"><img src="assets/hunfen_profile.jpg" alt="水晶庭成員 混分" style="width:100%;height:100%;object-fit:cover;object-position:center 38%"></div>
-      <div>
-        <div class="m-name">混分<span class="en">Hunfen</span></div>
-        <div class="m-role">夥伴 / Staff</div>
-        <div class="m-meta">
-          <div class="m-meta-row"><span class="m-meta-label">RP 擔當</span><span class="m-meta-value">接待・調酒・陪聊・表演・攝影</span></div>
-          <div class="m-meta-row"><span class="m-meta-label">特殊服務</span><span class="m-meta-value">密談・留影</span></div>
-          <div class="m-meta-row"><span class="m-meta-label">氣質</span><span class="m-meta-value">男裝麗人・溫柔優雅・旅人</span></div>
-        </div>
-        <div class="m-body">
-          <p>她看起來總像是剛從一段很長的旅程裡走進來。俐落的男裝、從容的舉止，加上一種不急著說明自己的氣質，使初見之人往往先記住她的優雅與些許神祕。她待人極有禮貌，說話不疾不徐；若你願意多坐一會，便會發現那份距離其實很柔軟。</p>
-          <p>她在東方文化的環境裡長大，之後卻很少真正停在一個地方。一路上做過表演者，也接觸過學問與工藝；有時跟著音樂走，有時為一道料理、一杯酒，或某本書在陌生城市多留幾日。對她而言，旅行從來不是為了抵達某個偉大的終點，而是去認識不同的人、不同的生活，以及那些只有停下來才會看見的小事。</p>
-          <p>水晶庭原本也只是她旅途中的一站。某個夜晚，她在這裡喝過酒、聽過幾段故事，也看見有人在水晶的微光下卸下一天的疲憊。於是她沒有急著離開。起初只是順手幫著接待來客，後來也會站到吧檯後調酒；興致來時上場表演，或替客人拍下一張屬於那晚的留影。沒有特別戲劇性的理由，只是覺得這裡值得多停一陣子。</p>
-          <p>若只是初識，她會把分寸拿捏得很漂亮；熟悉之後卻會明顯健談許多，甚至偶爾露出有些天然的一面。從旅行見聞、音樂與美食，到一些奇怪的小知識，她都很樂意慢慢聊。</p>
-        </div>
-        <div class="m-quote">「若今晚不急著趕路，就再坐一會吧。我還有很多故事，可以慢慢說給你聽。」</div>
-        <div class="m-foot">她喜歡替人斟酒，也喜歡替人留下照片。旅行帶走很多東西，能留下的，往往只是片刻與記憶。</div>
-      </div>
+    <div class="member-dots" id="memberDots" aria-hidden="true">
+      <button class="member-dot active" type="button" data-member="0" tabindex="-1"></button>
+      <button class="member-dot" type="button" data-member="1" tabindex="-1"></button>
+      <button class="member-dot" type="button" data-member="2" tabindex="-1"></button>
     </div>
 
-    <div class="master">
-      <div class="portrait" style="padding:0"><img src="assets/amu_profile.jpg" alt="水晶庭成員 阿木" style="width:100%;height:100%;object-fit:cover;object-position:center 34%"></div>
-      <div>
-        <div class="m-name">阿木<span class="en">Amu</span></div>
-        <div class="m-role">夥伴 / Staff</div>
-        <div class="m-meta">
-          <div class="m-meta-row"><span class="m-meta-label">RP 擔當</span><span class="m-meta-value">接待・陪聊</span></div>
-          <div class="m-meta-row"><span class="m-meta-label">特殊服務</span><span class="m-meta-value">—</span></div>
-          <div class="m-meta-row"><span class="m-meta-label">氣質</span><span class="m-meta-value">文雅青年・溫柔克制・偶爾毒舌</span></div>
-        </div>
-        <div class="m-body">
-          <p>初見阿木時，很容易先注意到他的禮貌。說話文雅、語氣不急，待人也稱得上溫柔；只是那份溫柔總留著一點距離，偶爾又會在最平靜的表情下丟出一句略顯尖銳的話，讓人一時分不清究竟是在認真，還是在若無其事地吐槽。再加上偶爾慢半拍的天然反應，他給人的第一印象往往比本人實際上更難捉摸。</p>
-          <p>他來自帶有東方文化色彩的環境，曾以學者的身分接觸過不少知識，後來卻逐漸習慣了四處行走的生活。比起把自己綁在某個頭銜上，他更在意一路遇見的人、可以自由選擇的去處，以及那些值得坐下來慢慢品味的料理與酒。若話題恰好對上，他其實相當健談；只是從不急著把所有事情一次說完。</p>
-          <p>阿木留在水晶庭並非全然偶然。他有自己的目的，卻沒有特別打算對每位來客解釋清楚。至少在店裡，他只是負責接待與陪聊的普通員工。客人若願意開口，他會順著話題陪上一段；若對方只想安靜喝點東西，他也懂得把沉默留在剛好的位置。</p>
-          <p>熟悉之後，那層初見時的克制會鬆開不少。他會變得更愛說話，也更常開玩笑，原本略帶毒舌的語氣通常只剩下輕巧的調侃。比起刻意熱絡，他更像是在聊天裡慢慢拉近距離——不過分親暱，也不故作冷淡，讓人能舒服地決定今晚想說多少、又想留下多少。</p>
-        </div>
-        <div class="m-quote">「想聊就聊吧。若一時想不到話題，我也可以先替你想一個——只是未必很正經。」</div>
-        <div class="m-foot">他似乎確實為了某件事停在這裡，只是比起追問答案，今晚先把酒喝完或許更重要。</div>
-      </div>
-    </div>
+    <div class="member-detail" id="memberDetail" aria-live="polite"></div>
   </div>
 </section>
 
@@ -1025,6 +1023,86 @@ function rememberVisit(result,guestName){if(!result?.join_token)return;writeVisi
     if(window.scrollY>60)nav.classList.add('solid');else nav.classList.remove('solid');
   });
 })();
+const MEMBER_PROFILES=[
+  {
+    name:"北風", en:"Northern Wind", role:"店長 / Keeper",
+    meta:[["RP 擔當","店長・調酒"],["特殊服務",'光釀・裁光 <span style="color:var(--crys-dim)">｜洽店長</span>']],
+    body:[
+      "你此刻見到的，是一位以斯卡提山脈山林之民模樣行走於此的旅者。他舉止文雅而從容，與初識之人總保留幾分恰到好處的距離，因此多少顯得難以看透；但真正熟悉之後，才會發現他其實相當健談。從書、工藝與音樂，到城市、山林與旅途中遇見的人事，他總有不少故事可說。",
+      "但這具身體，並不是他真正的樣子。據說他的本體流著古老的亞拉戈皇血——正是這份血脈，讓他有資格喚醒並看守這座水晶塔特異點。魂與記憶渡得過來，肉身卻總隨世界而變；如今這副山林之民的軀殼，不過是特異點為他開啟的、又一種「可能性的身體」。至於他真正的容貌、那雙傳說中的紅瞳，此刻並不在這裡。",
+      "他曾在城市生活，也走過山野與漫長旅途；做過工藝、研究過古老知識，也以冒險者的身分去過不少地方。如今比起刀光劍影，他更喜歡把時間花在酒、料理、書本與工坊裡，把一件件東西慢慢做好。",
+      "至於為何最後停在水晶庭，他自己也說不清。最初似乎只是循著某種來自水晶的指引走到這裡——他曾以為那是海德林的聲音，如今卻不再急著替它下定論。水晶庭原本只是旅途中的停留之處，最後卻成了他選擇留下、替來客點燈的地方。"
+    ],
+    quote:"「……你也是來躲雨的嗎？坐吧。這裡的光，會等你。」",
+    foot:"有些東西他只給熟人：一身親手裁的衣裳，或一杯只為你而釀的光。"
+  },
+  {
+    name:"混分", en:"Hunfen", role:"夥伴 / Staff",
+    meta:[["RP 擔當","接待・調酒・陪聊・表演・攝影"],["特殊服務","密談・留影"],["氣質","男裝麗人・溫柔優雅・旅人"]],
+    body:[
+      "她看起來總像是剛從一段很長的旅程裡走進來。俐落的男裝、從容的舉止，加上一種不急著說明自己的氣質，使初見之人往往先記住她的優雅與些許神祕。她待人極有禮貌，說話不疾不徐；若你願意多坐一會，便會發現那份距離其實很柔軟。",
+      "她在東方文化的環境裡長大，之後卻很少真正停在一個地方。一路上做過表演者，也接觸過學問與工藝；有時跟著音樂走，有時為一道料理、一杯酒，或某本書在陌生城市多留幾日。對她而言，旅行從來不是為了抵達某個偉大的終點，而是去認識不同的人、不同的生活，以及那些只有停下來才會看見的小事。",
+      "水晶庭原本也只是她旅途中的一站。某個夜晚，她在這裡喝過酒、聽過幾段故事，也看見有人在水晶的微光下卸下一天的疲憊。於是她沒有急著離開。起初只是順手幫著接待來客，後來也會站到吧檯後調酒；興致來時上場表演，或替客人拍下一張屬於那晚的留影。沒有特別戲劇性的理由，只是覺得這裡值得多停一陣子。",
+      "若只是初識，她會把分寸拿捏得很漂亮；熟悉之後卻會明顯健談許多，甚至偶爾露出有些天然的一面。從旅行見聞、音樂與美食，到一些奇怪的小知識，她都很樂意慢慢聊。"
+    ],
+    quote:"「若今晚不急著趕路，就再坐一會吧。我還有很多故事，可以慢慢說給你聽。」",
+    foot:"她喜歡替人斟酒，也喜歡替人留下照片。旅行帶走很多東西，能留下的，往往只是片刻與記憶。"
+  },
+  {
+    name:"阿木", en:"Amu", role:"夥伴 / Staff",
+    meta:[["RP 擔當","接待・陪聊"],["特殊服務","—"],["氣質","文雅青年・溫柔克制・偶爾毒舌"]],
+    body:[
+      "初見阿木時，很容易先注意到他的禮貌。說話文雅、語氣不急，待人也稱得上溫柔；只是那份溫柔總留著一點距離，偶爾又會在最平靜的表情下丟出一句略顯尖銳的話，讓人一時分不清究竟是在認真，還是在若無其事地吐槽。再加上偶爾慢半拍的天然反應，他給人的第一印象往往比本人實際上更難捉摸。",
+      "他來自帶有東方文化色彩的環境，曾以學者的身分接觸過不少知識，後來卻逐漸習慣了四處行走的生活。比起把自己綁在某個頭銜上，他更在意一路遇見的人、可以自由選擇的去處，以及那些值得坐下來慢慢品味的料理與酒。若話題恰好對上，他其實相當健談；只是從不急著把所有事情一次說完。",
+      "阿木留在水晶庭並非全然偶然。他有自己的目的，卻沒有特別打算對每位來客解釋清楚。至少在店裡，他只是負責接待與陪聊的普通員工。客人若願意開口，他會順著話題陪上一段；若對方只想安靜喝點東西，他也懂得把沉默留在剛好的位置。",
+      "熟悉之後，那層初見時的克制會鬆開不少。他會變得更愛說話，也更常開玩笑，原本略帶毒舌的語氣通常只剩下輕巧的調侃。比起刻意熱絡，他更像是在聊天裡慢慢拉近距離——不過分親暱，也不故作冷淡，讓人能舒服地決定今晚想說多少、又想留下多少。"
+    ],
+    quote:"「想聊就聊吧。若一時想不到話題，我也可以先替你想一個——只是未必很正經。」",
+    foot:"他似乎確實為了某件事停在這裡，只是比起追問答案，今晚先把酒喝完或許更重要。"
+  }
+];
+let activeMemberIndex=0;
+function renderMember(index,{scroll=true}={}){
+  const cards=[...document.querySelectorAll('.member-card')];
+  const dots=[...document.querySelectorAll('.member-dot')];
+  const detail=document.getElementById('memberDetail');
+  if(!detail||!cards.length)return;
+  activeMemberIndex=(index+MEMBER_PROFILES.length)%MEMBER_PROFILES.length;
+  const m=MEMBER_PROFILES[activeMemberIndex];
+  cards.forEach((c,i)=>{c.classList.toggle('active',i===activeMemberIndex);c.setAttribute('aria-pressed',i===activeMemberIndex?'true':'false')});
+  dots.forEach((d,i)=>d.classList.toggle('active',i===activeMemberIndex));
+  detail.innerHTML=`
+    <div class="m-name">${m.name}<span class="en">${m.en}</span></div>
+    <div class="m-role">${m.role}</div>
+    <div class="m-meta">${m.meta.map(([k,v])=>`<div class="m-meta-row"><span class="m-meta-label">${k}</span><span class="m-meta-value">${v}</span></div>`).join('')}</div>
+    <div class="m-body">${m.body.map(x=>`<p>${x}</p>`).join('')}</div>
+    <div class="m-quote">${m.quote}</div>
+    <div class="m-foot">${m.foot}</div>`;
+  detail.style.animation='none'; void detail.offsetWidth; detail.style.animation='';
+  if(scroll)cards[activeMemberIndex].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+(function initMemberCarousel(){
+  const cards=[...document.querySelectorAll('.member-card')];
+  const dots=[...document.querySelectorAll('.member-dot')];
+  const carousel=document.getElementById('memberCarousel');
+  if(!carousel||!cards.length)return;
+  cards.forEach((c,i)=>c.addEventListener('click',()=>renderMember(i)));
+  dots.forEach((d,i)=>d.addEventListener('click',()=>renderMember(i)));
+  document.getElementById('memberPrev')?.addEventListener('click',()=>renderMember(activeMemberIndex-1));
+  document.getElementById('memberNext')?.addEventListener('click',()=>renderMember(activeMemberIndex+1));
+  let timer;
+  carousel.addEventListener('scroll',()=>{
+    clearTimeout(timer);
+    timer=setTimeout(()=>{
+      const center=carousel.scrollLeft+carousel.clientWidth/2;
+      let best=0,dist=Infinity;
+      cards.forEach((c,i)=>{const cCenter=c.offsetLeft+c.offsetWidth/2;const d=Math.abs(cCenter-center);if(d<dist){dist=d;best=i}});
+      if(best!==activeMemberIndex)renderMember(best,{scroll:false});
+    },90);
+  },{passive:true});
+  renderMember(0,{scroll:false});
+})();
+
 refreshVisitCard();
 setInterval(refreshVisitCard,10000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshVisitCard();});

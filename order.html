@@ -140,27 +140,32 @@ img{display:block;max-width:100%}
 .head-copy .ey{margin-bottom:0}
 .head-copy .sub{margin-top:.35rem}
 
-.members{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-.member{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--line);border-radius:4px;background:rgba(17,26,43,.25);cursor:pointer;transition:.2s}
-.member:hover{border-color:var(--crys-dim)}
-.member.sel{border-color:var(--crys);background:rgba(127,211,214,.07)}
-.member .av{width:64px;height:64px;border-radius:4px;object-fit:cover;background:rgba(13,20,32,.8)}
-.member .info{min-width:0}
-.member .nm{color:var(--mist);font-size:1rem}
+.member-carousel{position:relative;display:grid;grid-template-columns:38px minmax(0,1fr) 38px;align-items:center;gap:8px;margin-top:2px}
+.members{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;padding:4px 2px 12px;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x}
+.members::-webkit-scrollbar{display:none}
+.member{flex:0 0 clamp(286px,34vw,356px);scroll-snap-align:center;display:flex;align-items:center;gap:14px;min-height:142px;padding:14px 16px;border:1px solid var(--line);border-radius:6px;background:linear-gradient(150deg,rgba(17,26,43,.36),rgba(9,20,31,.24));cursor:pointer;transition:.2s;box-shadow:inset 0 0 0 1px rgba(127,211,214,.025)}
+.member:hover{border-color:var(--crys-dim);transform:translateY(-1px)}
+.member.sel{border-color:var(--crys);background:linear-gradient(150deg,rgba(127,211,214,.10),rgba(17,26,43,.34));box-shadow:0 0 18px rgba(127,211,214,.08),inset 0 0 0 1px rgba(127,211,214,.08)}
+.member .av{width:88px;height:112px;border-radius:4px;object-fit:cover;object-position:center center;flex:none;background:rgba(13,20,32,.8);box-shadow:0 0 16px rgba(127,211,214,.08)}
+.member .info{min-width:0;flex:1}
+.member .nm{color:var(--mist);font-size:1.03rem}
 .member .nm .en{color:var(--crys-dim);font-style:italic;font-size:.82rem;margin-left:.35em}
 .member .role{color:var(--mute);font-size:.82rem;line-height:1.7}
 .member .rp,.member .tags{color:var(--mute);font-size:.8rem;line-height:1.55}
 .member .mini-label{color:var(--crys-dim);font-family:var(--serif);font-size:.7rem;letter-spacing:.1em;margin-right:.4em}
-.member .pick{margin-left:auto;width:18px;height:18px;border-radius:50%;border:1px solid var(--line)}
+.member .pick{margin-left:auto;width:18px;height:18px;border-radius:50%;border:1px solid var(--line);flex:none}
 .member.sel .pick{background:var(--crys);border-color:var(--crys);box-shadow:0 0 0 2px rgba(127,211,214,.14)}
 .member.unavailable{cursor:not-allowed;opacity:.58;filter:saturate(.72)}
-.member.unavailable:hover{border-color:var(--line)}
+.member.unavailable:hover{border-color:var(--line);transform:none}
 .member.unavailable .pick{display:none}
 .member .status-badge{display:inline-flex;align-items:center;gap:5px;margin-top:.35em;padding:2px 7px;border:1px solid var(--line);border-radius:999px;font-family:var(--tc);font-size:.7rem;line-height:1.45;letter-spacing:.05em;color:var(--mute)}
 .member .status-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
 .member .status-badge.on_duty{color:var(--crys);border-color:rgba(127,211,214,.32)}
 .member .status-badge.away{color:var(--gold);border-color:rgba(216,184,122,.30)}
 .member .status-badge.offline,.member .status-badge.loading,.member .status-badge.error{color:var(--mute)}
+.member-nav{width:36px;height:48px;border:1px solid rgba(127,211,214,.24);border-radius:999px;background:rgba(7,18,29,.38);color:var(--crys);font-family:var(--serif);font-size:1.7rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s;backdrop-filter:blur(5px)}
+.member-nav:hover{border-color:rgba(127,211,214,.58);background:rgba(127,211,214,.08);color:#e5fdff}
+.member-carousel-note{margin-top:3px;color:var(--crys-dim);font-size:.74rem;letter-spacing:.06em;text-align:center;opacity:.84}
 
 .opt.menu-item{display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:12px}
 .opt.menu-item .thumb{width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 0 14px rgba(127,211,214,.12))}
@@ -171,6 +176,14 @@ img{display:block;max-width:100%}
 @media(max-width:640px){
   .head-mark{align-items:flex-start}
   .head-mark img{width:72px;height:72px}
+  .member-carousel{grid-template-columns:28px minmax(0,1fr) 28px;gap:4px;margin-left:-4px;margin-right:-4px}
+  .member-nav{width:28px;height:44px;font-size:1.4rem;border-color:rgba(127,211,214,.18);background:rgba(7,18,29,.24)}
+  .members{gap:10px;padding:3px 1px 10px}
+  .member{flex-basis:min(82vw,320px);min-height:132px;padding:12px;gap:11px}
+  .member .av{width:78px;height:100px}
+  .member .nm{font-size:1rem}
+  .member .role,.member .rp,.member .tags{font-size:.76rem}
+  .member-carousel-note{font-size:.7rem}
   .opt.menu-item{grid-template-columns:60px 1fr;gap:10px}
   .opt.menu-item .thumb{width:60px;height:60px}
   .opt.menu-item .qty{grid-column:1/-1;justify-content:flex-end}
@@ -305,7 +318,12 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   <section class="section">
     <div class="s-h"><span class="no">貳</span><span class="zh">指名</span><span class="en">Choose Your Host</span></div>
     <div class="hint">選擇今夜想指名的成員。（可不選，僅點餐亦可）</div>
-    <div class="members" id="members"></div>
+    <div class="member-carousel" aria-label="成員選擇">
+      <button class="member-nav" type="button" aria-label="上一位成員" onclick="scrollMembers(-1)">‹</button>
+      <div class="members" id="members"></div>
+      <button class="member-nav" type="button" aria-label="下一位成員" onclick="scrollMembers(1)">›</button>
+    </div>
+    <div class="member-carousel-note">左右滑動瀏覽成員・點選卡片即可指名</div>
   </section>
 
   <!-- STEP 3: 特殊服務 -->
@@ -371,8 +389,8 @@ const SUPABASE_ANON_KEY = "sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T"; // �
 // ---- 資料：成員 / 服務 / 菜單（改這裡即可增減）----
 const MEMBERS = [
   { id:"northwind", name:"北風", en:"Northern Wind", role:"店長 / Keeper", rp:"店長・調酒", tags:"光釀・裁光", av:"assets/master.jpg", services:["custom","tailor"], contactServices:["custom","tailor"], status:"loading", selectable:false },
-  { id:"dc_324828765547003904", name:"混分", en:"Hunfen", role:"夥伴 / Staff", rp:"接待・調酒・陪聊・表演・攝影", tags:"密談・留影", av:"assets/hunfen_avatar.jpg", services:["confide","photo"], contactServices:[], status:"loading", selectable:false },
-  { id:"dc_339046999171137536", name:"阿木", en:"Amu", role:"夥伴 / Staff", rp:"接待・陪聊", tags:"—", av:"assets/amu_avatar.jpg", services:[], contactServices:[], status:"loading", selectable:false },
+  { id:"dc_324828765547003904", name:"混分", en:"Hunfen", role:"夥伴 / Staff", rp:"接待・調酒・陪聊・表演・攝影", tags:"密談・留影", av:"assets/hunfen_profile.jpg", services:["confide","photo"], contactServices:[], status:"loading", selectable:false },
+  { id:"dc_339046999171137536", name:"阿木", en:"Amu", role:"夥伴 / Staff", rp:"接待・陪聊", tags:"—", av:"assets/amu_profile.jpg", services:[], contactServices:[], status:"loading", selectable:false },
 ];
 const SERVICES = [
   { id:"custom",  name:"光釀", en:"Custom Blend", price:null, priceLabel:"時價" },
@@ -539,9 +557,24 @@ function syncSelectedMemberAvailability(){
   update();
 }
 
+function scrollMembers(direction){
+  const track=$("members");
+  if(!track) return;
+  const card=track.querySelector('.member');
+  const amount=card ? card.getBoundingClientRect().width + 14 : Math.max(260, track.clientWidth*.78);
+  track.scrollBy({left:direction*amount,behavior:'smooth'});
+}
+function centerSelectedMember(){
+  if(!state.member) return;
+  const el=document.querySelector(`.member[data-id="${state.member}"]`);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+
 // ---- 渲染成員 ----
 function renderMembers(){
-  $("members").innerHTML = MEMBERS.map(m=>{
+  const track=$("members");
+  const previousScroll=track ? track.scrollLeft : 0;
+  track.innerHTML = MEMBERS.map(m=>{
     const selectable = m.selectable === true;
     const status = m.status || "loading";
     return `
@@ -583,7 +616,12 @@ function renderMembers(){
       renderMembers();
       renderServices();
       update();
+      requestAnimationFrame(centerSelectedMember);
     });
+  });
+  requestAnimationFrame(()=>{
+    if(state.member){ centerSelectedMember(); }
+    else if(track){ track.scrollLeft=previousScroll; }
   });
 }
 
