@@ -8,7 +8,7 @@
 /* =========================================================
    La Crystalline Crystal Voucher
    SINGLE APPROVED MASTER SURFACE:
-   assets/crystal_voucher_base.png
+   assets/crystal_voucher_base.webp
    ========================================================= */
 .visit-card{
   position:fixed;
@@ -57,7 +57,7 @@
   border-radius:0!important;
   clip-path:none!important;
   background-color:transparent!important;
-  background-image:url("crystal_voucher_base.png")!important;
+  background-image:url("crystal_voucher_base.webp")!important;
   background-repeat:no-repeat!important;
   background-position:center!important;
   background-size:100% 100%!important;
@@ -262,14 +262,14 @@
 .visit-card.receipt-ready .vc-ticket{color:#fff0c9}
 .visit-card .vc-checkout-signature{
   position:absolute;
-  right:2.5%;
+  right:1%;
   bottom:-2%;
   z-index:4;
-  width:35%;
-  max-width:310px;
+  width:42%;
+  max-width:370px;
   height:auto;
   display:none;
-  transform:rotate(-15deg);
+  transform:translateY(48%) rotate(-15deg);
   transform-origin:center;
   opacity:.88;
   pointer-events:none;
@@ -289,14 +289,14 @@
   margin:0 auto!important;
   overflow:visible!important;
   display:none;
-  background-image:url("crystal_receipt_base_md.png")!important;
+  background-image:url("crystal_receipt_base_md.webp")!important;
   background-size:100% 100%!important;
   background-repeat:no-repeat!important;
 }
 .receipt.visit-card-surface.show{display:block!important}
-.receipt.visit-card-surface.receipt-len-md{background-image:url("crystal_receipt_base_md.png")!important;min-height:900px}
-.receipt.visit-card-surface.receipt-len-lg{background-image:url("crystal_receipt_base_lg.png")!important;min-height:1220px}
-.receipt.visit-card-surface.receipt-len-xl{background-image:url("crystal_receipt_base_xl.png")!important;min-height:1680px}
+.receipt.visit-card-surface.receipt-len-md{background-image:url("crystal_receipt_base_md.webp")!important;min-height:900px}
+.receipt.visit-card-surface.receipt-len-lg{background-image:url("crystal_receipt_base_lg.webp")!important;min-height:1220px}
+.receipt.visit-card-surface.receipt-len-xl{background-image:url("crystal_receipt_base_xl.webp")!important;min-height:1680px}
 .receipt.visit-card-surface .receipt-head{
   margin:7.4% 10.5% 0;
   padding:0 0 14px!important;
@@ -352,7 +352,7 @@
   .visit-card .vc-ey{font-size:.56rem}
   .visit-card .vc-ticket-row{min-height:82px;padding:0 9%}
   .visit-card .vc-ticket{font-size:3.9rem}
-  .visit-card .vc-checkout-signature{right:0;bottom:-7%;width:38%;max-width:190px}
+  .visit-card .vc-checkout-signature{right:-1%;bottom:-5%;width:46%;max-width:225px;transform:translateY(42%) rotate(-15deg)}
   .visit-card .vc-status{right:-1%;min-width:80px;padding:7px 10px;font-size:.62rem}
   .visit-card .vc-owner{font-size:.72rem;letter-spacing:.08em}
   .visit-card .vc-state-line{font-size:.62rem;margin-top:2px}
@@ -362,7 +362,7 @@
   .visit-card .vc-sub{font-size:.52rem;line-height:1.45;padding-bottom:.5%}
   .visit-card .vc-actions{gap:6px;padding-top:1%}
   .visit-card .vc-btn{min-width:0;flex:1 1 0;padding:7px 6px;font-size:.56rem;letter-spacing:.03em}
-  .receipt.visit-card-surface{width:96vw!important;height:auto!important;min-height:720px;background-image:url("crystal_receipt_base_md.png")!important}
+  .receipt.visit-card-surface{width:96vw!important;height:auto!important;min-height:720px;background-image:url("crystal_receipt_base_md.webp")!important}
   .receipt.visit-card-surface.receipt-len-md{min-height:820px}
   .receipt.visit-card-surface.receipt-len-lg{min-height:1080px}
   .receipt.visit-card-surface.receipt-len-xl{min-height:1460px}
@@ -378,9 +378,9 @@
     background-size:100% 100%!important;background-repeat:no-repeat!important;box-shadow:none!important;overflow:visible!important;
     -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;page-break-inside:avoid!important;
   }
-  .receipt.visit-card-surface.receipt-len-md{background-image:url("crystal_receipt_base_md.png")!important}
-  .receipt.visit-card-surface.receipt-len-lg{background-image:url("crystal_receipt_base_lg.png")!important}
-  .receipt.visit-card-surface.receipt-len-xl{background-image:url("crystal_receipt_base_xl.png")!important}
+  .receipt.visit-card-surface.receipt-len-md{background-image:url("crystal_receipt_base_md.webp")!important}
+  .receipt.visit-card-surface.receipt-len-lg{background-image:url("crystal_receipt_base_lg.webp")!important}
+  .receipt.visit-card-surface.receipt-len-xl{background-image:url("crystal_receipt_base_xl.webp")!important}
   .receipt.visit-card-surface .receipt-head,.receipt.visit-card-surface .receipt-body{margin:0 7.5%!important;background:transparent!important;overflow:visible!important}
   .receipt.visit-card-surface .receipt-head{margin-top:6.5%!important}
   .receipt.visit-card-surface .receipt-body{padding-bottom:8%!important}
