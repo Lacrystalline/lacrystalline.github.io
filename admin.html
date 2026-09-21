@@ -3,26 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>店長後台｜水晶庭 La Crystalline</title>
+<title>管理後台｜水晶庭 La Crystalline</title>
 <link rel="icon" type="image/png" href="assets/emblem_nav.png">
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#090d14;--panel:#111a2b;--panel2:#0d1420;--crys:#7fd3d6;--crys2:#4a8f95;--gold:#d8b87a;--mist:#e8edf2;--mute:#9aa7b4;--line:rgba(127,211,214,.18);--danger:#d87a8f;--ok:#9ed59e;--serif:"Cormorant Garamond",serif;--tc:"Noto Serif TC",serif}
+:root{--ink:#090d14;--panel:#111a2b;--panel2:#0d1420;--crys:#7fd3d6;--crys2:#4a8f95;--gold:#d8b87a;--mist:#e8edf2;--mute:#9aa7b4;--line:rgba(127,211,214,.18);--danger:#d87a8f;--ok:#9ed59e;--warn:#e8c67e;--serif:"Cormorant Garamond",serif;--tc:"Noto Serif TC",serif}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(900px 650px at 85% -5%,rgba(50,90,130,.25),transparent 60%),linear-gradient(180deg,#070b12,#0a1120 48%,#080d16);color:var(--mist);font-family:var(--tc);font-weight:300;min-height:100vh}
-button,input,select,textarea{font:inherit}.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 22px;background:rgba(8,12,20,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;color:var(--mist);text-decoration:none}.brand img{height:28px}.brand span{font-family:var(--serif);letter-spacing:.12em}.brand small{display:block;color:var(--crys2);font-family:var(--tc);font-size:.58rem;letter-spacing:.24em}.top-actions{display:flex;gap:9px;align-items:center}.ghost,.primary,.danger{border:1px solid var(--line);border-radius:3px;padding:9px 13px;cursor:pointer;background:transparent;color:var(--mist)}.ghost:hover{border-color:var(--crys2);color:var(--crys)}.primary{background:linear-gradient(135deg,var(--crys),var(--crys2));border:none;color:#06121a;font-weight:600}.danger{border-color:rgba(216,122,143,.45);color:#efb0bd}.danger:hover{background:rgba(216,122,143,.08)}
-.wrap{max-width:1180px;margin:0 auto;padding:30px 20px 70px}.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:22px}.ey{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1.02rem}.hero h1{font-family:var(--serif);font-size:clamp(2rem,5vw,3rem);font-weight:500;letter-spacing:.08em;margin:.1em 0}.sub{color:var(--mute);font-size:.9rem}.session{color:var(--mute);font-size:.78rem;text-align:right;max-width:340px;overflow-wrap:anywhere}
-.card{background:rgba(17,26,43,.55);border:1px solid var(--line);border-radius:5px;padding:18px}.login{max-width:460px;margin:11vh auto 0}.login h2{font-family:var(--serif);font-size:1.7rem;font-weight:500;margin:0 0 8px}.login p{color:var(--mute);font-size:.88rem;line-height:1.8}.field{margin:13px 0}.field label{display:block;color:var(--crys);font-size:.78rem;letter-spacing:.09em;margin-bottom:6px}.field input,.toolbar input,.toolbar select{width:100%;background:rgba(13,20,32,.9);border:1px solid var(--line);border-radius:3px;color:var(--mist);padding:10px 12px;outline:none}.field input:focus,.toolbar input:focus,.toolbar select:focus{border-color:var(--crys2)}.login .primary{width:100%;margin-top:8px;padding:11px}.msg{min-height:1.5em;color:var(--danger);font-size:.83rem;margin-top:10px}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}.stat{padding:14px 16px;background:rgba(17,26,43,.45);border:1px solid var(--line);border-radius:4px}.stat .k{color:var(--mute);font-size:.75rem;letter-spacing:.08em}.stat .v{font-family:var(--serif);font-size:1.8rem;color:var(--crys);margin-top:2px}.toolbar{display:grid;grid-template-columns:1.5fr .8fr auto;gap:10px;margin-bottom:14px}.toolbar button{white-space:nowrap}
-.orders{display:grid;gap:12px}.order{background:rgba(17,26,43,.48);border:1px solid var(--line);border-radius:5px;overflow:hidden}.order.new{border-left:3px solid var(--crys)}.order.confirmed{border-left:3px solid var(--gold)}.order.completed{border-left:3px solid var(--ok)}.order.cancelled{border-left:3px solid var(--danger)}.oh{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:14px 16px;cursor:pointer}.code{font-family:var(--serif);letter-spacing:.13em;color:var(--crys);font-size:1.12rem}.who{font-size:.9rem}.who small{display:block;color:var(--mute);margin-top:2px}.time{color:var(--mute);font-size:.76rem;text-align:right}.status{font-size:.72rem;border:1px solid var(--line);border-radius:999px;padding:4px 8px;white-space:nowrap}.status.new{color:var(--crys)}.status.confirmed{color:var(--gold)}.status.completed{color:var(--ok)}.status.cancelled{color:#efb0bd}.body{display:none;border-top:1px solid var(--line);padding:15px 16px 17px;background:rgba(8,13,22,.22)}.order.open .body{display:block}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.block{border:1px solid rgba(127,211,214,.1);padding:11px 12px;border-radius:3px}.block h3{font-size:.74rem;color:var(--crys2);letter-spacing:.11em;font-weight:500;margin:0 0 7px}.block p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.list{margin:0;padding-left:18px}.list li{margin:3px 0}.money{font-family:var(--serif);color:var(--gold);font-size:1.25rem}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.actions button,.actions select{background:rgba(13,20,32,.85);border:1px solid var(--line);color:var(--mist);border-radius:3px;padding:8px 10px}.actions select{min-width:145px}.empty{text-align:center;color:var(--mute);padding:48px 15px;border:1px dashed var(--line);border-radius:5px}.hidden{display:none!important}.toast{position:fixed;right:18px;bottom:18px;background:#111a2b;border:1px solid var(--crys2);padding:12px 15px;border-radius:4px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s;z-index:50}.toast.show{opacity:1;transform:none}.toast.err{border-color:var(--danger)}
-@media(max-width:760px){.wrap{padding:24px 14px 60px}.top{padding:11px 14px}.brand span{display:none}.hero{align-items:start;flex-direction:column}.session{text-align:left}.stats{grid-template-columns:repeat(2,1fr)}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.oh{grid-template-columns:1fr auto}.who{grid-column:1/2}.time{grid-column:1/2;text-align:left}.status{grid-column:2/3;grid-row:1/2}.grid{grid-template-columns:1fr}}
+button,input,select,textarea{font:inherit}.hidden{display:none!important}.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 22px;background:rgba(8,12,20,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;color:var(--mist);text-decoration:none}.brand img{height:30px}.brand span{font-family:var(--serif);letter-spacing:.12em}.brand small{display:block;color:var(--crys2);font-family:var(--tc);font-size:.58rem;letter-spacing:.24em}.top-actions{display:flex;gap:9px;align-items:center}.ghost,.primary,.danger,.okbtn{border:1px solid var(--line);border-radius:4px;padding:9px 13px;cursor:pointer;background:transparent;color:var(--mist);transition:.2s}.ghost:hover{border-color:var(--crys2);color:var(--crys)}.primary{background:linear-gradient(135deg,var(--crys),var(--crys2));border:none;color:#06121a;font-weight:600}.danger{border-color:rgba(216,122,143,.5);color:#efb0bd}.danger:hover{background:rgba(216,122,143,.08)}.okbtn{border-color:rgba(158,213,158,.4);color:var(--ok)}button:disabled{opacity:.45;cursor:not-allowed}
+.wrap{max-width:1380px;margin:0 auto;padding:24px 20px 70px}.login{max-width:460px;margin:11vh auto 0;background:rgba(17,26,43,.58);border:1px solid var(--line);border-radius:6px;padding:22px}.ey{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1.02rem}.login h1,.page-title h1{font-family:var(--serif);font-weight:500;letter-spacing:.07em}.login h1{font-size:2rem;margin:.15em 0}.login p,.muted{color:var(--mute)}.field{margin:14px 0}.field label{display:block;color:var(--crys);font-size:.78rem;letter-spacing:.09em;margin-bottom:6px}.field input,.field select,.field textarea,.toolbar input,.toolbar select,.modal-form input,.modal-form select,.modal-form textarea{width:100%;background:rgba(13,20,32,.9);border:1px solid var(--line);border-radius:4px;color:var(--mist);padding:10px 12px;outline:none}.field textarea,.modal-form textarea{min-height:88px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus,.toolbar input:focus,.toolbar select:focus,.modal-form input:focus,.modal-form select:focus,.modal-form textarea:focus{border-color:var(--crys2)}.login .primary{width:100%;margin-top:8px;padding:11px}.msg{min-height:1.5em;color:var(--danger);font-size:.83rem;margin-top:10px}
+.app-shell{display:grid;grid-template-columns:190px minmax(0,1fr);gap:20px}.side{position:sticky;top:72px;align-self:start;background:rgba(17,26,43,.48);border:1px solid var(--line);border-radius:6px;padding:10px}.profile{padding:10px 10px 13px;border-bottom:1px solid var(--line);margin-bottom:8px}.profile .name{font-family:var(--serif);font-size:1.25rem;color:var(--mist)}.profile .role{font-size:.75rem;color:var(--crys);margin-top:2px}.navbtn{width:100%;text-align:left;border:0;background:transparent;color:var(--mute);padding:10px 11px;border-radius:4px;cursor:pointer;margin:2px 0}.navbtn:hover{background:rgba(127,211,214,.06);color:var(--mist)}.navbtn.active{background:rgba(127,211,214,.1);color:var(--crys)}
+.main{min-width:0}.page-title{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:0 0 18px}.page-title h1{font-size:clamp(2rem,4vw,2.8rem);margin:.05em 0}.page-title .sub{color:var(--mute);font-size:.86rem}.section{display:none}.section.active{display:block}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}.stat{padding:14px 16px;background:rgba(17,26,43,.5);border:1px solid var(--line);border-radius:5px}.stat .k{color:var(--mute);font-size:.72rem;letter-spacing:.08em}.stat .v{font-family:var(--serif);font-size:1.65rem;color:var(--crys);margin-top:3px}.stat.gold .v{color:var(--gold)}.stat.ok .v{color:var(--ok)}.stat.danger .v{color:#efb0bd}
+.panel{background:rgba(17,26,43,.5);border:1px solid var(--line);border-radius:6px;padding:16px;margin-bottom:12px}.panel h2{font-family:var(--serif);font-weight:500;font-size:1.35rem;margin:0 0 10px;color:var(--mist)}.panel h3{font-size:.78rem;color:var(--crys2);letter-spacing:.1em;margin:0 0 8px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.kv{display:grid;grid-template-columns:minmax(120px,.6fr) 1fr;gap:7px 12px;font-size:.9rem}.kv .k{color:var(--mute)}.kv .v{color:var(--mist);overflow-wrap:anywhere}.money{font-family:var(--serif);color:var(--gold);font-size:1.12em}.good{color:var(--ok)}.bad{color:#efb0bd}.warn{color:var(--warn)}
+.toolbar{display:grid;grid-template-columns:1.6fr .8fr auto;gap:10px;margin-bottom:12px}.list{display:grid;gap:10px}.item-card{border:1px solid var(--line);background:rgba(13,20,32,.45);border-radius:5px;padding:13px}.item-card.clickable{cursor:pointer}.item-card.clickable:hover{border-color:var(--crys2)}.item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.item-head .title{font-family:var(--serif);font-size:1.1rem;color:var(--mist)}.item-head .meta{color:var(--mute);font-size:.78rem;margin-top:3px}.badge{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-size:.7rem;white-space:nowrap}.badge.new{color:var(--crys)}.badge.confirmed{color:var(--gold)}.badge.completed{color:var(--ok)}.badge.cancelled{color:#efb0bd}.badge.low{color:#efb0bd;border-color:rgba(216,122,143,.4)}.detail{display:grid;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions button,.actions select{background:rgba(13,20,32,.9);border:1px solid var(--line);color:var(--mist);border-radius:4px;padding:8px 10px}.empty{text-align:center;color:var(--mute);padding:42px 16px;border:1px dashed var(--line);border-radius:5px}.split{display:grid;grid-template-columns:minmax(300px,.85fr) minmax(380px,1.15fr);gap:12px;align-items:start}.sticky-detail{position:sticky;top:76px}
+.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.dow{text-align:center;color:var(--crys2);font-size:.72rem;padding:5px}.day{min-height:92px;border:1px solid var(--line);border-radius:4px;padding:7px;background:rgba(13,20,32,.35);cursor:pointer}.day.blank{opacity:0;pointer-events:none}.day:hover{border-color:var(--crys2)}.day.open{background:rgba(127,211,214,.07);border-color:rgba(127,211,214,.35)}.day.locked{box-shadow:inset 0 0 0 1px rgba(216,184,122,.25)}.day .n{font-family:var(--serif);font-size:1.05rem}.day .flags{font-size:.68rem;color:var(--mute);margin-top:4px}.day .av{font-size:.67rem;margin-top:6px;line-height:1.45}.day.open .n{color:var(--crys)}
+.table{width:100%;border-collapse:collapse;font-size:.84rem}.table th,.table td{padding:9px 8px;border-bottom:1px solid rgba(127,211,214,.1);text-align:left;vertical-align:top}.table th{color:var(--crys2);font-weight:500}.scroll{overflow:auto}
+dialog{border:1px solid var(--line);border-radius:7px;background:#0d1420;color:var(--mist);width:min(560px,calc(100vw - 28px));box-shadow:0 22px 80px rgba(0,0,0,.55);padding:0}dialog::backdrop{background:rgba(2,6,12,.75);backdrop-filter:blur(4px)}.modal-head{display:flex;justify-content:space-between;align-items:center;padding:15px 17px;border-bottom:1px solid var(--line)}.modal-head h2{font-family:var(--serif);font-weight:500;margin:0}.modal-body{padding:15px 17px}.modal-form{display:grid;gap:12px}.modal-form label{display:grid;gap:5px;color:var(--crys);font-size:.78rem}.modal-actions{display:flex;justify-content:flex-end;gap:8px;padding:0 17px 17px}.x{border:0;background:transparent;color:var(--mute);font-size:1.3rem;cursor:pointer}.toast{position:fixed;right:18px;bottom:18px;z-index:80;background:#111a2b;border:1px solid var(--crys2);padding:12px 15px;border-radius:4px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s;max-width:min(420px,calc(100vw - 36px))}.toast.show{opacity:1;transform:none}.toast.err{border-color:var(--danger)}
+@media(max-width:960px){.app-shell{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto;gap:4px;padding:7px}.profile{display:none}.navbtn{width:auto;white-space:nowrap;padding:9px 11px}.split{grid-template-columns:1fr}.sticky-detail{position:static}.stats{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.wrap{padding:18px 12px 60px}.top{padding:10px 12px}.brand span{display:none}.top-actions a{display:none}.page-title{align-items:start;flex-direction:column}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.grid2,.grid3{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.kv{grid-template-columns:1fr}.calendar{gap:3px}.day{min-height:76px;padding:5px}.day .av{display:none}.table{font-size:.78rem}}
 </style>
 </head>
 <body>
 <nav class="top">
-  <a class="brand" href="index.html"><img src="assets/emblem_nav.png" alt="水晶庭"><span>La Crystalline<small>店長後台</small></span></a>
+  <a class="brand" href="index.html"><img src="assets/emblem_nav.png" alt="水晶庭"><span>La Crystalline<small>MANAGEMENT</small></span></a>
   <div class="top-actions">
     <a class="ghost" href="order.html" style="text-decoration:none">前台點餐</a>
     <button class="ghost hidden" id="logoutBtn">登出</button>
@@ -30,123 +35,141 @@ button,input,select,textarea{font:inherit}.top{position:sticky;top:0;z-index:20;
 </nav>
 
 <main class="wrap">
-  <section id="loginView" class="card login">
-    <div class="ey">Keeper Only</div>
-    <h2>店長登入</h2>
-    <p>使用 Supabase Authentication 建立的店長帳號登入。此頁不使用 service_role key，公開訪客無法讀取訂單。</p>
+  <section id="loginView" class="login">
+    <div class="ey">Crystal Ledger</div>
+    <h1>管理後台</h1>
+    <p>使用店內 Supabase Authentication 帳號登入。管理資料透過受保護的後端 API 存取，瀏覽器不持有 service role key。</p>
     <div class="field"><label>EMAIL</label><input id="email" type="email" autocomplete="username" placeholder="keeper@example.com"></div>
     <div class="field"><label>PASSWORD</label><input id="password" type="password" autocomplete="current-password" placeholder="••••••••"></div>
     <button id="loginBtn" class="primary">登入後台</button>
     <div id="loginMsg" class="msg"></div>
   </section>
 
-  <section id="adminView" class="hidden">
-    <div class="hero">
-      <div><div class="ey">Order Ledger</div><h1>店長訂單簿</h1><div class="sub">查看、篩選並更新水晶庭指名・點餐訂單。</div></div>
-      <div id="sessionInfo" class="session"></div>
-    </div>
+  <section id="appView" class="hidden">
+    <div class="app-shell">
+      <aside class="side" id="sideNav">
+        <div class="profile"><div class="name" id="actorName">—</div><div class="role" id="actorRole">—</div></div>
+        <button class="navbtn active" data-tab="overview">今晚營運</button>
+        <button class="navbtn" data-tab="orders">訂單</button>
+        <button class="navbtn" data-tab="payroll">薪資</button>
+        <button class="navbtn" data-tab="crm">CRM</button>
+        <button class="navbtn" data-tab="schedule">班表</button>
+        <button class="navbtn" data-tab="inventory">庫存</button>
+      </aside>
 
-    <div class="stats">
-      <div class="stat"><div class="k">全部</div><div class="v" id="sAll">0</div></div>
-      <div class="stat"><div class="k">新訂單</div><div class="v" id="sNew">0</div></div>
-      <div class="stat"><div class="k">已確認</div><div class="v" id="sConfirmed">0</div></div>
-      <div class="stat"><div class="k">已完成</div><div class="v" id="sCompleted">0</div></div>
-    </div>
+      <div class="main">
+        <section class="section active" id="tab-overview">
+          <div class="page-title"><div><div class="ey">Tonight</div><h1>今晚營運</h1><div class="sub">當班、訂單、營收與預估薪資總覽。</div></div><button class="ghost" id="refreshOverview">重新整理</button></div>
+          <div id="overviewBody"><div class="empty">讀取中…</div></div>
+        </section>
 
-    <div class="toolbar">
-      <input id="search" placeholder="搜尋取件碼、旅者名稱、伺服器、指名…">
-      <select id="filterStatus"><option value="">全部狀態</option><option value="new">新訂單</option><option value="confirmed">已確認</option><option value="completed">已完成</option><option value="cancelled">已取消</option></select>
-      <button id="refreshBtn" class="ghost">重新整理</button>
-    </div>
+        <section class="section" id="tab-orders">
+          <div class="page-title"><div><div class="ey">Orders</div><h1>訂單</h1><div class="sub">完整訂單檢視；完成並收款仍由 Discord 流程處理。</div></div><button class="ghost" id="refreshOrders">重新整理</button></div>
+          <div class="toolbar"><input id="orderSearch" placeholder="搜尋取件碼、旅者、伺服器、指名…"><select id="orderStatus"><option value="">全部狀態</option><option value="new">新訂單</option><option value="confirmed">已確認</option><option value="completed">已完成</option><option value="cancelled">已取消</option></select><button class="ghost" id="orderClear">清除</button></div>
+          <div id="ordersList" class="list"><div class="empty">尚未讀取。</div></div>
+        </section>
 
-    <div id="orders" class="orders"></div>
+        <section class="section" id="tab-payroll">
+          <div class="page-title"><div><div class="ey">Payroll</div><h1>薪資結算</h1><div class="sub">工時 Override、Bonus、確認與結清。</div></div><button class="ghost" id="refreshPayroll">重新整理</button></div>
+          <div class="split"><div id="payrollList" class="list"><div class="empty">尚未讀取。</div></div><div id="payrollDetail" class="panel sticky-detail"><div class="empty">選擇一筆結算。</div></div></div>
+        </section>
+
+        <section class="section" id="tab-crm">
+          <div class="page-title"><div><div class="ey">Guest Relations</div><h1>CRM</h1><div class="sub">旅者來訪、消費、偏好與追蹤紀錄。</div></div><button class="ghost" id="refreshCrm">重新整理</button></div>
+          <div class="split"><div><input id="crmSearch" style="width:100%;margin-bottom:10px;background:rgba(13,20,32,.9);border:1px solid var(--line);border-radius:4px;color:var(--mist);padding:10px 12px" placeholder="搜尋旅者名稱或伺服器"><div id="crmList" class="list"><div class="empty">尚未讀取。</div></div></div><div id="crmDetail" class="panel sticky-detail"><div class="empty">選擇一位旅者。</div></div></div>
+        </section>
+
+        <section class="section" id="tab-schedule">
+          <div class="page-title"><div><div class="ey">Schedule</div><h1>班表</h1><div class="sub">營業日、鎖定狀態與全員出勤填寫狀況。</div></div></div>
+          <div class="panel"><div class="calendar-head"><button class="ghost" id="prevMonth">← 上月</button><strong id="monthLabel">—</strong><button class="ghost" id="nextMonth">下月 →</button></div><div id="calendar" class="calendar"></div></div>
+          <div id="scheduleDetail" class="panel"><div class="empty">點選日期查看與管理。</div></div>
+        </section>
+
+        <section class="section" id="tab-inventory">
+          <div class="page-title"><div><div class="ey">Warehouse</div><h1>倉庫／庫存</h1><div class="sub">入庫、出庫、報廢、盤點與低庫存警示。</div></div><div class="actions" style="margin:0"><button class="primary" id="newInventory">新增品項</button><button class="ghost" id="refreshInventory">重新整理</button></div></div>
+          <div class="split"><div id="inventoryList" class="list"><div class="empty">尚未讀取。</div></div><div id="inventoryDetail" class="panel sticky-detail"><div class="empty">選擇一個庫存品項。</div></div></div>
+        </section>
+      </div>
+    </div>
   </section>
 </main>
+
+<dialog id="modal">
+  <div class="modal-head"><h2 id="modalTitle">—</h2><button class="x" id="modalX">×</button></div>
+  <form id="modalForm"><div class="modal-body modal-form" id="modalFields"></div><div class="modal-actions"><button type="button" class="ghost" id="modalCancel">取消</button><button type="submit" class="primary" id="modalSubmit">儲存</button></div></form>
+</dialog>
 <div id="toast" class="toast"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = "https://idqysanzhafayovieqig.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const $ = id => document.getElementById(id);
-let allOrders=[];
-const fmt = n => Number(n||0).toLocaleString('en-US');
-const esc = s => String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const SUPABASE_URL="https://idqysanzhafayovieqig.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T";
+const ADMIN_API=SUPABASE_URL+"/functions/v1/admin-api";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const fmt=n=>Number(n||0).toLocaleString('en-US');
+const qty=n=>{const x=Number(n||0);return Number.isInteger(x)?String(x):x.toFixed(3).replace(/0+$/,'').replace(/\.$/,'')};
 const statusText={new:'新訂單',confirmed:'已確認',completed:'已完成',cancelled:'已取消'};
-function showToast(msg,err=false){const t=$('toast');t.textContent=msg;t.className='toast show'+(err?' err':'');setTimeout(()=>t.className='toast',2600)}
-function localTime(iso){if(!iso)return '';return new Date(iso).toLocaleString('zh-TW',{hour12:false})}
-function detailList(arr,type){if(!Array.isArray(arr)||!arr.length)return '<span style="color:var(--mute)">無</span>';return '<ul class="list">'+arr.map(x=>type==='item'?`<li>${esc(x.name)} × ${esc(x.qty)} <span style="color:var(--mute)">(${fmt(x.price)} Gil)</span></li>`:`<li>${esc(x.name)}${x.price==null?' <span style="color:var(--gold)">時價</span>':` <span style="color:var(--mute)">(${fmt(x.price)} Gil)</span>`}</li>`).join('')+'</ul>'}
-async function signIn(){
-  $('loginMsg').textContent='';$('loginBtn').disabled=true;$('loginBtn').textContent='登入中…';
-  const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
-  $('loginBtn').disabled=false;$('loginBtn').textContent='登入後台';
-  if(error){$('loginMsg').textContent='登入失敗：'+error.message;return}
-  await syncSession();
-}
-async function signOut(){await sb.auth.signOut();await syncSession()}
-async function syncSession(){
+const payrollStatus={draft:'草稿',confirmed:'已確認',settled:'已結清'};
+const crmNoteLabel={general:'一般',preference:'偏好',avoidance:'避雷',follow_up:'追蹤'};
+let actor=null,orders=[],payroll=[],crmGuests=[],inventory=[],scheduleDays=[],scheduleRows=[],currentMonth='',selectedCrm=null,selectedInventory=null,selectedPayroll=null,selectedScheduleDate=null;
+let modalHandler=null;
+function toast(msg,err=false){const t=$('toast');t.textContent=msg;t.className='toast show'+(err?' err':'');setTimeout(()=>t.className='toast',3000)}
+function localTime(iso){return iso?new Date(iso).toLocaleString('zh-TW',{hour12:false}):'—'}
+function netText(n){n=Number(n||0);return n>0?`員工應交店家 ${fmt(n)} Gil`:n<0?`店家應付員工 ${fmt(Math.abs(n))} Gil`:'無需補款'}
+async function api(action,payload={}){
   const {data:{session}}=await sb.auth.getSession();
-  const on=!!session;
-  $('loginView').classList.toggle('hidden',on);$('adminView').classList.toggle('hidden',!on);$('logoutBtn').classList.toggle('hidden',!on);
-  if(on){$('sessionInfo').textContent='已登入：'+session.user.email;await loadOrders();subscribeRealtime()}else{$('sessionInfo').textContent='';allOrders=[];unsubscribeRealtime()}
+  if(!session) throw new Error('登入狀態已失效');
+  const r=await fetch(ADMIN_API,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':SUPABASE_ANON_KEY},body:JSON.stringify({action,...payload})});
+  let data={};try{data=await r.json()}catch{}
+  if(!r.ok||data.ok===false)throw new Error(data.error||`API ${r.status}`);
+  return data;
 }
-async function loadOrders(){
-  $('orders').innerHTML='<div class="empty">讀取訂單中…</div>';
-  const {data,error}=await sb.from('orders').select('*').order('created_at',{ascending:false});
-  if(error){$('orders').innerHTML='<div class="empty">無法讀取訂單：'+esc(error.message)+'</div>';showToast('讀取失敗',true);return}
-  allOrders=data||[];render();
-}
-function render(){
-  const q=$('search').value.trim().toLowerCase(), fs=$('filterStatus').value;
-  const rows=allOrders.filter(o=>{
-    const hay=[o.code,o.guest_name,o.server,o.host,o.note].filter(Boolean).join(' ').toLowerCase();
-    return (!q||hay.includes(q))&&(!fs||(o.status||'new')===fs);
-  });
-  $('sAll').textContent=allOrders.length;$('sNew').textContent=allOrders.filter(o=>(o.status||'new')==='new').length;$('sConfirmed').textContent=allOrders.filter(o=>o.status==='confirmed').length;$('sCompleted').textContent=allOrders.filter(o=>o.status==='completed').length;
-  if(!rows.length){$('orders').innerHTML='<div class="empty">目前沒有符合條件的訂單。</div>';return}
-  $('orders').innerHTML=rows.map(o=>{const st=o.status||'new';return `<article class="order ${esc(st)}" data-id="${o.id}">
-    <div class="oh" data-toggle>
-      <div class="code">${esc(o.code)}</div>
-      <div class="who">${esc(o.guest_name)}<small>${esc(o.server)}${o.host?' ・ 指名 '+esc(o.host):''}</small></div>
-      <div class="time">${esc(localTime(o.created_at))}<br><span class="money">${fmt(o.total)} Gil</span></div>
-      <div class="status ${esc(st)}">${statusText[st]||esc(st)}</div>
-    </div>
-    <div class="body">
-      <div class="grid">
-        <div class="block"><h3>特殊服務</h3>${detailList(o.services,'service')}</div>
-        <div class="block"><h3>點餐內容</h3>${detailList(o.items,'item')}</div>
-        <div class="block"><h3>備註</h3><p>${o.note?esc(o.note):'<span style="color:var(--mute)">無</span>'}</p></div>
-        <div class="block"><h3>訂單資訊</h3><p>取件碼：${esc(o.code)}<br>旅者：${esc(o.guest_name)} / ${esc(o.server)}<br>指名：${esc(o.host||'無')}<br>合計：<span class="money">${fmt(o.total)} Gil</span></p></div>
-      </div>
-      <div class="actions">
-        <select data-status><option value="new" ${st==='new'?'selected':''}>新訂單</option><option value="confirmed" ${st==='confirmed'?'selected':''}>已確認</option><option value="completed" ${st==='completed'?'selected':''}>已完成</option><option value="cancelled" ${st==='cancelled'?'selected':''}>已取消</option></select>
-        <button data-copy>複製取件碼</button>
-        <button data-delete class="danger">刪除訂單</button>
-      </div>
-    </div>
-  </article>`}).join('');
-  document.querySelectorAll('[data-toggle]').forEach(x=>x.onclick=()=>x.closest('.order').classList.toggle('open'));
-  document.querySelectorAll('[data-status]').forEach(x=>x.onchange=()=>setStatus(x.closest('.order').dataset.id,x.value));
-  document.querySelectorAll('[data-copy]').forEach(x=>x.onclick=async()=>{const id=x.closest('.order').dataset.id,o=allOrders.find(a=>String(a.id)===String(id));await navigator.clipboard.writeText(o.code);showToast('已複製 '+o.code)});
-  document.querySelectorAll('[data-delete]').forEach(x=>x.onclick=()=>removeOrder(x.closest('.order').dataset.id));
-}
-async function setStatus(id,status){const {error}=await sb.from('orders').update({status,updated_at:new Date().toISOString()}).eq('id',id);if(error){showToast('狀態更新失敗：'+error.message,true);return}const o=allOrders.find(a=>String(a.id)===String(id));if(o)o.status=status;render();showToast('狀態已更新')}
-async function removeOrder(id){const o=allOrders.find(a=>String(a.id)===String(id));if(!confirm(`確定刪除訂單 ${o?.code||id}？此動作無法復原。`))return;const {error}=await sb.from('orders').delete().eq('id',id);if(error){showToast('刪除失敗：'+error.message,true);return}allOrders=allOrders.filter(a=>String(a.id)!==String(id));render();showToast('訂單已刪除')}
-$('loginBtn').onclick=signIn;$('password').addEventListener('keydown',e=>{if(e.key==='Enter')signIn()});$('logoutBtn').onclick=signOut;$('refreshBtn').onclick=loadOrders;$('search').oninput=render;$('filterStatus').onchange=render;
-let rtChannel=null;
-function subscribeRealtime(){
-  if(rtChannel) return;
-  try{
-    rtChannel=sb.channel('orders-rt')
-      .on('postgres_changes',{event:'*',schema:'public',table:'orders'},payload=>{
-        // reload quietly on any insert/update/delete
-        loadOrders();
-        if(payload.eventType==='INSERT'){ showToast('有新訂單進來了'); }
-      })
-      .subscribe();
-  }catch(e){ console.warn('realtime 訂閱失敗',e); }
-}
-function unsubscribeRealtime(){ if(rtChannel){ sb.removeChannel(rtChannel); rtChannel=null; } }
+function setTab(name){document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id==='tab-'+name));if(name==='overview')loadOverview();if(name==='orders'&&!orders.length)loadOrders();if(name==='payroll'&&!payroll.length)loadPayroll();if(name==='crm'&&!crmGuests.length)loadCrm();if(name==='schedule'&&!scheduleDays.length)loadSchedule();if(name==='inventory'&&!inventory.length)loadInventory()}
+function openModal(title,fields,submitText,handler){$('modalTitle').textContent=title;$('modalFields').innerHTML=fields;$('modalSubmit').textContent=submitText||'儲存';modalHandler=handler;$('modal').showModal()}
+function closeModal(){$('modal').close();modalHandler=null}
+function val(name){return $('modalForm').elements[name]?.value??''}
+$('modalX').onclick=closeModal;$('modalCancel').onclick=closeModal;$('modalForm').onsubmit=async e=>{e.preventDefault();if(!modalHandler)return;$('modalSubmit').disabled=true;try{await modalHandler();closeModal()}catch(err){toast(err.message||String(err),true)}finally{$('modalSubmit').disabled=false}};
+async function signIn(){$('loginMsg').textContent='';$('loginBtn').disabled=true;try{const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await syncSession()}catch(err){$('loginMsg').textContent='登入失敗：'+(err.message||err)}finally{$('loginBtn').disabled=false}}
+async function signOut(){await sb.auth.signOut();location.reload()}
+async function syncSession(){const {data:{session}}=await sb.auth.getSession();$('loginView').classList.toggle('hidden',!!session);$('appView').classList.toggle('hidden',!session);$('logoutBtn').classList.toggle('hidden',!session);if(!session)return;try{const boot=await api('bootstrap');actor=boot.actor;$('actorName').textContent=actor.display_name;$('actorRole').textContent=actor.management_role==='keeper'?'店長 / Keeper':actor.management_role==='manager'?'經理 / Manager':actor.member_type;document.querySelectorAll('.navbtn[data-tab="inventory"]').forEach(x=>x.classList.toggle('hidden',!actor.can_inventory));document.querySelectorAll('.navbtn:not([data-tab="inventory"])').forEach(x=>x.classList.toggle('hidden',!actor.can_admin));if(actor.can_admin){renderOverview(boot.tonight);setTab('overview')}else if(actor.can_inventory){setTab('inventory')}else throw new Error('此帳號沒有網站後台權限')}catch(err){await sb.auth.signOut();$('loginView').classList.remove('hidden');$('appView').classList.add('hidden');$('loginMsg').textContent='後台權限驗證失敗：'+(err.message||err)}}
+function renderOverview(d){if(!d){$('overviewBody').innerHTML='<div class="empty">無資料。</div>';return}const o=d.orders||{},s=d.settlements||{},staff=Array.isArray(d.staff)?d.staff:[];$('overviewBody').innerHTML=`<div class="stats"><div class="stat"><div class="k">當班 / 暫離</div><div class="v">${d.active_count||0} / ${d.away_count||0}</div></div><div class="stat gold"><div class="k">已完成營收</div><div class="v">${fmt(o.completed_total)} Gil</div></div><div class="stat"><div class="k">預估員工應得</div><div class="v">${fmt(d.estimated_staff_due)} Gil</div></div><div class="stat ${Number(d.estimated_venue_net)>=0?'ok':'danger'}"><div class="k">預估店家淨額</div><div class="v">${fmt(d.estimated_venue_net)} Gil</div></div></div><div class="grid2"><div class="panel"><h2>人員</h2>${staff.length?staff.map(x=>`<div class="item-card"><div class="item-head"><div><div class="title">${esc(x.display_name)}</div><div class="meta">${x.ended_at?'已下班':x.status==='away'?'暫離':'當班中'}｜計薪 ${x.payable_minutes||0} 分</div></div><div class="money">${fmt(x.estimated_staff_due)} Gil</div></div></div>`).join(''):'<div class="empty">今晚尚無班次。</div>'}</div><div class="panel"><h2>營運</h2><div class="kv"><div class="k">營業日</div><div class="v">${esc(d.operating_date)}</div><div class="k">訂單</div><div class="v">共 ${o.order_count||0}｜待接 ${o.new_count||0}｜處理中 ${o.confirmed_count||0}｜完成 ${o.completed_count||0}</div><div class="k">餐飲營收</div><div class="v money">${fmt(o.completed_dining)} Gil</div><div class="k">特殊服務營收</div><div class="v money">${fmt(o.completed_service)} Gil</div><div class="k">特殊服務員工分潤</div><div class="v">${fmt(d.estimated_service_staff_share)} Gil</div><div class="k">薪資結算</div><div class="v">草稿 ${s.draft_count||0}｜確認 ${s.confirmed_count||0}｜結清 ${s.settled_count||0}</div></div></div></div>`}
+async function loadOverview(){try{const r=await api('tonight');renderOverview(r.data)}catch(err){toast(err.message,true)}}
+async function loadOrders(){try{const r=await api('orders_list',{limit:150});orders=r.data||[];renderOrders()}catch(err){$('ordersList').innerHTML='<div class="empty">'+esc(err.message)+'</div>'}}
+function orderList(arr,type){if(!Array.isArray(arr)||!arr.length)return '無';return arr.map(x=>type==='items'?`${esc(x.name||x.id)} × ${esc(x.qty||1)}`:`${esc(x.name||x.id)}${x.price==null?'（時價）':''}`).join('、')}
+function renderOrders(){const q=$('orderSearch').value.trim().toLowerCase(),st=$('orderStatus').value;const rows=orders.filter(o=>(!st||o.status===st)&&(!q||[o.code,o.guest_name,o.server,o.host,o.note].filter(Boolean).join(' ').toLowerCase().includes(q)));$('ordersList').innerHTML=rows.length?rows.map(o=>`<div class="item-card"><div class="item-head"><div><div class="title">${esc(o.code)}｜${esc(o.guest_name)} @ ${esc(o.server)}</div><div class="meta">${localTime(o.created_at)}${o.host?'｜指名 '+esc(o.host):''}</div></div><div><span class="badge ${esc(o.status||'new')}">${statusText[o.status]||esc(o.status)}</span> <span class="money">${fmt(o.total)} Gil</span></div></div><div class="grid2" style="margin-top:10px"><div><h3>餐飲</h3><div class="muted">${orderList(o.items,'items')}</div></div><div><h3>特殊服務</h3><div class="muted">${orderList(o.services,'services')}</div></div></div>${o.note?`<div class="muted" style="margin-top:8px">備註：${esc(o.note)}</div>`:''}<div class="actions">${o.status==='cancelled'?`<button class="ghost" onclick="changeOrderStatus(${o.id},'new')">恢復新訂單</button>`:o.status==='completed'?'':`<button class="danger" onclick="changeOrderStatus(${o.id},'cancelled')">取消訂單</button>`}<button class="ghost" onclick="navigator.clipboard.writeText('${esc(o.code)}').then(()=>toast('已複製 ${esc(o.code)}'))">複製取件碼</button></div></div>`).join(''):'<div class="empty">沒有符合條件的訂單。</div>'}
+async function changeOrderStatus(id,status){if(status==='cancelled'&&!confirm('確定取消此訂單？'))return;try{await api('order_set_status',{order_id:id,status});toast('訂單狀態已更新');await loadOrders();await loadOverview()}catch(err){toast(err.message,true)}}
+async function loadPayroll(){try{const r=await api('payroll_list');payroll=Array.isArray(r.data)?r.data:[];renderPayrollList()}catch(err){$('payrollList').innerHTML='<div class="empty">'+esc(err.message)+'</div>'}}
+function renderPayrollList(){payroll=payroll||[];$('payrollList').innerHTML=payroll.length?payroll.map(x=>`<div class="item-card clickable" onclick="openPayroll(${x.shift_id})"><div class="item-head"><div><div class="title">${esc(x.display_name)}｜${esc(x.operating_date)}</div><div class="meta">Shift #${x.shift_id}｜計薪 ${x.payable_minutes} 分</div></div><span class="badge ${x.status==='settled'?'completed':x.status==='confirmed'?'confirmed':'new'}">${payrollStatus[x.status]||x.status}</span></div><div style="margin-top:8px"><span class="money">應得 ${fmt(x.staff_due_total)} Gil</span><div class="muted">${esc(netText(x.net_to_venue))}</div></div></div>`).join(''):'<div class="empty">目前沒有薪資結算。</div>'}
+async function openPayroll(id){selectedPayroll=id;try{const r=await api('payroll_detail',{shift_id:id});renderPayrollDetail(r.data)}catch(err){toast(err.message,true)}}
+function renderPayrollDetail(x){$('payrollDetail').innerHTML=`<h2>${esc(x.display_name)}｜${esc(x.operating_date)}</h2><div class="kv"><div class="k">狀態</div><div class="v">${payrollStatus[x.status]||x.status}</div><div class="k">實際工時</div><div class="v">${x.actual_minutes} 分</div><div class="k">系統計薪</div><div class="v">${x.system_payable_minutes} 分</div><div class="k">人工 Override</div><div class="v">${x.payable_minutes_override==null?'無':x.payable_minutes_override+' 分'}</div><div class="k">最終計薪</div><div class="v">${x.payable_minutes} 分</div><div class="k">時薪</div><div class="v">${fmt(x.hourly_rate)} Gil</div><div class="k">基本薪資</div><div class="v money">${fmt(x.base_pay)} Gil</div><div class="k">特殊服務分潤</div><div class="v">${fmt(x.service_staff_share)} / ${fmt(x.service_gross)} Gil</div><div class="k">Bonus</div><div class="v">${fmt(x.bonus)} Gil${x.bonus_note?'｜'+esc(x.bonus_note):''}</div><div class="k">代收合計</div><div class="v">${fmt(x.collected_total)} Gil</div><div class="k">員工應得</div><div class="v money">${fmt(x.staff_due_total)} Gil</div><div class="k">結算方向</div><div class="v ${Number(x.net_to_venue)>=0?'good':'bad'}">${esc(netText(x.net_to_venue))}</div></div><div class="actions">${x.status==='draft'?`<button class="primary" onclick="editPayroll(${x.shift_id},${x.payable_minutes_override==null?'null':x.payable_minutes_override},${x.bonus},'${esc((x.bonus_note||'').replace(/'/g,'&#39;'))}')">調整結算</button><button class="okbtn" onclick="confirmPayroll(${x.shift_id})">確認結算</button>`:''}${x.status==='confirmed'?`<button class="okbtn" onclick="settlePayroll(${x.shift_id},${x.net_to_venue})">完成結清</button>`:''}</div>`}
+function editPayroll(id,override,bonus,note){openModal('調整薪資結算',`<label>計薪分鐘 Override（留空=系統）<input name="override" type="number" min="0" max="240" step="10" value="${override==null?'':override}"></label><label>Bonus Gil<input name="bonus" type="number" min="0" step="1" value="${bonus||0}"></label><label>Bonus 備註<textarea name="note">${esc(note||'')}</textarea></label>`,'儲存',async()=>{await api('payroll_adjust',{shift_id:id,payable_minutes_override:val('override')===''?null:Number(val('override')),bonus:Number(val('bonus')||0),bonus_note:val('note')});toast('薪資已更新');await loadPayroll();await openPayroll(id);await loadOverview()})}
+async function confirmPayroll(id){if(!confirm('確認後會鎖定這筆結算，確定？'))return;try{await api('payroll_confirm',{shift_id:id});toast('結算已確認');await loadPayroll();await openPayroll(id)}catch(err){toast(err.message,true)}}
+function settlePayroll(id,net){openModal('完成薪資結清',`<label>實際淨額（+員工交店／-店付員工）<input name="actual" type="number" step="1" value="${net||0}"></label><label>結清備註<textarea name="note"></textarea></label>`,'完成結清',async()=>{await api('payroll_settle',{shift_id:id,actual_net_to_venue:Number(val('actual')),note:val('note')});toast('已完成結清');await loadPayroll();await openPayroll(id);await loadOverview()})}
+async function loadCrm(){try{const r=await api('crm_list');crmGuests=Array.isArray(r.data)?r.data:[];renderCrmList()}catch(err){$('crmList').innerHTML='<div class="empty">'+esc(err.message)+'</div>'}}
+function renderCrmList(){const q=$('crmSearch').value.trim().toLowerCase();const rows=crmGuests.filter(x=>!q||[x.guest_name,x.server].join(' ').toLowerCase().includes(q));$('crmList').innerHTML=rows.length?rows.map(x=>`<div class="item-card clickable" onclick="openCrm(${x.guest_id})"><div class="item-head"><div><div class="title">${esc(x.guest_name)} @ ${esc(x.server)}</div><div class="meta">最近 ${esc(x.last_visit_date||'—')}｜來訪 ${x.visit_count||0} 次｜備註 ${x.note_count||0}</div></div><div class="money">${fmt(x.completed_spend)} Gil</div></div><div class="muted" style="margin-top:6px">常點：${esc(x.favorite_item||'—')}｜服務：${esc(x.favorite_service||'—')}｜指名：${esc(x.favorite_host||'—')}</div></div>`).join(''):'<div class="empty">沒有符合條件的旅者。</div>'}
+async function openCrm(id){selectedCrm=id;try{const r=await api('crm_detail',{guest_id:id});renderCrmDetail(r.data)}catch(err){toast(err.message,true)}}
+function rank(rows,key){return Array.isArray(rows)&&rows.length?rows.slice(0,5).map(x=>`${esc(x.name)} × ${esc(x[key]??0)}`).join('、'):'—'}
+function renderCrmDetail(x){const visits=Array.isArray(x.recent_visits)?x.recent_visits:[],notes=Array.isArray(x.notes)?x.notes:[],ordersx=Array.isArray(x.recent_orders)?x.recent_orders:[];$('crmDetail').innerHTML=`<h2>${esc(x.guest_name)} @ ${esc(x.server)}</h2><div class="kv"><div class="k">首次／最近</div><div class="v">${esc(x.first_visit_date||'—')} / ${esc(x.last_visit_date||'—')}</div><div class="k">來訪次數</div><div class="v">${x.visit_count||0}</div><div class="k">累計消費</div><div class="v money">${fmt(x.completed_spend)} Gil</div><div class="k">常點餐飲</div><div class="v">${rank(x.top_items,'qty')}</div><div class="k">常用服務</div><div class="v">${rank(x.top_services,'count')}</div><div class="k">常指名</div><div class="v">${rank(x.top_hosts,'count')}</div></div><div class="panel" style="margin-top:12px"><h3>摘要備註</h3><div>${x.summary_note?esc(x.summary_note):'<span class="muted">—</span>'}</div></div><div class="grid2"><div><h3>最近來訪</h3>${visits.length?visits.map(v=>`<div class="muted">${esc(v.operating_date)}｜${v.order_count} 單｜${fmt(v.completed_spend)} Gil</div>`).join(''):'<div class="muted">—</div>'}</div><div><h3>最近訂單</h3>${ordersx.length?ordersx.slice(0,5).map(o=>`<div class="muted">${esc(o.code)}｜${statusText[o.status]||esc(o.status)}｜${fmt(o.total)} Gil</div>`).join(''):'<div class="muted">—</div>'}</div></div><div style="margin-top:12px"><h3>CRM 備註</h3>${notes.length?notes.map(n=>`<div class="item-card"><strong>[${crmNoteLabel[n.note_type]||esc(n.note_type)}]</strong> ${esc(n.note_text)}<div class="meta">${esc(n.created_by||'—')}｜${localTime(n.created_at)}</div></div>`).join(''):'<div class="muted">—</div>'}</div><div class="actions"><button class="primary" onclick="editCrmSummary(${x.guest_id},'${esc((x.summary_note||'').replace(/'/g,'&#39;'))}')">編輯摘要</button><button class="ghost" onclick="addCrmNote(${x.guest_id},'general')">一般備註</button><button class="ghost" onclick="addCrmNote(${x.guest_id},'preference')">偏好</button><button class="danger" onclick="addCrmNote(${x.guest_id},'avoidance')">避雷</button><button class="ghost" onclick="addCrmNote(${x.guest_id},'follow_up')">追蹤</button></div>`}
+function editCrmSummary(id,note){openModal('編輯旅者摘要',`<label>摘要備註<textarea name="note" maxlength="800">${esc(note||'')}</textarea></label>`,'儲存',async()=>{await api('crm_update_summary',{guest_id:id,note:val('note')});toast('CRM 摘要已更新');await loadCrm();await openCrm(id)})}
+function addCrmNote(id,type){openModal('新增'+(crmNoteLabel[type]||'CRM')+'備註',`<label>內容<textarea name="note" maxlength="800" required></textarea></label>`,'新增',async()=>{await api('crm_add_note',{guest_id:id,note_type:type,note_text:val('note')});toast('CRM 備註已新增');await loadCrm();await openCrm(id)})}
+function taipeiMonth(){const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit'}).formatToParts(new Date());return p.find(x=>x.type==='year').value+'-'+p.find(x=>x.type==='month').value}
+function moveMonth(offset){const [y,m]=currentMonth.split('-').map(Number);const d=new Date(Date.UTC(y,m-1+offset,1));currentMonth=d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');loadSchedule()}
+async function loadSchedule(){if(!currentMonth)currentMonth=taipeiMonth();$('monthLabel').textContent=currentMonth.replace('-',' 年 ')+' 月';try{const r=await api('schedule_month',{month:currentMonth});scheduleDays=r.days||[];scheduleRows=r.schedule||[];renderCalendar()}catch(err){$('calendar').innerHTML='<div class="empty" style="grid-column:1/-1">'+esc(err.message)+'</div>'}}
+function renderCalendar(){const [y,m]=currentMonth.split('-').map(Number),firstDow=new Date(Date.UTC(y,m-1,1)).getUTCDay(),last=new Date(Date.UTC(y,m,0)).getUTCDate();let html=['日','一','二','三','四','五','六'].map(x=>`<div class="dow">${x}</div>`).join('');for(let i=0;i<firstDow;i++)html+='<div class="day blank"></div>';for(let d=1;d<=last;d++){const date=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`,info=scheduleDays.find(x=>x.operating_date===date)||{is_open:false,is_locked:false,note:null},rows=scheduleRows.filter(x=>x.operating_date===date),a=rows.filter(x=>x.availability==='available').length,t=rows.filter(x=>x.availability==='tentative').length,u=rows.filter(x=>x.availability==='unavailable').length;html+=`<div class="day ${info.is_open?'open':''} ${info.is_locked?'locked':''}" onclick="openScheduleDay('${date}')"><div class="n">${d}</div><div class="flags">${info.is_open?'營業':''}${info.is_locked?' 🔒':''}</div>${info.is_open?`<div class="av">🟢${a}　🟡${t}　🔴${u}</div>`:''}</div>`}$('calendar').innerHTML=html}
+function openScheduleDay(date){selectedScheduleDate=date;const info=scheduleDays.find(x=>x.operating_date===date)||{operating_date:date,is_open:false,is_locked:false,note:null},rows=scheduleRows.filter(x=>x.operating_date===date);$('scheduleDetail').innerHTML=`<h2>${esc(date)}</h2><div class="kv"><div class="k">營業</div><div class="v">${info.is_open?'是':'否'}</div><div class="k">鎖定</div><div class="v">${info.is_locked?'是':'否'}</div><div class="k">備註</div><div class="v">${esc(info.note||'—')}</div></div>${info.is_open?`<div class="scroll" style="margin-top:12px"><table class="table"><thead><tr><th>員工</th><th>類型</th><th>出勤</th><th>備註</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.display_name)}</td><td>${esc(x.member_type)}</td><td>${x.availability==='available'?'🟢 可出勤':x.availability==='tentative'?'🟡 未定':x.availability==='unavailable'?'🔴 無法出勤':'— 未填'}</td><td>${esc(x.staff_note||'')}</td></tr>`).join('')}</tbody></table></div>`:''}<div class="actions"><button class="primary" onclick="editScheduleDay('${date}',${info.is_open?'true':'false'},${info.is_locked?'true':'false'},'${esc((info.note||'').replace(/'/g,'&#39;'))}')">管理日期</button></div>`}
+function editScheduleDay(date,isOpen,isLocked,note){openModal('管理營業日｜'+date,`<label>營業狀態<select name="open"><option value="1" ${isOpen?'selected':''}>營業</option><option value="0" ${!isOpen?'selected':''}>不營業</option></select></label><label>班表鎖定<select name="locked"><option value="0" ${!isLocked?'selected':''}>開放填寫</option><option value="1" ${isLocked?'selected':''}>鎖定</option></select></label><label>備註<textarea name="note">${esc(note||'')}</textarea></label>`,'儲存',async()=>{await api('schedule_set_day',{operating_date:date,is_open:val('open')==='1',is_locked:val('locked')==='1',note:val('note')||null});toast('營業日已更新；Discord 月班表會同步更新');await loadSchedule();openScheduleDay(date)})}
+async function loadInventory(){try{const r=await api('inventory_list');inventory=Array.isArray(r.data)?r.data:[];renderInventoryList()}catch(err){$('inventoryList').innerHTML='<div class="empty">'+esc(err.message)+'</div>'}}
+function renderInventoryList(){$('inventoryList').innerHTML=inventory.length?inventory.map(x=>`<div class="item-card clickable" onclick="openInventory(${x.item_id})"><div class="item-head"><div><div class="title">${x.low_stock?'⚠ ':''}${esc(x.item_name)}</div><div class="meta">${esc(x.category)}｜警戒 ${qty(x.reorder_level)} ${esc(x.unit)}</div></div><div><span class="${x.low_stock?'bad':'good'}">${qty(x.stock_qty)} ${esc(x.unit)}</span></div></div></div>`).join(''):'<div class="empty">尚未建立庫存品項。</div>'}
+async function openInventory(id){selectedInventory=id;try{const r=await api('inventory_detail',{item_id:id});renderInventoryDetail(r.data)}catch(err){toast(err.message,true)}}
+function renderInventoryDetail(x){const tx=Array.isArray(x.transactions)?x.transactions:[];$('inventoryDetail').innerHTML=`<h2>${x.low_stock?'⚠ ':''}${esc(x.item_name)}</h2><div class="kv"><div class="k">分類</div><div class="v">${esc(x.category)}</div><div class="k">目前庫存</div><div class="v ${x.low_stock?'bad':'good'}">${qty(x.stock_qty)} ${esc(x.unit)}</div><div class="k">警戒值</div><div class="v">${qty(x.reorder_level)} ${esc(x.unit)}</div><div class="k">目標庫存</div><div class="v">${x.par_level==null?'未設定':qty(x.par_level)+' '+esc(x.unit)}</div><div class="k">備註</div><div class="v">${esc(x.note||'—')}</div></div><div style="margin-top:12px"><h3>最近異動</h3>${tx.length?tx.map(t=>`<div class="muted">${localTime(t.created_at)}｜${esc(t.movement_type)} ${qty(t.quantity)}｜${qty(t.stock_before)} → ${qty(t.stock_after)}${t.created_by?'｜'+esc(t.created_by):''}</div>`).join(''):'<div class="muted">—</div>'}</div><div class="actions"><button class="okbtn" onclick="inventoryMove(${x.item_id},'in','${esc(x.item_name)}')">入庫</button><button class="ghost" onclick="inventoryMove(${x.item_id},'out','${esc(x.item_name)}')">出庫</button><button class="danger" onclick="inventoryMove(${x.item_id},'waste','${esc(x.item_name)}')">報廢</button><button class="ghost" onclick="inventoryCount(${x.item_id},${x.stock_qty},'${esc(x.unit)}')">盤點修正</button><button class="ghost" onclick="inventorySettings(${x.item_id},${x.reorder_level},${x.par_level==null?'null':x.par_level},'${esc((x.note||'').replace(/'/g,'&#39;'))}')">設定</button></div>`}
+function inventoryMove(id,type,name){const labels={in:'入庫',out:'出庫',waste:'報廢'};openModal(name+'｜'+labels[type],`<label>數量<input name="quantity" type="number" min="0.001" step="0.001" required></label><label>備註<textarea name="note"></textarea></label>`,labels[type],async()=>{await api('inventory_move',{item_id:id,movement_type:type,quantity:Number(val('quantity')),note:val('note')||null});toast('庫存已更新');await loadInventory();await openInventory(id)})}
+function inventoryCount(id,stock,unit){openModal('盤點修正',`<label>實際庫存（${esc(unit)}）<input name="qty" type="number" min="0" step="0.001" value="${stock}" required></label><label>備註<textarea name="note"></textarea></label>`,'更新',async()=>{await api('inventory_set_stock',{item_id:id,new_qty:Number(val('qty')),note:val('note')||null});toast('盤點已更新');await loadInventory();await openInventory(id)})}
+function inventorySettings(id,reorder,par,note){openModal('庫存設定',`<label>補貨警戒值<input name="reorder" type="number" min="0" step="0.001" value="${reorder}" required></label><label>目標庫存（可留空）<input name="par" type="number" min="0" step="0.001" value="${par==null?'':par}"></label><label>備註<textarea name="note">${esc(note||'')}</textarea></label>`,'儲存',async()=>{await api('inventory_update',{item_id:id,reorder_level:Number(val('reorder')),par_level:val('par')===''?null:Number(val('par')),note:val('note')||null});toast('庫存設定已更新');await loadInventory();await openInventory(id)})}
+function newInventory(){openModal('新增庫存品項',`<label>品項名稱<input name="name" required maxlength="80"></label><label>分類<select name="category"><option value="ingredient">原料</option><option value="beverage">飲料</option><option value="food">食物</option><option value="consumable">耗材</option><option value="other">其他</option></select></label><label>單位<input name="unit" placeholder="瓶、個、份、ml、g…" required></label><label>初始庫存<input name="initial" type="number" min="0" step="0.001" value="0" required></label><label>補貨警戒值<input name="reorder" type="number" min="0" step="0.001" value="0" required></label><label>目標庫存（可留空）<input name="par" type="number" min="0" step="0.001"></label><label>備註<textarea name="note"></textarea></label>`,'新增',async()=>{await api('inventory_create',{item_name:val('name'),category:val('category'),unit:val('unit'),initial_qty:Number(val('initial')),reorder_level:Number(val('reorder')),par_level:val('par')===''?null:Number(val('par')),note:val('note')||null});toast('庫存品項已建立');await loadInventory()})}
+
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));$('loginBtn').onclick=signIn;$('password').addEventListener('keydown',e=>{if(e.key==='Enter')signIn()});$('logoutBtn').onclick=signOut;$('refreshOverview').onclick=loadOverview;$('refreshOrders').onclick=loadOrders;$('orderSearch').oninput=renderOrders;$('orderStatus').onchange=renderOrders;$('orderClear').onclick=()=>{$('orderSearch').value='';$('orderStatus').value='';renderOrders()};$('refreshPayroll').onclick=loadPayroll;$('refreshCrm').onclick=loadCrm;$('crmSearch').oninput=renderCrmList;$('prevMonth').onclick=()=>moveMonth(-1);$('nextMonth').onclick=()=>moveMonth(1);$('refreshInventory').onclick=loadInventory;$('newInventory').onclick=newInventory;
 sb.auth.onAuthStateChange(()=>syncSession());syncSession();
 </script>
 </body>
