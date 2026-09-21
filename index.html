@@ -917,6 +917,14 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
           </div>
         </button>
         <button class="member-card" type="button" data-member="2" aria-pressed="false">
+          <div class="portrait"><img src="assets/chikage_profile.webp" alt="水晶庭成員 千影" loading="lazy" decoding="async"></div>
+          <div class="member-card-copy">
+            <div class="member-card-name">千影<span class="member-card-en">Chi·Kage</span></div>
+            <div class="member-card-role">夥伴 / Staff</div>
+            <div class="member-card-rp">前臺接待</div>
+          </div>
+        </button>
+        <button class="member-card" type="button" data-member="3" aria-pressed="false">
           <div class="portrait"><img src="assets/amu_profile.webp" alt="水晶庭成員 阿木" loading="lazy" decoding="async"></div>
           <div class="member-card-copy">
             <div class="member-card-name">阿木<span class="member-card-en">Amu</span></div>
@@ -932,6 +940,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <button class="member-dot active" type="button" data-member="0" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="1" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="2" tabindex="-1"></button>
+      <button class="member-dot" type="button" data-member="3" tabindex="-1"></button>
     </div>
 
     <div class="member-detail" id="memberDetail" aria-live="polite"></div>
@@ -1090,6 +1099,18 @@ const MEMBER_PROFILES=[
     ],
     quote:"「若今晚不急著趕路，就再坐一會吧。我還有很多故事，可以慢慢說給你聽。」",
     foot:"她喜歡替人斟酒，也喜歡替人留下照片。旅行帶走很多東西，能留下的，往往只是片刻與記憶。"
+  },
+  {
+    name:"千影", en:"Chi·Kage", role:"夥伴 / Staff",
+    meta:[["RP 擔當","前臺接待"],["特殊服務","陪聊・攝影・其它"],["氣質","古板有禮・隨性淡然・獨行傭兵"]],
+    body:[
+      "無論何時見到千影，他的言行總帶著幾分古板的禮貌。端正的措辭與習慣性的距離感，常讓初識之人覺得難以接近；真正相處後才會發現，他其實隨性得近乎沒有脾氣，對大多數事情都不怎麼計較。",
+      "那些禮節來自很久以前。千影曾是某個人的守護騎士，守時、警戒、重視承諾，以及總將自己的意見放在後面的習慣，至今仍留在身上。那段職責如今早已結束，至於他曾守護的是誰、又為何離開，他很少主動談起。",
+      "現在的他是一名傭兵。護送、討伐、探索，只要條件合適便可能接下；但比起結伴，他更習慣獨自行動。甚至沒有委託時，只因聽聞某處存在值得挑戰的強敵或未知之地，便會親自走上一趟。比起證明些什麼，他似乎只是想知道，由自己選擇究竟能走到多遠。",
+      "受到邀請後，他暫時在水晶庭停下腳步。初見時依舊克制而有禮，熟悉之後卻會明顯健談許多，有時說話甚至意外地直接。至於那些偶爾比言語更加大膽的舉動？本人似乎從不覺得有哪裡不妥。"
+    ],
+    quote:"「請坐。不必特意找話題，想說的時候再說便好。」",
+    foot:"曾經的他只需要知道該守在誰的身旁；如今仍在學著決定自己想往哪裡走。"
   },
   {
     name:"阿木", en:"Amu", role:"夥伴 / Staff",
