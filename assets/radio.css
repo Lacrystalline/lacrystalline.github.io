@@ -1,13 +1,26 @@
 /* La Crystalline Radio — shared public player */
-.lc-radio-launch{position:fixed;right:18px;bottom:18px;z-index:9200;border:1px solid rgba(205,181,123,.38);background:rgba(7,12,20,.94);color:#e8dcc1;border-radius:999px;padding:10px 14px;font:600 12px/1.2 'Noto Serif TC',serif;letter-spacing:.08em;box-shadow:0 12px 36px rgba(0,0,0,.32);cursor:pointer;display:none}
+.lc-radio-launch{position:fixed;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:9200;max-width:min(300px,calc(100vw - 36px));border:1px solid rgba(205,181,123,.38);background:rgba(7,12,20,.94);color:#e8dcc1;border-radius:999px;padding:10px 14px;font:600 12px/1.2 'Noto Serif TC',serif;letter-spacing:.04em;box-shadow:0 12px 36px rgba(0,0,0,.32);cursor:pointer;display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lc-radio-launch.show{display:block}
-.lc-radio-panel{position:fixed;right:18px;bottom:18px;z-index:9250;width:236px;padding:13px;background:rgba(6,11,19,.97);border:1px solid rgba(205,181,123,.42);box-shadow:0 20px 60px rgba(0,0,0,.5);border-radius:14px;color:#eef6fb;display:none}
-.lc-radio-panel.show{display:block}
+
+/* Mobile/default compact radio: title first, player on expand. */
+.lc-radio-compact{position:fixed;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:9240;width:270px;max-width:calc(100vw - 36px);min-height:58px;border:1px solid rgba(205,181,123,.42);background:rgba(6,11,19,.96);box-shadow:0 16px 46px rgba(0,0,0,.44);border-radius:13px;color:#eef6fb;display:none;align-items:center;gap:10px;padding:9px 10px 9px 11px;cursor:pointer;text-align:left}
+.lc-radio-compact.show{display:flex}
+.lc-radio-compact-mark{width:30px;height:30px;flex:0 0 30px;border:1px solid rgba(205,181,123,.36);border-radius:50%;display:grid;place-items:center;color:#d7c28c;font-size:15px;background:rgba(205,181,123,.05)}
+.lc-radio-compact-copy{min-width:0;flex:1}
+.lc-radio-compact-kicker{font:600 8px/1.1 'Cormorant Garamond',serif;letter-spacing:.18em;color:#cdb57b;text-transform:uppercase;margin-bottom:3px}
+.lc-radio-compact-title{font:600 12px/1.25 'Noto Serif TC',serif;color:#f4f0e7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc-radio-compact-author{font:400 9px/1.3 'Noto Serif TC',serif;color:rgba(222,236,246,.58);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc-radio-compact-open{flex:0 0 auto;color:#d8c48f;font:500 10px/1.1 'Noto Serif TC',serif;white-space:nowrap}
+
+/* Keep the panel mounted when collapsed so the YouTube player keeps its state. */
+.lc-radio-panel{position:fixed;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:9250;width:224px;padding:11px;background:rgba(6,11,19,.97);border:1px solid rgba(205,181,123,.42);box-shadow:0 20px 60px rgba(0,0,0,.5);border-radius:14px;color:#eef6fb;opacity:0;visibility:hidden;pointer-events:none;transform:translateX(calc(100% + 44px));transition:opacity .18s ease,transform .18s ease,visibility .18s ease}
+.lc-radio-panel.show{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(0)}
+.lc-radio-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:2px}.lc-radio-head-copy{min-width:0;flex:1}.lc-radio-collapse{appearance:none;border:0;background:transparent;color:rgba(228,214,178,.76);padding:1px 2px 4px;font:500 10px/1.2 'Noto Serif TC',serif;cursor:pointer;white-space:nowrap}
 .lc-radio-kicker{font:600 10px/1.2 'Cormorant Garamond',serif;letter-spacing:.22em;color:#cdb57b;text-transform:uppercase;margin-bottom:7px}
 .lc-radio-title{font:600 14px/1.35 'Noto Serif TC',serif;color:#f4f0e7;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lc-radio-author{font:400 11px/1.4 'Noto Serif TC',serif;color:rgba(222,236,246,.66);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lc-radio-player{width:210px;height:210px;margin:0 auto 10px;background:#020509}
-.lc-radio-player iframe{width:210px!important;height:210px!important;border:0;display:block}
+.lc-radio-player{width:200px;height:200px;margin:0 auto 10px;background:#020509}
+.lc-radio-player iframe{width:200px!important;height:200px!important;border:0;display:block}
 .lc-radio-row{display:flex;gap:7px;align-items:center;justify-content:space-between}
 .lc-radio-btn{appearance:none;border:1px solid rgba(205,181,123,.32);background:rgba(255,255,255,.035);color:#e9dfc8;border-radius:8px;padding:7px 9px;font:500 11px/1.2 'Noto Serif TC',serif;cursor:pointer;flex:1}
 .lc-radio-btn:hover{background:rgba(205,181,123,.09)}
@@ -18,4 +31,12 @@
 .lc-radio-mark{font-size:24px;color:#cdb57b;margin-bottom:8px}.lc-radio-card h3{font:600 21px/1.3 'Cormorant Garamond','Noto Serif TC',serif;letter-spacing:.08em;margin:0 0 9px}.lc-radio-card p{font:400 13px/1.8 'Noto Serif TC',serif;color:rgba(235,242,246,.74);margin:0 0 15px}
 .lc-radio-consent-actions{display:flex;gap:9px}.lc-radio-consent-actions button{flex:1;border-radius:10px;padding:11px 10px;cursor:pointer;font:600 12px/1.2 'Noto Serif TC',serif}.lc-radio-yes{background:#d7c28c;color:#0a1018;border:1px solid #d7c28c}.lc-radio-no{background:transparent;color:#dbe7ef;border:1px solid rgba(214,226,235,.28)}
 .lc-radio-remember{display:flex;justify-content:center;align-items:center;gap:7px;margin-top:14px;color:rgba(224,235,242,.6);font:400 11px/1.2 'Noto Serif TC',serif}.lc-radio-remember input{accent-color:#cdb57b}
-@media(max-width:640px){.lc-radio-panel{right:10px;bottom:10px;width:224px;padding:11px}.lc-radio-player,.lc-radio-player iframe{width:200px!important;height:200px!important}.lc-radio-launch{right:10px;bottom:10px}.lc-radio-card{padding:22px 18px}.lc-radio-consent-actions{flex-direction:column}}
+
+@media(max-width:640px){
+  .lc-radio-panel{right:10px;bottom:max(10px,env(safe-area-inset-bottom));width:224px;padding:11px}
+  .lc-radio-player,.lc-radio-player iframe{width:200px!important;height:200px!important}
+  .lc-radio-launch{right:10px;bottom:max(10px,env(safe-area-inset-bottom));max-width:calc(100vw - 20px)}
+  .lc-radio-compact{right:10px;bottom:max(10px,env(safe-area-inset-bottom));width:238px;max-width:calc(100vw - 20px);min-height:54px;padding:8px 9px}
+  .lc-radio-compact-mark{width:28px;height:28px;flex-basis:28px}
+  .lc-radio-card{padding:22px 18px}.lc-radio-consent-actions{flex-direction:column}
+}

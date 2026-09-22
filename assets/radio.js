@@ -4,8 +4,9 @@
   const SUPABASE_ANON_KEY='sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T';
   const PREF_KEY='lacrystalline_radio_pref_v1'; // on | off | ask
   const SESSION_KEY='lacrystalline_radio_session_v1'; // on | off
-  const AUTO_NEXT_URL=SUPABASE_URL+'/functions/v1/radio-public-next';
-  let sb=null, state=null, player=null, playerReady=false, ytLoading=false, consentShown=false, desiredVideo=null, advancingVideo=null;
+  const DURATION_REPORT_URL=SUPABASE_URL+'/functions/v1/radio-duration-report';
+  let sb=null, state=null, player=null, playerReady=false, ytLoading=false, consentShown=false, desiredVideo=null, reportedDurationVideo=null;
+  let panelExpanded=window.matchMedia&&window.matchMedia('(min-width:641px)').matches;
 
   function pref(){ return localStorage.getItem(PREF_KEY)||'ask'; }
   function sessionPref(){ return sessionStorage.getItem(SESSION_KEY)||''; }
@@ -23,9 +24,23 @@
     if(document.getElementById('lcRadioPanel'))return;
     document.body.insertAdjacentHTML('beforeend',`
       <button id="lcRadioLaunch" class="lc-radio-launch" type="button">♫ 今晚有音樂</button>
+      <button id="lcRadioCompact" class="lc-radio-compact" type="button" aria-label="展開 La Crystalline Radio">
+        <span class="lc-radio-compact-mark">♫</span>
+        <span class="lc-radio-compact-copy">
+          <span class="lc-radio-compact-kicker">La Crystalline Radio</span>
+          <span id="lcRadioCompactTitle" class="lc-radio-compact-title">水晶庭音樂台</span>
+          <span id="lcRadioCompactAuthor" class="lc-radio-compact-author">與今晚同步聆聽</span>
+        </span>
+        <span class="lc-radio-compact-open">展開</span>
+      </button>
       <section id="lcRadioPanel" class="lc-radio-panel" aria-label="La Crystalline Radio">
-        <div class="lc-radio-kicker">La Crystalline Radio</div>
-        <div id="lcRadioTitle" class="lc-radio-title">水晶庭音樂台</div>
+        <div class="lc-radio-head">
+          <div class="lc-radio-head-copy">
+            <div class="lc-radio-kicker">La Crystalline Radio</div>
+            <div id="lcRadioTitle" class="lc-radio-title">水晶庭音樂台</div>
+          </div>
+          <button id="lcRadioCollapse" class="lc-radio-collapse" type="button">收合</button>
+        </div>
         <div id="lcRadioAuthor" class="lc-radio-author">與今晚同步聆聽</div>
         <div id="lcRadioPlayer" class="lc-radio-player"></div>
         <div class="lc-radio-row">
@@ -48,6 +63,8 @@
       </div>`);
 
     document.getElementById('lcRadioLaunch').addEventListener('click',()=>enableFromGesture(false));
+    document.getElementById('lcRadioCompact').addEventListener('click',()=>{panelExpanded=true;showPanel();});
+    document.getElementById('lcRadioCollapse').addEventListener('click',()=>{panelExpanded=false;showCompact();});
     document.getElementById('lcRadioSync').addEventListener('click',()=>syncPlayer(true));
     document.getElementById('lcRadioMute').addEventListener('click',()=>disableAudio(false));
     document.getElementById('lcRadioYes').addEventListener('click',()=>{
@@ -64,35 +81,46 @@
 
   function showConsent(){ if(consentShown||!live(state))return; consentShown=true; document.getElementById('lcRadioConsent').classList.add('show'); }
   function hideConsent(){ document.getElementById('lcRadioConsent').classList.remove('show'); }
-  function showLaunch(text){ const b=document.getElementById('lcRadioLaunch'); b.textContent=text||'♫ 今晚有音樂'; b.classList.add('show'); }
+  function shortTitle(){ return state&&state.current_title||'今晚有音樂'; }
+  function showLaunch(text){ const b=document.getElementById('lcRadioLaunch'); b.textContent=text||('♫ '+shortTitle()); b.title=shortTitle(); b.classList.add('show'); hideCompact(); }
   function hideLaunch(){ document.getElementById('lcRadioLaunch').classList.remove('show'); }
-  function showPanel(){ document.getElementById('lcRadioPanel').classList.add('show'); hideLaunch(); }
+  function showCompact(){ if(!live(state)||!wantsAudio())return; document.getElementById('lcRadioCompact').classList.add('show'); document.getElementById('lcRadioPanel').classList.remove('show'); hideLaunch(); }
+  function hideCompact(){ document.getElementById('lcRadioCompact').classList.remove('show'); }
+  function showPanel(){ document.getElementById('lcRadioPanel').classList.add('show'); hideCompact(); hideLaunch(); }
   function hidePanel(){ document.getElementById('lcRadioPanel').classList.remove('show'); }
+  function showActiveUI(){ if(panelExpanded)showPanel(); else showCompact(); }
   function status(t){ document.getElementById('lcRadioStatus').textContent=t||''; }
   function updateMeta(){
-    document.getElementById('lcRadioTitle').textContent=state&&state.current_title||'水晶庭音樂台';
-    document.getElementById('lcRadioAuthor').textContent=state&&state.current_author||'與今晚同步聆聽';
+    const title=state&&state.current_title||'水晶庭音樂台';
+    const author=state&&state.current_author||'與今晚同步聆聽';
+    document.getElementById('lcRadioTitle').textContent=title;
+    document.getElementById('lcRadioAuthor').textContent=author;
+    document.getElementById('lcRadioCompactTitle').textContent=title;
+    document.getElementById('lcRadioCompactAuthor').textContent=author;
+    const launch=document.getElementById('lcRadioLaunch');
+    if(launch&&launch.classList.contains('show')){launch.textContent='♫ '+title;launch.title=title;}
   }
 
-  async function requestAdvance(videoId){
-    if(!videoId||advancingVideo===videoId)return;
-    advancingVideo=videoId;
-    status('正在銜接下一首…');
+  async function reportDuration(){
+    if(!playerReady||!player||!state||!state.current_video_id)return;
+    let duration=0;
+    let videoId='';
     try{
-      const res=await fetch(AUTO_NEXT_URL,{
+      duration=Math.round(Number(player.getDuration?player.getDuration():0));
+      videoId=player.getVideoData&&player.getVideoData().video_id||state.current_video_id||'';
+    }catch(e){return;}
+    if(!videoId||duration<30||duration>7200||reportedDurationVideo===videoId)return;
+    reportedDurationVideo=videoId;
+    try{
+      const res=await fetch(DURATION_REPORT_URL,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({video_id:videoId})
+        body:JSON.stringify({video_id:videoId,duration_seconds:duration})
       });
       if(!res.ok)throw new Error('HTTP '+res.status);
-      const data=await res.json();
-      if(!data.advanced){
-        setTimeout(()=>{if(advancingVideo===videoId)advancingVideo=null;},1800);
-      }
     }catch(e){
-      console.warn('La Crystalline Radio auto-next failed',e);
-      status('下一首同步失敗，請等待店員切歌。');
-      setTimeout(()=>{if(advancingVideo===videoId)advancingVideo=null;},3000);
+      console.warn('La Crystalline Radio duration report failed',e);
+      setTimeout(()=>{if(reportedDurationVideo===videoId)reportedDurationVideo=null;},5000);
     }
   }
 
@@ -107,27 +135,26 @@
     if(player||!live(state))return;
     desiredVideo=state.current_video_id;
     player=new YT.Player('lcRadioPlayer',{
-      width:210,height:210,videoId:state.current_video_id,
-      playerVars:{autoplay:1,controls:1,playsinline:1,start:Math.floor(pos(state)),origin:location.origin},
+      width:200,height:200,videoId:state.current_video_id,
+      playerVars:{autoplay:1,controls:1,playsinline:1,rel:0,fs:0,iv_load_policy:3,cc_load_policy:0,start:Math.floor(pos(state)),origin:location.origin},
       events:{
-        onReady:function(e){ playerReady=true; syncPlayer(true); },
+        onReady:function(e){ playerReady=true; syncPlayer(true); setTimeout(reportDuration,600); },
         onStateChange:function(e){
+          if(window.YT&&e.data===YT.PlayerState.PLAYING){ setTimeout(reportDuration,350); }
           if(window.YT&&e.data===YT.PlayerState.ENDED){
-            let id='';
-            try{id=player.getVideoData&&player.getVideoData().video_id||'';}catch(err){}
-            requestAdvance(id||state&&state.current_video_id||'');
+            status('本曲已結束，等待店內播放時軸切換下一首…');
           }
         },
-        onAutoplayBlocked:function(){ status('瀏覽器阻擋自動播放，請點「重新同步」開始。'); showPanel(); },
+        onAutoplayBlocked:function(){ status('瀏覽器阻擋自動播放，請展開後點「重新同步」開始。'); panelExpanded=true; showPanel(); },
         onError:function(){ status('這支 YouTube 影片目前無法在網頁播放，請通知店員切歌。'); }
       }
     });
   }
   function syncPlayer(force){
     updateMeta();
-    if(!live(state)){ if(playerReady&&player)try{player.stopVideo();}catch(e){} hidePanel(); hideLaunch(); return; }
-    if(!wantsAudio()){ hidePanel(); showLaunch('♫ 今晚有音樂'); return; }
-    showPanel();
+    if(!live(state)){ if(playerReady&&player)try{player.stopVideo();}catch(e){} hidePanel(); hideCompact(); hideLaunch(); return; }
+    if(!wantsAudio()){ hidePanel(); hideCompact(); showLaunch('♫ '+shortTitle()); return; }
+    showActiveUI();
     if(!player){ loadYT(); return; }
     if(!playerReady)return;
     const target=pos(state);
@@ -148,13 +175,14 @@
   function enableFromGesture(remember){
     if(pref()==='off'&&!remember)localStorage.setItem(PREF_KEY,'ask');
     sessionStorage.setItem(SESSION_KEY,'on');
-    showPanel(); loadYT(); setTimeout(()=>syncPlayer(true),50);
+    panelExpanded=window.matchMedia&&window.matchMedia('(min-width:641px)').matches;
+    showActiveUI(); loadYT(); setTimeout(()=>syncPlayer(true),50);
   }
   function disableAudio(remember){
     if(remember)localStorage.setItem(PREF_KEY,'off');
     sessionStorage.setItem(SESSION_KEY,'off');
     try{if(playerReady&&player)player.pauseVideo();}catch(e){}
-    hidePanel(); if(live(state))showLaunch('♫ 音樂已關閉'); else hideLaunch();
+    hidePanel(); hideCompact(); if(live(state))showLaunch('♫ '+shortTitle()); else hideLaunch();
   }
 
   async function fetchState(){
@@ -162,19 +190,19 @@
     if(res.error)throw res.error; state=res.data; updateMeta();
     if(!live(state)){ syncPlayer(false); return; }
     if(pref()==='ask'&&!sessionPref()) showConsent();
-    else if(wantsAudio()){ showPanel(); loadYT(); }
-    else showLaunch('♫ 今晚有音樂');
+    else if(wantsAudio()){ showActiveUI(); loadYT(); }
+    else showLaunch('♫ '+shortTitle());
   }
   function subscribe(){
     sb.channel('lc-radio-public')
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'radio_state',filter:'id=eq.1'},payload=>{
         const oldVideo=state&&state.current_video_id;
         state=payload.new;
-        if(!state||state.current_video_id!==oldVideo)advancingVideo=null;
+        if(!state||state.current_video_id!==oldVideo){reportedDurationVideo=null;}
         updateMeta();
         if(!live(state)){ syncPlayer(false); return; }
         if(pref()==='ask'&&!sessionPref()){ showConsent(); return; }
-        if(wantsAudio())syncPlayer(true); else showLaunch('♫ 今晚有音樂');
+        if(wantsAudio())syncPlayer(true); else showLaunch('♫ '+shortTitle());
       }).subscribe();
   }
 
