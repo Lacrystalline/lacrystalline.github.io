@@ -59,6 +59,7 @@ img{display:block;max-width:100%}.wrap{max-width:820px;margin:0 auto;padding:0 2
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/visit_voucher.css">
+  <link rel="stylesheet" href="assets/radio.css">
 </head>
 <body>
 <div class="crystal-veil" aria-hidden="true"></div>
@@ -189,5 +190,6 @@ $('imageReceiptBtn').addEventListener('click',saveReceiptImage);
 $('lookupBtn').addEventListener('click',lookup);$('clearBtn').addEventListener('click',()=>{$('guestName').value='';$('orderCode').value='';clearNotice();hideReceipt();const u=new URL(location.href);u.search='';history.replaceState({},'',u);});['guestName','orderCode'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')lookup();}));
 window.addEventListener('load',()=>{const u=new URL(location.href);const token=u.searchParams.get('r');const guest=u.searchParams.get('guest');const ticket=u.searchParams.get('ticket');if(guest)$('guestName').value=guest;if(ticket)$('orderCode').value=ticket;if(token){loadByToken(token);}else if(guest&&ticket){lookup();}});
 </script>
+  <script src="assets/radio.js"></script>
 </body>
 </html>

@@ -474,6 +474,7 @@ section{padding:72px 0}
 .member-dot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(127,211,214,.45);background:transparent;padding:0;cursor:pointer;transition:.2s}
 .member-dot.active{background:var(--crys);box-shadow:0 0 10px rgba(127,211,214,.38)}
 .member-detail{max-width:850px;margin:0 auto;padding-top:6px;animation:memberFade .26s ease}
+.member-detail:empty{display:none}
 @keyframes memberFade{from{opacity:.25;transform:translateY(4px)}to{opacity:1;transform:none}}
 .m-name{font-family:var(--serif);font-size:2.1rem;color:var(--mist);letter-spacing:.05em}
 .m-name .en{color:var(--crys-dim);font-style:italic;font-size:1.15rem;display:block;margin-top:.05em}
@@ -611,6 +612,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/visit_voucher.css">
+  <link rel="stylesheet" href="assets/radio.css">
 </head>
 <body>
 <div class="crystal-veil" aria-hidden="true"></div>
@@ -900,7 +902,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
     <div class="member-carousel-shell">
       <button class="member-arrow prev" id="memberPrev" type="button" aria-label="上一位成員">‹</button>
       <div class="member-carousel" id="memberCarousel">
-        <button class="member-card active" type="button" data-member="0" aria-pressed="true">
+        <button class="member-card" type="button" data-member="0" aria-pressed="false">
           <div class="portrait northwind-portrait"><img src="assets/master.webp" alt="店長 北風" loading="lazy" decoding="async"><img class="member-signature" src="assets/northern_wind_signature_member_m10.png" alt="" aria-hidden="true"></div>
           <div class="member-card-copy">
             <div class="member-card-name">北風<span class="member-card-en">Northern Wind</span></div>
@@ -937,7 +939,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
     </div>
 
     <div class="member-dots" id="memberDots" aria-hidden="true">
-      <button class="member-dot active" type="button" data-member="0" tabindex="-1"></button>
+      <button class="member-dot" type="button" data-member="0" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="1" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="2" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="3" tabindex="-1"></button>
@@ -1164,12 +1166,18 @@ function renderMember(index,{scroll=true}={}){
       if(best!==activeMemberIndex)renderMember(best,{scroll:false});
     },90);
   },{passive:true});
-  renderMember(0,{scroll:false});
+  requestAnimationFrame(()=>{
+    const first=cards[0];
+    if(first){
+      carousel.scrollLeft=Math.max(0, first.offsetLeft-(carousel.clientWidth-first.offsetWidth)/2);
+    }
+  });
 })();
 
 refreshVisitCard();
 setInterval(refreshVisitCard,10000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshVisitCard();});
 </script>
+  <script src="assets/radio.js"></script>
 </body>
 </html>
