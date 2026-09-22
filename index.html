@@ -1127,7 +1127,15 @@ const MEMBER_PROFILES=[
     foot:"他似乎確實為了某件事停在這裡，只是比起追問答案，今晚先把酒喝完或許更重要。"
   }
 ];
-let activeMemberIndex=0;
+let activeMemberIndex=-1;
+function centerMemberCard(index){
+  const carousel=document.getElementById('memberCarousel');
+  const cards=[...document.querySelectorAll('.member-card')];
+  const card=cards[index];
+  if(!carousel||!card)return;
+  const target=Math.max(0,card.offsetLeft-(carousel.clientWidth-card.offsetWidth)/2);
+  carousel.scrollTo({left:target,behavior:'smooth'});
+}
 function renderMember(index,{scroll=true}={}){
   const cards=[...document.querySelectorAll('.member-card')];
   const dots=[...document.querySelectorAll('.member-dot')];
@@ -1145,7 +1153,7 @@ function renderMember(index,{scroll=true}={}){
     <div class="m-quote">${m.quote}</div>
     <div class="m-foot">${m.foot}</div>`;
   detail.style.animation='none'; void detail.offsetWidth; detail.style.animation='';
-  if(scroll)cards[activeMemberIndex].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  if(scroll)centerMemberCard(activeMemberIndex);
 }
 (function initMemberCarousel(){
   const cards=[...document.querySelectorAll('.member-card')];
@@ -1154,24 +1162,8 @@ function renderMember(index,{scroll=true}={}){
   if(!carousel||!cards.length)return;
   cards.forEach((c,i)=>c.addEventListener('click',()=>renderMember(i)));
   dots.forEach((d,i)=>d.addEventListener('click',()=>renderMember(i)));
-  document.getElementById('memberPrev')?.addEventListener('click',()=>renderMember(activeMemberIndex-1));
-  document.getElementById('memberNext')?.addEventListener('click',()=>renderMember(activeMemberIndex+1));
-  let timer;
-  carousel.addEventListener('scroll',()=>{
-    clearTimeout(timer);
-    timer=setTimeout(()=>{
-      const center=carousel.scrollLeft+carousel.clientWidth/2;
-      let best=0,dist=Infinity;
-      cards.forEach((c,i)=>{const cCenter=c.offsetLeft+c.offsetWidth/2;const d=Math.abs(cCenter-center);if(d<dist){dist=d;best=i}});
-      if(best!==activeMemberIndex)renderMember(best,{scroll:false});
-    },90);
-  },{passive:true});
-  requestAnimationFrame(()=>{
-    const first=cards[0];
-    if(first){
-      carousel.scrollLeft=Math.max(0, first.offsetLeft-(carousel.clientWidth-first.offsetWidth)/2);
-    }
-  });
+  document.getElementById('memberPrev')?.addEventListener('click',()=>renderMember(activeMemberIndex<0?cards.length-1:activeMemberIndex-1));
+  document.getElementById('memberNext')?.addEventListener('click',()=>renderMember(activeMemberIndex<0?0:activeMemberIndex+1));
 })();
 
 refreshVisitCard();
