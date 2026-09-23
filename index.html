@@ -128,13 +128,21 @@ body::before{
 .nav-links a.order-link::after{display:none}
 .nav-links a.order-link:hover{color:#dff9fa;border-color:var(--crys);background:rgba(127,211,214,.14)}
 .nav-links a.discord-link{
-  display:inline-flex;align-items:center;gap:7px;
+  width:34px;height:34px;padding:0;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 34px;
   color:#d9e4ff;border:1px solid rgba(141,158,255,.38);
-  padding:6px 11px;border-radius:999px;background:rgba(88,101,242,.10)
+  background:rgba(88,101,242,.10)
 }
 .nav-links a.discord-link::after{display:none}
 .nav-links a.discord-link:hover{color:#fff;border-color:rgba(173,184,255,.7);background:rgba(88,101,242,.20)}
-.nav-links a.discord-link .dc-dot{width:7px;height:7px;border-radius:50%;background:#8ea1ff;box-shadow:0 0 10px rgba(142,161,255,.7)}
+.discord-icon{width:20px;height:20px;display:block}
+.discord-contact-icon{
+  width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  color:#d9e4ff;border:1px solid rgba(141,158,255,.38);background:rgba(88,101,242,.10);
+  transition:background .2s ease,border-color .2s ease,color .2s ease,transform .2s ease
+}
+.discord-contact-icon:hover{color:#fff;border-color:rgba(173,184,255,.72);background:rgba(88,101,242,.20);transform:translateY(-1px)}
+.discord-contact-icon .discord-icon{width:24px;height:24px}
 .nav-toggle{display:none;background:none;border:none;color:var(--mist);font-size:1.5rem;cursor:pointer;line-height:1}
 @media(max-width:760px){
   body.nav-open{overflow:hidden;touch-action:none}
@@ -172,7 +180,7 @@ body::before{
   }
   .nav-links a + a{border-top:1px solid rgba(127,211,214,.08)}
   .nav-links a.order-link{margin-top:10px;padding:11px 18px;border-top:1px solid rgba(127,211,214,.45)}
-  .nav-links a.discord-link{justify-content:center;margin-top:10px;padding:11px 18px;border-top:1px solid rgba(127,211,214,.08)}
+  .nav-links a.discord-link{width:42px;height:42px;flex:0 0 42px;justify-content:center;margin-top:10px;padding:0;border-top:1px solid rgba(141,158,255,.38)}
   .nav-logo,.nav-toggle{position:relative;z-index:1001}
   .nav-toggle{display:block;font-size:1.65rem;padding:6px 4px}
 }
@@ -634,9 +642,9 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
     <a href="#special">服務</a>
     <a href="#master">成員</a>
     <a href="#find">FIND US</a>
-    <a class="discord-link" id="discordTopLink" href="#" target="_blank" rel="noopener noreferrer"><span class="dc-dot" aria-hidden="true"></span>Discord</a>
     <a href="receipt.html">訂單查詢</a>
     <a class="order-link" href="order.html">指名・點餐</a>
+    <a class="discord-link" id="discordTopLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="加入 Discord" title="加入 Discord"><svg class="discord-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7.6c3-1.55 7-1.55 10 0 1.65 2.2 2.55 5.05 2.65 7.95-1.7 1.35-3.35 2.15-5 2.55l-.9-1.2c1.05-.25 2.05-.65 2.85-1.2-2.7 1.25-6.5 1.25-9.2 0 .8.55 1.8.95 2.85 1.2l-.9 1.2c-1.65-.4-3.3-1.2-5-2.55.1-2.9 1-5.75 2.65-7.95Z"/><circle cx="9.5" cy="12.4" r="1.15" fill="currentColor"/><circle cx="14.5" cy="12.4" r="1.15" fill="currentColor"/></svg></a>
   </div>
   <button class="nav-toggle" id="navToggle" aria-label="選單" aria-controls="navLinks" aria-expanded="false">☰</button>
 </nav>
@@ -988,7 +996,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
     <div class="eyebrow" style="text-align:center">循光而來</div>
     <h2 class="s-title">FIND US</h2>
     <div class="row"><div class="k">所在地</div><div class="v">伊弗利特 · 海霧村 · 10 區 45 號</div></div>
-    <div class="row"><div class="k">Discord</div><div class="v"><a id="discordContactLink" href="#" target="_blank" rel="noopener noreferrer" style="color:var(--crys);text-decoration:none;border-bottom:1px solid rgba(127,211,214,.35);padding-bottom:2px">加入水晶庭 Discord · 自動取得「旅人」身分</a></div></div>
+    <div class="row"><div class="k">Discord</div><div class="v"><a id="discordContactLink" class="discord-contact-icon" href="#" target="_blank" rel="noopener noreferrer" aria-label="加入 Discord" title="加入 Discord"><svg class="discord-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7.6c3-1.55 7-1.55 10 0 1.65 2.2 2.55 5.05 2.65 7.95-1.7 1.35-3.35 2.15-5 2.55l-.9-1.2c1.05-.25 2.05-.65 2.85-1.2-2.7 1.25-6.5 1.25-9.2 0 .8.55 1.8.95 2.85 1.2l-.9 1.2c-1.65-.4-3.3-1.2-5-2.55.1-2.9 1-5.75 2.65-7.95Z"/><circle cx="9.5" cy="12.4" r="1.15" fill="currentColor"/><circle cx="14.5" cy="12.4" r="1.15" fill="currentColor"/></svg></a></div></div>
     <div class="row"><div class="k">營業時間</div><div class="v">每週六 22:00 — 02:00　<span style="font-size:.6em;color:var(--mute);letter-spacing:.1em">（表定）</span></div>
       <div style="margin-top:.9em;font-family:var(--serif);font-style:italic;color:var(--crys-dim);font-size:1rem;letter-spacing:.03em;max-width:30em;margin-left:auto;margin-right:auto">實際營業以遊戲內「招募／募集」看板為準——<br>看板亮起，燈就為你點著。</div></div>
   </div>
@@ -1062,7 +1070,18 @@ async function refreshVisitCard(forceOpen=false){
     document.getElementById('vcTicket').textContent=data.ticket_code||v.ticket_code||'—';
     const vl=document.getElementById('vlTicket');if(vl)vl.textContent=`${data.ticket_code||v.ticket_code||'—'} · ${visitStatusLabel(data.status)}`;
     document.getElementById('vcStatus').textContent=visitStatusLabel(data.status);
-    const stateLine=document.getElementById('vcStateLine'); if(stateLine)stateLine.textContent=visitStatusLabel(data.status);
+    const stateLine=document.getElementById('vcStateLine');
+    if(stateLine){
+      if(data.status==='waiting' && Number.isFinite(Number(data.queue_position))){
+        const pos=Math.max(1,Number(data.queue_position)||1);
+        const ahead=Math.max(0,Number(data.queue_ahead)||0);
+        stateLine.textContent=`目前候位第 ${pos} 組${ahead>0?` · 前方 ${ahead} 組`:''}`;
+        stateLine.style.display='block';
+      }else{
+        stateLine.textContent='';
+        stateLine.style.display='none';
+      }
+    }
     const phrase=document.getElementById('vcPhrase'); if(phrase)phrase.textContent=data.visit_phrase||'願今夜的微光，留在你的記憶裡。';
     const owner=document.getElementById('vcOwner'); if(owner)owner.textContent=(v.guest_name&&v.server)?`${v.guest_name} · ${v.server}`:(v.guest_name||'本次旅者');
     const sub=document.getElementById('vcSub');
