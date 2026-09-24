@@ -273,6 +273,8 @@
   pointer-events:none;
   user-select:none;
   image-rendering:auto;
+  transform:rotate(-15deg);
+  transform-origin:center center;
 }
 .visit-card.receipt-ready .vc-checkout-signature{display:block}
 
