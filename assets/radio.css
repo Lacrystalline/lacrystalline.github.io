@@ -26,10 +26,20 @@
 .lc-radio-btn{appearance:none;border:1px solid rgba(205,181,123,.32);background:rgba(255,255,255,.035);color:#e9dfc8;border-radius:8px;padding:7px 9px;font:500 11px/1.2 'Noto Serif TC',serif;cursor:pointer;flex:1}
 .lc-radio-btn:hover{background:rgba(205,181,123,.09)}
 .lc-radio-volume{display:flex;align-items:center;gap:7px;color:rgba(228,214,178,.8);font:500 9px/1 'Noto Serif TC',serif;user-select:none}
-.lc-radio-volume-compact{width:100%;padding:1px 1px 0;border-top:1px solid rgba(205,181,123,.10)}
+.lc-radio-volume-compact{width:100%;min-height:28px;padding:1px 1px 0;border-top:1px solid rgba(205,181,123,.10);cursor:default}
 .lc-radio-volume-panel{margin:1px 0 9px}
 .lc-radio-volume-icon{width:18px;flex:0 0 18px;text-align:center;font-size:12px;line-height:1}
 .lc-radio-volume input[type=range]{appearance:none;-webkit-appearance:none;flex:1;min-width:0;height:24px;background:transparent;cursor:pointer;accent-color:#cdb57b}
+/* Compact volume: the whole row is the hover bridge, not only the speaker icon.
+   This prevents the slider from collapsing while the pointer moves from icon to bar. */
+@media (hover:hover) and (pointer:fine){
+  .lc-radio-volume-compact input[type=range]{flex:0 0 0;max-width:0;opacity:0;pointer-events:none;overflow:hidden;transition:max-width .14s ease,opacity .10s ease,flex-basis .14s ease}
+  .lc-radio-volume-compact .lc-radio-volume-value{width:0;flex:0 0 0;opacity:0;overflow:hidden;white-space:nowrap;transition:width .14s ease,flex-basis .14s ease,opacity .10s ease}
+  .lc-radio-volume-compact:hover input[type=range],
+  .lc-radio-volume-compact:focus-within input[type=range]{flex:1 1 120px;max-width:180px;opacity:1;pointer-events:auto}
+  .lc-radio-volume-compact:hover .lc-radio-volume-value,
+  .lc-radio-volume-compact:focus-within .lc-radio-volume-value{width:31px;flex:0 0 31px;opacity:1}
+}
 .lc-radio-volume input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:999px;background:rgba(205,181,123,.25)}
 .lc-radio-volume input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;margin-top:-5.5px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:#d7c28c;box-shadow:0 1px 5px rgba(0,0,0,.35)}
 .lc-radio-volume input[type=range]::-moz-range-track{height:3px;border-radius:999px;background:rgba(205,181,123,.25)}
