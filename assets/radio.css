@@ -3,8 +3,9 @@
 .lc-radio-launch.show{display:block}
 
 /* Mobile/default compact radio: title first, player on expand. */
-.lc-radio-compact{position:fixed;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:9240;width:270px;max-width:calc(100vw - 36px);min-height:58px;border:1px solid rgba(205,181,123,.42);background:rgba(6,11,19,.96);box-shadow:0 16px 46px rgba(0,0,0,.44);border-radius:13px;color:#eef6fb;display:none;align-items:center;gap:10px;padding:9px 10px 9px 11px;cursor:pointer;text-align:left}
+.lc-radio-compact{position:fixed;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:9240;width:270px;max-width:calc(100vw - 36px);min-height:76px;border:1px solid rgba(205,181,123,.42);background:rgba(6,11,19,.96);box-shadow:0 16px 46px rgba(0,0,0,.44);border-radius:13px;color:#eef6fb;display:none;flex-direction:column;padding:8px 10px 7px}
 .lc-radio-compact.show{display:flex}
+.lc-radio-compact-main{appearance:none;border:0;background:transparent;color:inherit;width:100%;display:flex;align-items:center;gap:10px;padding:1px 0 5px;cursor:pointer;text-align:left}
 .lc-radio-compact-mark{width:30px;height:30px;flex:0 0 30px;border:1px solid rgba(205,181,123,.36);border-radius:50%;display:grid;place-items:center;color:#d7c28c;font-size:15px;background:rgba(205,181,123,.05)}
 .lc-radio-compact-copy{min-width:0;flex:1}
 .lc-radio-compact-kicker{font:600 8px/1.1 'Cormorant Garamond',serif;letter-spacing:.18em;color:#cdb57b;text-transform:uppercase;margin-bottom:3px}
@@ -24,6 +25,16 @@
 .lc-radio-row{display:flex;gap:7px;align-items:center;justify-content:space-between}
 .lc-radio-btn{appearance:none;border:1px solid rgba(205,181,123,.32);background:rgba(255,255,255,.035);color:#e9dfc8;border-radius:8px;padding:7px 9px;font:500 11px/1.2 'Noto Serif TC',serif;cursor:pointer;flex:1}
 .lc-radio-btn:hover{background:rgba(205,181,123,.09)}
+.lc-radio-volume{display:flex;align-items:center;gap:7px;color:rgba(228,214,178,.8);font:500 9px/1 'Noto Serif TC',serif;user-select:none}
+.lc-radio-volume-compact{width:100%;padding:1px 1px 0;border-top:1px solid rgba(205,181,123,.10)}
+.lc-radio-volume-panel{margin:1px 0 9px}
+.lc-radio-volume-icon{width:18px;flex:0 0 18px;text-align:center;font-size:12px;line-height:1}
+.lc-radio-volume input[type=range]{appearance:none;-webkit-appearance:none;flex:1;min-width:0;height:24px;background:transparent;cursor:pointer;accent-color:#cdb57b}
+.lc-radio-volume input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:999px;background:rgba(205,181,123,.25)}
+.lc-radio-volume input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;margin-top:-5.5px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:#d7c28c;box-shadow:0 1px 5px rgba(0,0,0,.35)}
+.lc-radio-volume input[type=range]::-moz-range-track{height:3px;border-radius:999px;background:rgba(205,181,123,.25)}
+.lc-radio-volume input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:#d7c28c;box-shadow:0 1px 5px rgba(0,0,0,.35)}
+.lc-radio-volume-value{width:31px;flex:0 0 31px;text-align:right;color:rgba(224,235,242,.58);font-variant-numeric:tabular-nums}
 .lc-radio-status{font:400 10px/1.35 'Noto Serif TC',serif;color:rgba(224,235,242,.62);margin-top:8px;min-height:14px}
 .lc-radio-consent{position:fixed;inset:0;z-index:9400;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(1,5,10,.68);backdrop-filter:blur(7px)}
 .lc-radio-consent.show{display:flex}
@@ -36,7 +47,7 @@
   .lc-radio-panel{right:10px;bottom:max(10px,env(safe-area-inset-bottom));width:224px;padding:11px}
   .lc-radio-player,.lc-radio-player iframe{width:200px!important;height:200px!important}
   .lc-radio-launch{right:10px;bottom:max(10px,env(safe-area-inset-bottom));max-width:calc(100vw - 20px)}
-  .lc-radio-compact{right:10px;bottom:max(10px,env(safe-area-inset-bottom));width:238px;max-width:calc(100vw - 20px);min-height:54px;padding:8px 9px}
+  .lc-radio-compact{right:10px;bottom:max(10px,env(safe-area-inset-bottom));width:252px;max-width:calc(100vw - 20px);min-height:74px;padding:7px 9px 6px}
   .lc-radio-compact-mark{width:28px;height:28px;flex-basis:28px}
   .lc-radio-card{padding:22px 18px}.lc-radio-consent-actions{flex-direction:column}
 }

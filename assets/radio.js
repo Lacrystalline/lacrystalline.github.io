@@ -4,14 +4,43 @@
   const SUPABASE_ANON_KEY='sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T';
   const PREF_KEY='lacrystalline_radio_pref_v1'; // on | off | ask
   const SESSION_KEY='lacrystalline_radio_session_v1'; // on | off
+  const VOLUME_KEY='lacrystalline_radio_volume_v1'; // 0..100, local only
   const DURATION_REPORT_URL=SUPABASE_URL+'/functions/v1/radio-duration-report';
   let sb=null, state=null, player=null, playerReady=false, ytLoading=false, consentShown=false, desiredVideo=null, reportedDurationVideo=null;
   let panelExpanded=window.matchMedia&&window.matchMedia('(min-width:641px)').matches;
+  let localVolume=readVolume();
 
   function pref(){ return localStorage.getItem(PREF_KEY)||'ask'; }
   function sessionPref(){ return sessionStorage.getItem(SESSION_KEY)||''; }
   function wantsAudio(){ const p=pref(); return p==='on'||(p==='ask'&&sessionPref()==='on'); }
   function wantsSilence(){ const p=pref(); return p==='off'||(p==='ask'&&sessionPref()==='off'); }
+  function readVolume(){
+    const raw=localStorage.getItem(VOLUME_KEY);
+    if(raw===null||raw==='')return 100;
+    const n=Number(raw);
+    return Number.isFinite(n)?Math.max(0,Math.min(100,Math.round(n))):100;
+  }
+  function volumeIcon(v){ return v<=0?'🔇':v<=40?'🔉':'🔊'; }
+  function updateVolumeUI(){
+    const value=Math.max(0,Math.min(100,Math.round(localVolume)));
+    ['lcRadioCompactVolume','lcRadioPanelVolume'].forEach(id=>{const el=document.getElementById(id);if(el&&Number(el.value)!==value)el.value=String(value);});
+    ['lcRadioCompactVolumeIcon','lcRadioPanelVolumeIcon'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=volumeIcon(value);});
+    ['lcRadioCompactVolumeValue','lcRadioPanelVolumeValue'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=value+'%';});
+  }
+  function applyVolume(){
+    updateVolumeUI();
+    if(!playerReady||!player)return;
+    try{
+      player.setVolume(localVolume);
+      if(localVolume<=0)player.mute(); else player.unMute();
+    }catch(e){}
+  }
+  function setLocalVolume(value){
+    const n=Math.max(0,Math.min(100,Math.round(Number(value)||0)));
+    localVolume=n;
+    localStorage.setItem(VOLUME_KEY,String(n));
+    applyVolume();
+  }
   function live(s){ return !!(s&&s.current_video_id&&(s.status==='playing'||s.status==='paused')); }
   function pos(s){
     let base=Number(s&&s.position_seconds||0);
@@ -24,15 +53,22 @@
     if(document.getElementById('lcRadioPanel'))return;
     document.body.insertAdjacentHTML('beforeend',`
       <button id="lcRadioLaunch" class="lc-radio-launch" type="button">♫ 今晚有音樂</button>
-      <button id="lcRadioCompact" class="lc-radio-compact" type="button" aria-label="展開 La Crystalline Radio">
-        <span class="lc-radio-compact-mark">♫</span>
-        <span class="lc-radio-compact-copy">
-          <span class="lc-radio-compact-kicker">La Crystalline Radio</span>
-          <span id="lcRadioCompactTitle" class="lc-radio-compact-title">水晶庭音樂台</span>
-          <span id="lcRadioCompactAuthor" class="lc-radio-compact-author">與今晚同步聆聽</span>
-        </span>
-        <span class="lc-radio-compact-open">展開</span>
-      </button>
+      <div id="lcRadioCompact" class="lc-radio-compact">
+        <button id="lcRadioCompactOpen" class="lc-radio-compact-main" type="button" aria-label="展開 La Crystalline Radio">
+          <span class="lc-radio-compact-mark">♫</span>
+          <span class="lc-radio-compact-copy">
+            <span class="lc-radio-compact-kicker">La Crystalline Radio</span>
+            <span id="lcRadioCompactTitle" class="lc-radio-compact-title">水晶庭音樂台</span>
+            <span id="lcRadioCompactAuthor" class="lc-radio-compact-author">與今晚同步聆聽</span>
+          </span>
+          <span class="lc-radio-compact-open">展開</span>
+        </button>
+        <label class="lc-radio-volume lc-radio-volume-compact" title="音量">
+          <span id="lcRadioCompactVolumeIcon" class="lc-radio-volume-icon" aria-hidden="true">🔊</span>
+          <input id="lcRadioCompactVolume" type="range" min="0" max="100" step="1" value="100" aria-label="音量">
+          <span id="lcRadioCompactVolumeValue" class="lc-radio-volume-value">100%</span>
+        </label>
+      </div>
       <section id="lcRadioPanel" class="lc-radio-panel" aria-label="La Crystalline Radio">
         <div class="lc-radio-head">
           <div class="lc-radio-head-copy">
@@ -43,6 +79,11 @@
         </div>
         <div id="lcRadioAuthor" class="lc-radio-author">與今晚同步聆聽</div>
         <div id="lcRadioPlayer" class="lc-radio-player"></div>
+        <label class="lc-radio-volume lc-radio-volume-panel" title="音量">
+          <span id="lcRadioPanelVolumeIcon" class="lc-radio-volume-icon" aria-hidden="true">🔊</span>
+          <input id="lcRadioPanelVolume" type="range" min="0" max="100" step="1" value="100" aria-label="音量">
+          <span id="lcRadioPanelVolumeValue" class="lc-radio-volume-value">100%</span>
+        </label>
         <div class="lc-radio-row">
           <button id="lcRadioSync" class="lc-radio-btn" type="button">重新同步</button>
           <button id="lcRadioMute" class="lc-radio-btn" type="button">關閉音樂</button>
@@ -63,10 +104,15 @@
       </div>`);
 
     document.getElementById('lcRadioLaunch').addEventListener('click',()=>enableFromGesture(false));
-    document.getElementById('lcRadioCompact').addEventListener('click',()=>{panelExpanded=true;showPanel();});
+    document.getElementById('lcRadioCompactOpen').addEventListener('click',()=>{panelExpanded=true;showPanel();});
     document.getElementById('lcRadioCollapse').addEventListener('click',()=>{panelExpanded=false;showCompact();});
     document.getElementById('lcRadioSync').addEventListener('click',()=>syncPlayer(true));
     document.getElementById('lcRadioMute').addEventListener('click',()=>disableAudio(false));
+    ['lcRadioCompactVolume','lcRadioPanelVolume'].forEach(id=>{
+      document.getElementById(id).addEventListener('input',e=>setLocalVolume(e.target.value));
+      document.getElementById(id).addEventListener('change',e=>setLocalVolume(e.target.value));
+    });
+    updateVolumeUI();
     document.getElementById('lcRadioYes').addEventListener('click',()=>{
       const remember=document.getElementById('lcRadioRemember').checked;
       if(remember)localStorage.setItem(PREF_KEY,'on'); else sessionStorage.setItem(SESSION_KEY,'on');
@@ -138,7 +184,7 @@
       width:200,height:200,videoId:state.current_video_id,
       playerVars:{autoplay:1,controls:1,playsinline:1,rel:0,fs:0,iv_load_policy:3,cc_load_policy:0,start:Math.floor(pos(state)),origin:location.origin},
       events:{
-        onReady:function(e){ playerReady=true; syncPlayer(true); setTimeout(reportDuration,600); },
+        onReady:function(e){ playerReady=true; applyVolume(); syncPlayer(true); setTimeout(reportDuration,600); },
         onStateChange:function(e){
           if(window.YT&&e.data===YT.PlayerState.PLAYING){ setTimeout(reportDuration,350); }
           if(window.YT&&e.data===YT.PlayerState.ENDED){
@@ -169,6 +215,7 @@
         if(force||Math.abs(here-target)>2.5)player.seekTo(target,true);
         if(state.status==='playing')player.playVideo(); else if(state.status==='paused')player.pauseVideo();
       }
+      applyVolume();
       status(state.status==='playing'?'與店內同步播放中':'店內目前已暫停');
     }catch(e){ status('播放器正在重新連線…'); }
   }
