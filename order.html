@@ -114,6 +114,9 @@ img{display:block;max-width:100%}
 .opts{display:grid;gap:9px}
 .opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:3px;cursor:pointer;transition:.2s;background:rgba(17,26,43,.25)}
 .opt:hover{border-color:var(--crys-dim)}
+.opt.service-disabled{cursor:not-allowed;opacity:.46;filter:saturate(.55)}
+.opt.service-disabled:hover{border-color:var(--line)}
+.service-closed-note{color:var(--muted);font-size:.92rem;letter-spacing:.03em}
 .opt.sel{border-color:var(--crys);background:rgba(127,211,214,.07)}
 .opt .box{width:20px;height:20px;border-radius:4px;border:1.5px solid var(--crys-dim);flex:none;position:relative}
 .opt.sel .box{border-color:var(--crys);background:var(--crys)}
@@ -416,7 +419,7 @@ const BITES = [
 ];
 
 // ---- 狀態 ----
-const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null, identityBound:false };
+const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null, identityBound:false, specialServiceEnabled:null };
 
 const fmt = n => n.toLocaleString('en-US');
 const $ = id => document.getElementById(id);
@@ -634,6 +637,34 @@ function renderMembers(){
 function renderServices(){
   const box=$("services"), hint=$("svcHint");
   const member = MEMBERS.find(m=>m.id===state.member);
+
+  if(state.specialServiceEnabled !== true){
+    if(state.services.size) state.services.clear();
+    const statusText = state.specialServiceEnabled === false
+      ? '特殊服務目前暫停受理。餐飲點單仍正常開放。'
+      : '正在確認特殊服務受理狀態…';
+    hint.textContent=statusText;
+
+    if(!member){
+      box.innerHTML='';
+      return;
+    }
+
+    const avail = SERVICES.filter(s=>member.services.includes(s.id));
+    if(!avail.length){
+      box.innerHTML='';
+      return;
+    }
+
+    box.innerHTML = avail.map(s=>`
+      <div class="opt service-disabled" data-id="${s.id}" aria-disabled="true">
+        <div class="box"></div>
+        <div class="nm">${s.name}<span class="en">${s.en}</span></div>
+        <div class="pr">暫停受理</div>
+      </div>`).join('');
+    return;
+  }
+
   if(!member){
     box.innerHTML='';
     hint.textContent='請先於上方指名一位成員，即會顯示其可提供的服務。';
@@ -662,6 +693,7 @@ function renderServices(){
   }).join('');
   box.querySelectorAll('.opt:not(.contact-only)').forEach(el=>{
     el.addEventListener('click',()=>{
+      if(state.specialServiceEnabled !== true) return;
       const id=el.dataset.id;
       if(state.services.has(id)){state.services.delete(id);el.classList.remove('sel');}
       else{state.services.add(id);el.classList.add('sel');}
@@ -835,6 +867,31 @@ try{
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); window.sb=sb;
   }
 }catch(e){ console.warn('Supabase 初始化失敗',e); }
+
+async function loadSpecialServiceStatus(){
+  if(!sb){
+    state.specialServiceEnabled=null;
+    renderServices();
+    update();
+    return;
+  }
+  try{
+    const {data,error}=await sb.rpc('get_special_service_enabled');
+    if(error) throw error;
+    const enabled = data === true;
+    const changed = state.specialServiceEnabled !== enabled;
+    state.specialServiceEnabled = enabled;
+    if(!enabled && state.services.size) state.services.clear();
+    if(changed) renderServices();
+    update();
+  }catch(err){
+    console.warn('特殊服務狀態讀取失敗：',err);
+    state.specialServiceEnabled=null;
+    if(state.services.size) state.services.clear();
+    renderServices();
+    update();
+  }
+}
 
 
 const VISIT_STORAGE_KEY="la_crystalline_active_visit_v1";
@@ -1071,6 +1128,7 @@ $("identitySwitch").addEventListener('click',releaseVisitIdentity);
 // init
 renderMembers();
 renderServices();
+loadSpecialServiceStatus();
 renderMenu("drinks", DRINKS);
 renderMenu("bites", BITES);
 renderCompanions();
@@ -1088,7 +1146,8 @@ if(continueIntent){
 }
 setTimeout(()=>refreshVisitCard(false),250);
 setInterval(refreshVisitCard,10000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshVisitCard();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshVisitCard();loadSpecialServiceStatus();}});
+setInterval(loadSpecialServiceStatus,10000);
 setInterval(loadPublicStaffStatus, 30000);
 </script>
   <script src="assets/radio.js"></script>
