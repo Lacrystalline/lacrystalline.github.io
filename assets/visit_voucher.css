@@ -259,6 +259,7 @@
 .visit-card .vc-btn:hover{transform:translateY(-1px);background:rgba(24,58,79,.58);border-color:rgba(255,255,255,.80)}
 .visit-card .vc-btn.gold,.visit-card .vc-btn.primary{color:#f7f2e8}
 .visit-card .vc-btn[aria-disabled="true"]{opacity:.42;pointer-events:none}
+.visit-card #vcOrder,.visit-card #vcReceipt{font-size:1.56rem;letter-spacing:.06em}
 .visit-card.receipt-ready .vc-ticket{color:#fff0c9}
 .visit-card .vc-checkout-signature{
   position:absolute;
@@ -362,6 +363,7 @@
   .visit-card .vc-sub{font-size:.52rem;line-height:1.45;padding-bottom:.5%}
   .visit-card .vc-actions{gap:6px;padding-top:1%}
   .visit-card .vc-btn{min-width:0;flex:1 1 0;padding:7px 6px;font-size:.56rem;letter-spacing:.03em}
+  .visit-card #vcOrder,.visit-card #vcReceipt{font-size:1.12rem;letter-spacing:.04em}
   .receipt.visit-card-surface{width:96vw!important;height:auto!important;min-height:720px;background-image:url("crystal_receipt_base_md.webp")!important}
   .receipt.visit-card-surface.receipt-len-md{min-height:820px}
   .receipt.visit-card-surface.receipt-len-lg{min-height:1080px}

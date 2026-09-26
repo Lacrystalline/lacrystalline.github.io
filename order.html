@@ -161,6 +161,10 @@ img{display:block;max-width:100%}
 .member.unavailable{cursor:not-allowed;opacity:.58;filter:saturate(.72)}
 .member.unavailable:hover{border-color:var(--line);transform:none}
 .member.unavailable .pick{display:none}
+.member.host-disabled{cursor:not-allowed;opacity:.46;filter:saturate(.58)}
+.member.host-disabled:hover{border-color:var(--line);transform:none}
+.member.host-disabled .pick{display:none}
+.host-closed-note{color:var(--mute);font-size:.86rem;letter-spacing:.03em}
 .member .status-badge{display:inline-flex;align-items:center;gap:5px;margin-top:.35em;padding:2px 7px;border:1px solid var(--line);border-radius:999px;font-family:var(--tc);font-size:.7rem;line-height:1.45;letter-spacing:.05em;color:var(--mute)}
 .member .status-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
 .member .status-badge.on_duty{color:var(--crys);border-color:rgba(127,211,214,.32)}
@@ -322,13 +326,13 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   <!-- STEP 2: 指名 -->
   <section class="section order-stage" hidden>
     <div class="s-h"><span class="no">貳</span><span class="zh">指名</span><span class="en">Choose Your Host</span></div>
-    <div class="hint">選擇今夜想指名的成員。（可不選，僅點餐亦可）</div>
+    <div class="hint" id="hostHint">選擇今夜想指名的成員。（可不選，僅點餐亦可）</div>
     <div class="member-carousel" aria-label="成員選擇">
       <button class="member-nav" type="button" aria-label="上一位成員" onclick="scrollMembers(-1)">‹</button>
       <div class="members" id="members"></div>
       <button class="member-nav" type="button" aria-label="下一位成員" onclick="scrollMembers(1)">›</button>
     </div>
-    <div class="member-carousel-note">左右滑動瀏覽成員・點選卡片即可指名</div>
+    <div class="member-carousel-note" id="memberNote">左右滑動瀏覽成員・點選卡片即可指名</div>
   </section>
 
   <!-- STEP 3: 特殊服務 -->
@@ -582,11 +586,34 @@ function centerSelectedMember(){
 function renderMembers(){
   const track=$("members");
   const previousScroll=track ? track.scrollLeft : 0;
+  const hostHint=$("hostHint");
+  const memberNote=$("memberNote");
+  const hostEnabled = state.specialServiceEnabled === true;
+
+  if(!hostEnabled && state.member){
+    state.member=null;
+    if(state.services.size) state.services.clear();
+  }
+
+  if(hostHint){
+    hostHint.textContent = hostEnabled
+      ? '選擇今夜想指名的成員。（可不選，僅點餐亦可）'
+      : (state.specialServiceEnabled === false
+          ? '指名目前暫停受理。餐飲點單仍正常開放。'
+          : '正在確認指名受理狀態…');
+  }
+  if(memberNote){
+    memberNote.textContent = hostEnabled
+      ? '左右滑動瀏覽成員・點選卡片即可指名'
+      : '目前不可指名；特殊服務恢復後即可再次選擇成員';
+    memberNote.classList.toggle('host-closed-note', !hostEnabled);
+  }
+
   track.innerHTML = MEMBERS.map(m=>{
-    const selectable = m.selectable === true;
+    const selectable = hostEnabled && m.selectable === true;
     const status = m.status || "loading";
     return `
-    <div class="member${selectable?'':' unavailable'}${state.member===m.id?' sel':''}" data-id="${m.id}" aria-disabled="${selectable?'false':'true'}">
+    <div class="member${selectable?'':' unavailable'}${!hostEnabled?' host-disabled':''}${state.member===m.id?' sel':''}" data-id="${m.id}" aria-disabled="${selectable?'false':'true'}">
       <img class="av" src="${m.av}" alt="${m.name}" onerror="this.style.opacity=0">
       <div class="info">
         <div class="nm">${m.name}<span class="en">${m.en}</span></div>
@@ -601,6 +628,7 @@ function renderMembers(){
 
   document.querySelectorAll('.member').forEach(el=>{
     el.addEventListener('click',()=>{
+      if(state.specialServiceEnabled !== true) return;
       const id=el.dataset.id;
       const picked=MEMBERS.find(m=>m.id===id);
       if(!picked || !picked.selectable) return;
@@ -871,6 +899,9 @@ try{
 async function loadSpecialServiceStatus(){
   if(!sb){
     state.specialServiceEnabled=null;
+    if(state.services.size) state.services.clear();
+    if(state.member) state.member=null;
+    renderMembers();
     renderServices();
     update();
     return;
@@ -881,13 +912,21 @@ async function loadSpecialServiceStatus(){
     const enabled = data === true;
     const changed = state.specialServiceEnabled !== enabled;
     state.specialServiceEnabled = enabled;
-    if(!enabled && state.services.size) state.services.clear();
-    if(changed) renderServices();
+    if(!enabled){
+      if(state.services.size) state.services.clear();
+      if(state.member) state.member=null;
+    }
+    if(changed){
+      renderMembers();
+      renderServices();
+    }
     update();
   }catch(err){
     console.warn('特殊服務狀態讀取失敗：',err);
     state.specialServiceEnabled=null;
     if(state.services.size) state.services.clear();
+    if(state.member) state.member=null;
+    renderMembers();
     renderServices();
     update();
   }
