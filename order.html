@@ -265,7 +265,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
       <img src="assets/icon_order.png" alt="點餐圖示">
       <div class="head-copy">
         <div class="ey">今夜，為自己留一點光</div>
-        <h1>指名・點餐</h1>
+        <h1>取號碼牌・點餐</h1>
         <div class="sub">水晶庭 · La Crystalline</div>
       </div>
     </div>
@@ -274,9 +274,10 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 
 <main class="wrap">
 
-  <!-- STEP 1: 客人資料 -->
+  <!-- STEP 1: 取號碼牌 -->
   <section class="section">
-    <div class="s-h"><span class="no">壹</span><span class="zh">您的身分</span><span class="en">Who Are You</span></div>
+    <div class="s-h"><span class="no">壹</span><span class="zh">取號碼牌</span><span class="en">Crystal Tag</span></div>
+    <div class="hint">先登錄本次來店資料並取得水晶號碼牌；完成帶位後，點餐內容會自動開放。</div>
     <div id="identityBound" class="identity-bound">
       <div>
         <div class="ib-k">YOUR IDENTITY · 本次旅者</div>
@@ -317,7 +318,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   </section>
 
   <!-- STEP 2: 指名 -->
-  <section class="section">
+  <section class="section order-stage" hidden>
     <div class="s-h"><span class="no">貳</span><span class="zh">指名</span><span class="en">Choose Your Host</span></div>
     <div class="hint">選擇今夜想指名的成員。（可不選，僅點餐亦可）</div>
     <div class="member-carousel" aria-label="成員選擇">
@@ -329,14 +330,14 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   </section>
 
   <!-- STEP 3: 特殊服務 -->
-  <section class="section">
+  <section class="section order-stage" hidden>
     <div class="s-h"><span class="no">參</span><span class="zh">特殊服務</span><span class="en">Special</span></div>
     <div class="hint" id="svcHint">請先於上方指名一位成員，即會顯示其可提供的服務。</div>
     <div class="opts" id="services"></div>
   </section>
 
   <!-- STEP 4: 點餐 -->
-  <section class="section">
+  <section class="section order-stage" hidden>
     <div class="s-h"><span class="no">肆</span><span class="zh">點餐</span><span class="en">Dining</span></div>
     <div class="hint">調酒與餐點可自由選擇數量。</div>
     <div class="hint" style="margin-top:6px">低消｜每位旅者至少點用一杯飲品或一份餐點。</div>
@@ -348,7 +349,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   </section>
 
   <!-- STEP 5: 備註 -->
-  <section class="section">
+  <section class="section order-stage" hidden>
     <div class="s-h"><span class="no">伍</span><span class="zh">備註</span><span class="en">Notes</span></div>
     <div class="field">
       <textarea id="note" placeholder="想對店長說的話、特殊需求、或今夜的心情…（選填）" maxlength="200"></textarea>
@@ -356,7 +357,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   </section>
 
   <div class="note" id="statusNote">
-    送出後，訂單將傳至店內。店長會在營業時間為您安排。<br>
+    STEP 01｜先取號碼牌並等待帶位。完成帶位後，STEP 02 起的點餐內容會自動出現。<br>
     營業時間：每週六 22:00–02:00｜實際以遊戲內招募看板為準。
   </div>
 </main>
@@ -364,7 +365,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 <div class="summary">
   <div class="row">
     <div class="tot">合計 <span id="total">0</span> <small>Gil</small></div>
-    <button class="btn" id="submitBtn" disabled>送出訂單</button>
+    <button class="btn" id="submitBtn" disabled>取號碼牌</button>
   </div>
 </div>
 
@@ -525,7 +526,8 @@ async function loadJoinSession(){
     const {data,error}=await sb.rpc('get_dining_session_public',{p_join_token:token});
     if(error) throw error;
     state.joinSession=data;
-    if(!data?.can_order) throw new Error('這個號碼牌目前不能再點餐');
+    if(!['waiting','seated'].includes(String(data?.status||''))) throw new Error('這個號碼牌目前不能再使用');
+    syncIdentityUI();
     const saved=readVisit();
     if(!state.identityBound && saved?.join_token===token && saved?.guest_name && !saved?.server){
       const {data:resolved,error:resolveError}=await sb.rpc('resolve_dining_session_saved_identity',{p_join_token:token,p_guest_name:saved.guest_name});
@@ -533,7 +535,8 @@ async function loadJoinSession(){
         saved.guest_name=resolved.guest_name; saved.server=resolved.server; saved.member_id=resolved.member_id??null; writeVisit(saved); syncIdentityUI();
       }
     }
-    banner.innerHTML=`<div>${state.identityBound?'本次來店已綁定':'加入同行號碼牌'}</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">${state.identityBound?'可直接追加點餐，不需再次輸入旅者資料 · ':''}來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size}${data.pending_count?` · 尚有 ${data.pending_count} 位待加入`:''}</div>`;
+    banner.innerHTML=`<div>${data.status==='waiting'?'等待帶位':'已完成帶位'}</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size}${data.pending_count?` · 尚有 ${data.pending_count} 位待加入`:''}${data.status==='waiting'?' · 帶位後開放點餐':' · 可開始點餐'}</div>`;
+    syncOrderStageVisibility();
   }catch(err){
     banner.innerHTML=`<div style="color:#dca0ad">號碼牌無效：${esc(err.message||err)}</div>`;
     state.joinSession={can_order:false};
@@ -744,19 +747,50 @@ function startSubmitCooldown(){
   }, 250);
 }
 
+function syncOrderStageVisibility(){
+  const seated = state.joinToken && state.joinSession?.status === 'seated' && state.joinSession?.can_order === true;
+  document.querySelectorAll('.order-stage').forEach(el=>{ el.hidden = !seated; });
+  const note=$("statusNote");
+  if(note){
+    if(!state.joinToken){
+      note.innerHTML='STEP 01｜先取號碼牌並等待帶位。完成帶位後，STEP 02 起的點餐內容會自動出現。<br>營業時間：每週六 22:00–02:00｜實際以遊戲內招募看板為準。';
+    }else if(state.joinSession?.status==='waiting'){
+      note.innerHTML='號碼牌已取得｜請等待水晶庭夥伴帶位。帶位完成後，本頁會自動開放點餐。<br>本頁每 10 秒同步一次狀態。';
+    }else if(seated){
+      note.innerHTML='已完成帶位｜現在可以開始點餐。<br>送出後，訂單將傳至店內。';
+    }
+  }
+}
+
 function update(){
   $("total").textContent = fmt(calcTotal());
-  const joinOk = !state.joinToken || state.joinSession?.can_order === true;
-  const partyOk = state.joinToken ? joinOk : companionsValid();
-  const ok = $("guestName").value.trim() && $("guestServer").value && partyOk && hasAnything();
+  syncOrderStageVisibility();
+  const btn=$("submitBtn");
   const remain = cooldownRemainingMs();
   if(remain > 0){
-    $("submitBtn").disabled = true;
-    $("submitBtn").textContent = `請稍候 ${Math.ceil(remain/1000)} 秒`;
-  }else{
-    $("submitBtn").disabled = !ok;
-    $("submitBtn").textContent = "送出訂單";
+    btn.disabled = true;
+    btn.textContent = `請稍候 ${Math.ceil(remain/1000)} 秒`;
+    return;
   }
+  const identityOk = $("guestName").value.trim() && $("guestServer").value;
+  if(!state.joinToken){
+    btn.disabled = !(identityOk && companionsValid());
+    btn.textContent = "取號碼牌";
+    return;
+  }
+  if(state.joinSession?.status === 'waiting'){
+    btn.disabled = true;
+    btn.textContent = "等待帶位…";
+    return;
+  }
+  if(state.joinSession?.can_order !== true){
+    btn.disabled = true;
+    btn.textContent = "目前無法點餐";
+    return;
+  }
+  const ok = identityOk && hasAnything();
+  btn.disabled = !ok;
+  btn.textContent = "送出訂單";
 }
 $("guestName").addEventListener('input',update);
 $("guestServer").addEventListener('change',update);
@@ -840,6 +874,7 @@ async function refreshVisitCard(forceOpen=false){
     if(!data){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
     if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
     v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; writeVisit(v);
+    if(state.joinToken && String(v.join_token)===String(state.joinToken)){ state.joinSession=data; syncOrderStageVisibility(); update(); }
     card.classList.toggle('receipt-ready',!!data.receipt_available);
     document.getElementById('vcTicket').textContent=data.ticket_code||v.ticket_code||'—';
     const vl=document.getElementById('vlTicket');if(vl)vl.textContent=`${data.ticket_code||v.ticket_code||'—'} · ${visitStatusLabel(data.status)}`;
@@ -954,83 +989,77 @@ function toast(msg, result, isErr){
   if(!isErr){setTimeout(()=>{t.className="toast";},2600)}else{setTimeout(()=>{t.className="toast err";},4000)}
 }
 
+async function notifyWaitingSession(joinToken){
+  try{
+    const res=await fetch(`${SUPABASE_URL}/functions/v1/discord-waiting-notify`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
+      body:JSON.stringify({join_token:joinToken})
+    });
+    const body=await res.json().catch(()=>null);
+    if(!res.ok || body?.ok===false) throw new Error(body?.error||`HTTP ${res.status}`);
+    return body;
+  }catch(err){ console.warn('候位 Discord 通知失敗',err); return null; }
+}
+
 $("submitBtn").addEventListener('click', async ()=>{
   const remain = cooldownRemainingMs();
-  if(remain > 0){
-    toast(`剛剛已送出訂單，請稍候 ${Math.ceil(remain/1000)} 秒再試。`, null, true);
-    update();
-    return;
-  }
-  const order = buildOrder();
-  if(!state.joinToken && !companionsValid()){
-    toast('請先完成來店人數與同行旅者資料。', null, true);
-    return;
-  }
-  $("submitBtn").disabled = true;
-  $("submitBtn").textContent = "送出中…";
-  try{
-    if(!sb){
-      throw new Error('點餐系統目前無法連線');
-    }
-    const args={
-      p_guest_name: order.guest_name,
-      p_server: order.server,
-      p_party_size: state.joinToken ? null : Number($("partySize").value),
-      p_companions: state.joinToken ? [] : collectCompanions(),
-      p_join_token: state.joinToken || null,
-      p_host: order.host,
-      p_services: order.services,
-      p_items: order.items,
-      p_note: order.note,
-    };
-    const {data,error}=await sb.rpc('submit_dining_order',args);
-    if(error) throw error;
-    rememberVisit(data, order);
-    const wasJoin = !!state.joinToken;
-    if(!state.joinToken && data?.join_token){
-      state.joinToken = String(data.join_token);
-      state.joinSession = {
-        ticket_code: data.ticket_code,
-        party_size: data.party_size,
-        identified_count: data.identified_count,
-        pending_count: data.pending_count,
-        can_order: true,
-        status: data.session_status
-      };
+  if(remain > 0){ toast(`剛剛已送出操作，請稍候 ${Math.ceil(remain/1000)} 秒再試。`, null, true); update(); return; }
+  if(!sb){ toast('點餐系統目前無法連線。', null, true); return; }
+
+  if(!state.joinToken){
+    if(!companionsValid()){ toast('請先完成來店人數與同行旅者資料。', null, true); return; }
+    $("submitBtn").disabled=true; $("submitBtn").textContent='取號中…';
+    try{
+      const guestName=$("guestName").value.trim();
+      const guestServer=$("guestServer").value;
+      const {data,error}=await sb.rpc('create_dining_session_ticket',{
+        p_guest_name:guestName,p_server:guestServer,p_party_size:Number($("partySize").value),p_companions:collectCompanions()
+      });
+      if(error) throw error;
+      state.joinToken=String(data.join_token);
+      state.joinSession={ticket_code:data.ticket_code,party_size:data.party_size,identified_count:data.identified_count,pending_count:data.pending_count,can_order:false,status:data.session_status};
+      rememberVisit(data,{guest_name:guestName,server:guestServer});
       $("partySetup").style.display='none';
-      const banner=$("joinBanner");
-      banner.classList.add('show');
-      banner.innerHTML=`<div>本頁已綁定本次水晶號碼牌</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">可繼續追加點餐 · 已登錄 ${data.identified_count}/${data.party_size}${data.pending_count?` · 尚有 ${data.pending_count} 位待加入`:''}</div>`;
-      const url=new URL(location.href);
-      url.searchParams.set('join',state.joinToken);
-      history.replaceState(null,'',url);
-      syncIdentityUI();
-    }else if(state.joinSession){
-      syncIdentityUI();
-      state.joinSession.identified_count = data.identified_count;
-      state.joinSession.pending_count = data.pending_count;
-    }
+      const banner=$("joinBanner"); banner.classList.add('show');
+      banner.innerHTML=`<div>水晶號碼牌已取得</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">請等待水晶庭夥伴帶位 · 帶位完成後自動開放點餐</div>`;
+      const url=new URL(location.href); url.searchParams.set('join',state.joinToken); history.replaceState(null,'',url);
+      syncIdentityUI(); syncOrderStageVisibility(); await refreshVisitCard(true);
+      const notified=await notifyWaitingSession(state.joinToken);
+      if(notified){
+        toast(`已取得 ${esc(data.ticket_code)}。請等待帶位，完成後本頁會自動開放點餐。`,null,false);
+      }else{
+        toast(`已取得 ${esc(data.ticket_code)}，但店內候位通知暫時未送達；請直接告知水晶庭夥伴。`,null,true);
+      }
+      startSubmitCooldown();
+    }catch(err){
+      console.error('取號碼牌失敗：',err);
+      const detail=err && (err.message||err.details||err.code) ? `（${err.message||err.details||err.code}）` : '';
+      toast(`取號失敗${detail}<br>請稍後再試，或直接私訊店長。`,null,true);
+    }finally{ update(); }
+    return;
+  }
+
+  if(state.joinSession?.status==='waiting' || state.joinSession?.can_order!==true){ toast('請等待水晶庭夥伴完成帶位後再點餐。',null,true); return; }
+  const order=buildOrder();
+  $("submitBtn").disabled=true; $("submitBtn").textContent='送出中…';
+  try{
+    const {data,error}=await sb.rpc('submit_dining_order_after_seating',{
+      p_guest_name:order.guest_name,p_server:order.server,p_join_token:state.joinToken,p_host:order.host,p_services:order.services,p_items:order.items,p_note:order.note
+    });
+    if(error) throw error;
+    rememberVisit(data,order);
+    if(state.joinSession){ state.joinSession.identified_count=data.identified_count; state.joinSession.pending_count=data.pending_count; state.joinSession.status=data.session_status; state.joinSession.can_order=data.session_status==='seated'; }
     await refreshVisitCard(true);
-    toast(
-      wasJoin
-        ? `已加入 ${esc(data.ticket_code)} 並送出本次點餐。`
-        : `已建立本次來店號碼牌。請保留號碼牌，同行者可使用分享連結加入；本頁也可直接繼續追加點餐。`,
-      data,
-      false
-    );
-    startSubmitCooldown();
+    toast(`訂單 ${esc(data.order_code)} 已送出。`,data,false); startSubmitCooldown();
     state.member=null; state.services.clear(); state.qty={};
     document.querySelectorAll('.opt').forEach(el=>el.classList.remove('sel'));
-    renderMembers(); renderServices();
-    document.querySelectorAll('.qn').forEach(el=>el.textContent='0');
-    $("note").value='';
+    renderMembers(); renderServices(); document.querySelectorAll('.qn').forEach(el=>el.textContent='0'); $("note").value='';
   }catch(err){
-    console.error("水晶庭訂單送出失敗：", err);
-    const detail = err && (err.message || err.details || err.code) ? `（${err.code || ''}${err.code && err.message ? ' / ' : ''}${err.message || err.details || ''}）` : '';
-    toast(`送出失敗${detail}<br>請稍後再試，或直接私訊店長。`, null, true);
-  }finally{
-    update();
-  }
+    console.error('水晶庭訂單送出失敗：',err);
+    const detail=err && (err.message||err.details||err.code) ? `（${err.code||''}${err.code&&err.message?' / ':''}${err.message||err.details||''}）` : '';
+    toast(`送出失敗${detail}<br>請稍後再試，或直接私訊店長。`,null,true);
+  }finally{ update(); }
 });
 
 $("identitySwitch").addEventListener('click',releaseVisitIdentity);
