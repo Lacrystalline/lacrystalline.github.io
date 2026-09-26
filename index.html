@@ -679,7 +679,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <div class="vc-phrase-wrap"><div class="vc-phrase" id="vcPhrase">願今夜的微光，留在你的記憶裡。</div></div>
       <div class="vc-sub" id="vcSub">—</div>
       <div class="vc-actions">
-        <a class="vc-btn primary" id="vcOrder" href="order.html">追加點餐</a>
+        <a class="vc-btn primary" id="vcOrder" href="order.html">點餐</a>
         <button class="vc-btn" id="vcShare" type="button">分享同行</button>
         <a class="vc-btn gold" id="vcReceipt" href="receipt.html" aria-disabled="true">收據（結帳後）</a>
       </div>
@@ -1089,10 +1089,15 @@ async function refreshVisitCard(forceOpen=false){
     const sub=document.getElementById('vcSub');
     if(data.receipt_available){sub.textContent=`今夜已結帳 · 紀念收據保留至 ${visitDate(data.receipt_expires_at)}。`;}
     else if(data.status==='waiting'){sub.textContent=`來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size} · 請等待夥伴帶位。`;}
-    else if(data.status==='seated'){sub.textContent=`已完成帶位 · 可繼續追加點餐${data.pending_count?` · 尚有 ${data.pending_count} 位同行待加入`:''}。`;}
+    else if(data.status==='seated'){
+      const hasOrders=Number(data.order_count||0)>0;
+      sub.textContent=`已完成帶位 · ${hasOrders?'可繼續追加點餐':'可以開始點餐'}${data.pending_count?` · 尚有 ${data.pending_count} 位同行待加入`:''}。`;
+    }
     else if(data.status==='cancelled'){sub.textContent='本次來店已取消。';}
     else{sub.textContent=`來店 ${data.party_size} 人 · ${visitStatusLabel(data.status)}。`;}
     const order=document.getElementById('vcOrder'),share=document.getElementById('vcShare'),receipt=document.getElementById('vcReceipt');
+    const hasOrders=Number(data.order_count||0)>0;
+    if(order) order.textContent=hasOrders?'追加點餐':'點餐';
     
     order.href=visitOrderUrl(v.join_token,true);
     order.style.display=data.can_order?'inline-flex':'none';
