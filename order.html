@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>指名・點餐｜水晶庭 La Crystalline</title>
+<title>點餐與接待｜水晶庭 La Crystalline</title>
 <link rel="icon" type="image/png" href="assets/emblem_nav.png">
 <link rel="apple-touch-icon" href="assets/emblem.png">
-<meta name="description" content="水晶庭 La Crystalline — FF14 水晶主題 RP 酒吧・指名與點餐">
+<meta name="description" content="水晶庭 La Crystalline — FF14 水晶主題 RP 酒吧・點餐與接待">
 <meta property="og:type" content="website">
-<meta property="og:title" content="指名・點餐｜水晶庭 La Crystalline">
-<meta property="og:description" content="尋找心中那抹被遺忘的水晶之光。指名成員、點一杯只屬於今夜的光。">
+<meta property="og:title" content="點餐與接待｜水晶庭 La Crystalline">
+<meta property="og:description" content="尋找心中那抹被遺忘的水晶之光。選擇接待成員，點一杯只屬於今夜的光。">
 <meta property="og:image" content="assets/emblem_hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -330,20 +330,20 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 
   <!-- STEP 2: 指名 -->
   <section class="section order-stage" hidden>
-    <div class="s-h"><span class="no">貳</span><span class="zh">指名</span><span class="en">Choose Your Host</span></div>
-    <div class="hint" id="hostHint">選擇今夜想指名的成員。（可不選，僅點餐亦可）</div>
+    <div class="s-h"><span class="no">貳</span><span class="zh">接待成員</span><span class="en">Choose a Member</span></div>
+    <div class="hint" id="hostHint">若希望由特定成員接待，可於此選擇。（可略過，直接點餐亦可）</div>
     <div class="member-carousel" aria-label="成員選擇">
       <button class="member-nav" type="button" aria-label="上一位成員" onclick="scrollMembers(-1)">‹</button>
       <div class="members" id="members"></div>
       <button class="member-nav" type="button" aria-label="下一位成員" onclick="scrollMembers(1)">›</button>
     </div>
-    <div class="member-carousel-note" id="memberNote">左右滑動瀏覽成員・點選卡片即可指名</div>
+    <div class="member-carousel-note" id="memberNote">左右滑動瀏覽成員・點選卡片即可選擇</div>
   </section>
 
   <!-- STEP 3: 特殊服務 -->
   <section class="section order-stage" hidden>
-    <div class="s-h"><span class="no">參</span><span class="zh">特殊服務</span><span class="en">Special</span></div>
-    <div class="hint" id="svcHint">請先於上方指名一位成員，即會顯示其可提供的服務。</div>
+    <div class="s-h"><span class="no">參</span><span class="zh">體驗項目</span><span class="en">Experiences</span></div>
+    <div class="hint" id="svcHint">請先於上方選擇一位接待成員，即會顯示其可提供的體驗項目。</div>
     <div class="opts" id="services"></div>
   </section>
 
@@ -525,8 +525,8 @@ async function loadJoinSession(){
 }
 
 function staffStatusLabel(status){
-  if(status === "on_duty") return "當班中・可指名";
-  if(status === "away") return "暫離・目前不可指名";
+  if(status === "on_duty") return "當班中・可選擇";
+  if(status === "away") return "暫離・目前不可選擇";
   if(status === "offline") return "未當班";
   if(status === "error") return "狀態暫時無法確認";
   return "確認狀態中…";
@@ -570,15 +570,15 @@ function renderMembers(){
 
   if(hostHint){
     hostHint.textContent = hostEnabled
-      ? '選擇今夜想指名的成員。（可不選，僅點餐亦可）'
+      ? '若希望由特定成員接待，可於此選擇。（可略過，直接點餐亦可）'
       : (state.specialServiceEnabled === false
-          ? '指名目前暫停受理。餐飲點單仍正常開放。'
-          : '正在確認指名受理狀態…');
+          ? '接待成員選擇目前暫停受理。餐飲點單仍正常開放。'
+          : '正在確認接待成員選擇狀態…');
   }
   if(memberNote){
     memberNote.textContent = hostEnabled
-      ? '左右滑動瀏覽成員・點選卡片即可指名'
-      : '目前不可指名；特殊服務恢復後即可再次選擇成員';
+      ? '左右滑動瀏覽成員・點選卡片即可選擇'
+      : '目前暫不可選擇接待成員；體驗項目恢復後即可再次選擇';
     memberNote.classList.toggle('host-closed-note', !hostEnabled);
   }
 
@@ -592,7 +592,7 @@ function renderMembers(){
         <div class="nm">${m.name}<span class="en">${m.en}</span></div>
         <div class="role">${m.role}</div>
         <div class="rp"><span class="mini-label">RP</span>${m.rp}</div>
-        <div class="tags"><span class="mini-label">特殊服務</span>${m.tags}${(m.contactServices&&m.contactServices.length)?'｜洽店長':''}</div>
+        <div class="tags"><span class="mini-label">體驗項目</span>${m.tags}${(m.contactServices&&m.contactServices.length)?'｜洽店長':''}</div>
         <div class="status-badge ${status}">${staffStatusLabel(status)}</div>
       </div>
       ${selectable?'<div class="pick"></div>':''}
@@ -642,8 +642,8 @@ function renderServices(){
   if(state.specialServiceEnabled !== true){
     if(state.services.size) state.services.clear();
     const statusText = state.specialServiceEnabled === false
-      ? '特殊服務目前暫停受理。餐飲點單仍正常開放。'
-      : '正在確認特殊服務受理狀態…';
+      ? '體驗項目目前暫停受理。餐飲點單仍正常開放。'
+      : '正在確認體驗項目開放狀態…';
     hint.textContent=statusText;
 
     if(!member){
@@ -668,7 +668,7 @@ function renderServices(){
 
   if(!member){
     box.innerHTML='';
-    hint.textContent='請先於上方指名一位成員，即會顯示其可提供的服務。';
+    hint.textContent='請先於上方選擇一位接待成員，即會顯示其可提供的體驗項目。';
     return;
   }
   const avail = SERVICES.filter(s=>member.services.includes(s.id));
@@ -677,11 +677,11 @@ function renderServices(){
   if(!avail.length){
     state.services.clear();
     box.innerHTML='';
-    hint.textContent=`${member.name} 目前沒有設定特殊服務；仍可直接指名接待／陪聊。`;
+    hint.textContent=`${member.name} 目前沒有設定體驗項目；仍可選擇由此成員接待。`;
     return;
   }
   hint.textContent = contactOnly.size
-    ? `${member.name} 的特殊服務可於此查看；如需預約，請洽店長。`
+    ? `${member.name} 的體驗項目可於此查看；如需預約，請洽店長。`
     : `${member.name} 可提供以下服務（可複選）。`;
   box.innerHTML = avail.map(s=>{
     const isContact = contactOnly.has(s.id);
