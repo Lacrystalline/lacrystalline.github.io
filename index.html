@@ -1065,6 +1065,11 @@ async function refreshVisitCard(forceOpen=false){
   try{
     const {data,error}=await sb.rpc('get_dining_session_public',{p_join_token:v.join_token});
     if(error)throw error;
+    let memberData=null;
+    if(v.member_token){
+      const {data:md,error:me}=await sb.rpc('get_dining_member_public',{p_join_token:v.join_token,p_member_token:v.member_token});
+      if(!me&&md){memberData=md;v.guest_name=md.guest_name||v.guest_name;v.server=md.server||v.server;}
+    }
     if(!data){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
     if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
     v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; writeVisit(v);
@@ -1090,19 +1095,22 @@ async function refreshVisitCard(forceOpen=false){
     if(data.receipt_available){sub.textContent=`今夜已結帳 · 紀念收據保留至 ${visitDate(data.receipt_expires_at)}。`;}
     else if(data.status==='waiting'){sub.textContent=`來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size} · 請等待夥伴帶位。`;}
     else if(data.status==='seated'){
-      const hasOrders=Number(data.order_count||0)>0;
+      const hasOrders=memberData?Number(memberData.member_order_count||0)>0:Number(data.order_count||0)>0;
       sub.textContent=`已完成帶位 · ${hasOrders?'可繼續追加點餐':'可以開始點餐'}${data.pending_count?` · 尚有 ${data.pending_count} 位同行待加入`:''}。`;
     }
     else if(data.status==='cancelled'){sub.textContent='本次來店已取消。';}
     else{sub.textContent=`來店 ${data.party_size} 人 · ${visitStatusLabel(data.status)}。`;}
     const order=document.getElementById('vcOrder'),share=document.getElementById('vcShare'),receipt=document.getElementById('vcReceipt');
-    const hasOrders=Number(data.order_count||0)>0;
-    if(order) order.textContent=hasOrders?'追加點餐':'點餐';
+    const hasOrders=memberData?Number(memberData.member_order_count||0)>0:Number(data.order_count||0)>0;
+    if(order){
+      order.textContent=hasOrders?'＋ 追加點餐':'點餐';
+      order.classList.toggle('repeat-order-cta',hasOrders&&data.can_order===true);
+    }
     
     order.href=visitOrderUrl(v.join_token,true);
-    order.style.display=data.can_order?'inline-flex':'none';
+    order.style.display=(data.can_order&&!!v.member_token)?'inline-flex':'none';
     order.onclick=()=>{ if(data.can_order)setVisitCollapsed(v,true); };
-    share.style.display=(data.can_order&&Number(data.party_size)>1)?'inline-flex':'none';
+    share.style.display=(!!v.member_token&&['waiting','seated'].includes(String(data.status)))?'inline-flex':'none';
     share.onclick=()=>{const url=visitOrderUrl(v.join_token,false);navigator.clipboard?.writeText(url).then(()=>{share.textContent='同行連結已複製 ✓';setTimeout(()=>share.textContent='分享同行',1800)}).catch(()=>{});};
     receipt.href=visitReceiptUrl(v,data); receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true'); receipt.textContent=data.receipt_available?'查看紀念收據':'收據（結帳後）';
     document.getElementById('vcCollapse').onclick=collapseVisitCard;
@@ -1111,7 +1119,7 @@ async function refreshVisitCard(forceOpen=false){
     if(forceOpen){setVisitCollapsed(v,false);setVisitUi(true)}else{setVisitUi(!isVisitCollapsed(v))}
   }catch(e){console.warn('本次來店卡更新失敗',e)}
 }
-function rememberVisit(result,guestName){if(!result?.join_token)return;writeVisit({join_token:String(result.join_token),ticket_code:String(result.ticket_code||''),guest_name:String(guestName||''),saved_at:new Date().toISOString()});}
+function rememberVisit(result,guestName){if(!result?.join_token)return;const cur=readVisit()||{};writeVisit({...cur,join_token:String(result.join_token),ticket_code:String(result.ticket_code||cur.ticket_code||''),guest_name:String(result.guest_name||guestName||cur.guest_name||''),server:String(result.server||cur.server||''),member_id:result.member_id??cur.member_id??null,member_token:String(result.member_token||cur.member_token||''),saved_at:new Date().toISOString()});}
 
 (function(){
   var nav=document.getElementById('nav'),t=document.getElementById('navToggle'),l=document.getElementById('navLinks');

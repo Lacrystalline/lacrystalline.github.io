@@ -100,6 +100,8 @@ img{display:block;max-width:100%}
 .ib-switch{display:none;padding:7px 14px;border:1px solid rgba(127,211,214,.34);border-radius:999px;background:rgba(127,211,214,.05);color:var(--crys);font-family:var(--tc);font-size:.8rem;letter-spacing:.06em;cursor:pointer;transition:.18s ease;white-space:nowrap}
 .ib-switch.show{display:inline-flex;align-items:center;justify-content:center}
 .ib-switch:hover{border-color:rgba(127,211,214,.62);background:rgba(127,211,214,.11);color:#d8fbfd}
+.ib-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:640px){.ib-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.ib-actions .ib-switch{width:100%}}
 @media(max-width:640px){
   .identity-bound{display:none;flex-direction:column;align-items:flex-start}
   .identity-bound.show{display:flex}
@@ -291,7 +293,10 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
         <div class="ib-v" id="identityBoundValue">—</div>
         <div class="ib-note">本次來店期間會沿用此身份，後續追加點餐不需再次填寫。</div>
       </div>
-      <button class="ib-switch" id="identitySwitch" type="button">切換同行旅者</button>
+      <div class="ib-actions">
+        <button class="ib-switch" id="addGuestBtn" type="button">追加客人</button>
+        <button class="ib-switch" id="identitySwitch" type="button">更換使用者</button>
+      </div>
     </div>
     <div id="identityFields" class="identity-fields">
       <div class="field">
@@ -317,7 +322,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
           <option value="5">5 人</option><option value="6">6 人</option><option value="7">7 人</option><option value="8">8 人</option>
         </select>
       </div>
-      <div class="hint" style="margin-top:2px">主訂單人算第 1 位。選擇人數後，系統會展開其他同行旅者欄位。</div>
+      <div class="hint" style="margin-top:2px">您是第 1 位旅者；其餘同行請各自開啟「分享同行」連結，填寫自己的角色名與伺服器後加入此桌。</div>
       <div id="companions" class="companions"></div>
       <div id="partyStatus" class="party-status" style="display:none"></div>
     </div>
@@ -343,7 +348,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   </section>
 
   <!-- STEP 4: 點餐 -->
-  <section class="section order-stage" hidden>
+  <section class="section order-stage" id="diningSection" hidden>
     <div class="s-h"><span class="no">肆</span><span class="zh">點餐</span><span class="en">Dining</span></div>
     <div class="hint">調酒與餐點可自由選擇數量。</div>
     <div class="hint" style="margin-top:6px">低消｜每位旅者至少點用一杯飲品或一份餐點。</div>
@@ -423,7 +428,7 @@ const BITES = [
 ];
 
 // ---- 狀態 ----
-const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null, identityBound:false, specialServiceEnabled:null };
+const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null, identityBound:false, memberToken:null, memberOrderCount:0, specialServiceEnabled:null };
 
 const fmt = n => n.toLocaleString('en-US');
 const $ = id => document.getElementById(id);
@@ -439,81 +444,31 @@ function renderCompanions(){
   const box = $("companions");
   const status = $("partyStatus");
   if(!box || !status) return;
-  if(state.joinToken){
-    box.innerHTML='';
-    status.style.display='none';
-    return;
-  }
-  const size = Number($("partySize")?.value || 0);
-  const prior = [...box.querySelectorAll('.companion-card')].map(card=>({
-    guest_name: card.querySelector('.companion-name')?.value || '',
-    server: card.querySelector('.companion-server')?.value || '',
-    pending: !!card.querySelector('.companion-pending')?.checked,
-  }));
-  if(!size || size <= 1){
-    box.innerHTML='';
-    status.style.display = size===1 ? 'block' : 'none';
-    if(size===1) status.textContent='來店 1 人｜主旅者已登錄';
-    update();
-    return;
-  }
-  box.innerHTML = Array.from({length:size-1},(_,i)=>{
-    const v=prior[i]||{};
-    const slot=i+2;
-    return `<div class="companion-card" data-slot="${slot}">
-      <div class="companion-head">
-        <div class="companion-title">同行旅者 ${slot}</div>
-        <label class="pending-toggle"><input class="companion-pending" type="checkbox" ${v.pending?'checked':''}> 稍後自行加入</label>
-      </div>
-      <div class="companion-fields">
-        <div class="field" style="margin:0"><label>角色名</label><input class="companion-name" type="text" maxlength="40" placeholder="同行者角色名" value="${esc(v.guest_name||'')}"></div>
-        <div class="field" style="margin:0"><label>伺服器</label><select class="companion-server"><option value="">請選擇伺服器</option>${SERVER_OPTIONS.map(x=>`<option${x===v.server?' selected':''}>${x}</option>`).join('')}</select></div>
-      </div>
-    </div>`;
-  }).join('');
-  box.querySelectorAll('.companion-pending').forEach(el=>{
-    const card=el.closest('.companion-card');
-    const sync=()=>{
-      const pending=el.checked;
-      card.querySelector('.companion-name').disabled=pending;
-      card.querySelector('.companion-server').disabled=pending;
-      card.classList.toggle('pending',pending);
-      updatePartyStatus(); update();
-    };
-    el.addEventListener('change',sync); sync();
-  });
-  box.querySelectorAll('input,select').forEach(el=>el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{updatePartyStatus();update();}));
-  updatePartyStatus(); update();
+  box.innerHTML='';
+  if(state.joinToken){ status.style.display='none'; return; }
+  const size=Number($("partySize")?.value||0);
+  if(!size){ status.style.display='none'; update(); return; }
+  status.style.display='block';
+  status.textContent=size===1
+    ? '來店 1 人｜您將取得自己的點餐身分'
+    : `來店 ${size} 人｜您先登錄自己，其餘 ${size-1} 位同行將各自加入`;
+  update();
 }
 
 function collectCompanions(){
   if(state.joinToken) return [];
-  return [...document.querySelectorAll('.companion-card')].map(card=>({
-    guest_name: card.querySelector('.companion-name').value.trim(),
-    server: card.querySelector('.companion-server').value,
-    pending: card.querySelector('.companion-pending').checked,
-  }));
+  const size=Number($("partySize")?.value||0);
+  return Array.from({length:Math.max(0,size-1)},()=>({pending:true}));
 }
 
 function companionsValid(){
   if(state.joinToken) return true;
   const size=Number($("partySize")?.value||0);
-  if(!size) return false;
-  const rows=collectCompanions();
-  if(rows.length!==Math.max(0,size-1)) return false;
-  return rows.every(x=>x.pending || (x.guest_name && x.server));
+  return Number.isInteger(size) && size>=1 && size<=8;
 }
 
 function updatePartyStatus(){
-  if(state.joinToken) return;
-  const size=Number($("partySize")?.value||0);
-  const status=$("partyStatus");
-  if(!size){ status.style.display='none'; return; }
-  const rows=collectCompanions();
-  const identified=1+rows.filter(x=>!x.pending && x.guest_name && x.server).length;
-  const pending=rows.filter(x=>x.pending).length;
-  status.style.display='block';
-  status.textContent=`來店 ${size} 人｜已登錄 ${identified} / ${size}${pending?` · 稍後加入 ${pending}`:''}`;
+  renderCompanions();
 }
 
 async function loadJoinSession(){
@@ -522,7 +477,6 @@ async function loadJoinSession(){
   const token=new URLSearchParams(location.search).get('join') || storedActive;
   if(!token) return;
   state.joinToken=token;
-  syncIdentityUI();
   $("partySetup").style.display='none';
   const banner=$("joinBanner");
   banner.classList.add('show');
@@ -533,24 +487,43 @@ async function loadJoinSession(){
     if(error) throw error;
     state.joinSession=data;
     if(!['waiting','seated'].includes(String(data?.status||''))) throw new Error('這個號碼牌目前不能再使用');
-    syncIdentityUI();
-    const saved=readVisit();
-    if(!state.identityBound && saved?.join_token===token && saved?.guest_name && !saved?.server){
-      const {data:resolved,error:resolveError}=await sb.rpc('resolve_dining_session_saved_identity',{p_join_token:token,p_guest_name:saved.guest_name});
-      if(!resolveError && resolved?.guest_name && resolved?.server){
-        saved.guest_name=resolved.guest_name; saved.server=resolved.server; saved.member_id=resolved.member_id??null; writeVisit(saved); syncIdentityUI();
+
+    let saved=readVisit();
+    if(saved?.join_token===token && saved?.member_token){
+      const {data:member,error:memberError}=await sb.rpc('get_dining_member_public',{
+        p_join_token:token,
+        p_member_token:saved.member_token
+      });
+      if(!memberError && member?.member_token){
+        saved={...saved,guest_name:member.guest_name,server:member.server,member_id:member.member_id,member_token:member.member_token};
+        state.memberToken=String(member.member_token);
+        state.memberOrderCount=Number(member.member_order_count||0);
+        writeVisit(saved);
+      }else{
+        delete saved.member_token; delete saved.member_id; delete saved.guest_name; delete saved.server;
+        writeVisit(saved);
+      }
+    }else if(saved?.join_token===token && saved?.guest_name && saved?.server){
+      const {data:joined,error:joinError}=await sb.rpc('join_dining_session_member',{
+        p_join_token:token,p_guest_name:saved.guest_name,p_server:saved.server
+      });
+      if(!joinError && joined?.member_token){
+        saved={...saved,guest_name:joined.guest_name,server:joined.server,member_id:joined.member_id,member_token:joined.member_token};
+        state.memberToken=String(joined.member_token);
+        writeVisit(saved);
       }
     }
-    banner.innerHTML=`<div>${data.status==='waiting'?'等待帶位':'已完成帶位'}</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size}${data.pending_count?` · 尚有 ${data.pending_count} 位待加入`:''}${data.status==='waiting'?' · 帶位後開放點餐':' · 可開始點餐'}</div>`;
+
+    syncIdentityUI();
+    banner.innerHTML=`<div>${data.status==='waiting'?'等待帶位':'已完成帶位'}</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size}${data.pending_count?` · 尚有 ${data.pending_count} 位待自行加入`:''}${data.status==='waiting'?' · 帶位後開放點餐':' · 每位旅者各自點餐'}</div>`;
     syncOrderStageVisibility();
+    update();
   }catch(err){
-    banner.innerHTML=`<div style="color:#dca0ad">號碼牌無效：${esc(err.message||err)}</div>`;
-    state.joinSession={can_order:false};
+    console.error('號碼牌讀取失敗',err);
+    banner.innerHTML='<div>無法讀取這張水晶號碼牌。</div>';
   }
-  update();
 }
 
-// ---- 店員即時狀態 ----
 function staffStatusLabel(status){
   if(status === "on_duty") return "當班中・可指名";
   if(status === "away") return "暫離・目前不可指名";
@@ -807,16 +780,18 @@ function startSubmitCooldown(){
 }
 
 function syncOrderStageVisibility(){
-  const seated = state.joinToken && state.joinSession?.status === 'seated' && state.joinSession?.can_order === true;
+  const seated = state.joinToken && state.identityBound && state.memberToken && state.joinSession?.status === 'seated' && state.joinSession?.can_order === true;
   document.querySelectorAll('.order-stage').forEach(el=>{ el.hidden = !seated; });
   const note=$("statusNote");
   if(note){
     if(!state.joinToken){
-      note.innerHTML='STEP 01｜先取號碼牌並等待帶位。完成帶位後，STEP 02 起的點餐內容會自動出現。<br>營業時間：每週六 22:00–02:00｜實際以遊戲內招募看板為準。';
+      note.innerHTML='STEP 01｜先取號碼牌並等待帶位。同行旅者各自加入同一張號碼牌。<br>營業時間：每週六 22:00–02:00｜實際以遊戲內招募看板為準。';
+    }else if(!state.identityBound){
+      note.innerHTML='請先填寫自己的旅者名稱與伺服器，加入這張號碼牌。<br>每位同行都會擁有自己的點餐身分。';
     }else if(state.joinSession?.status==='waiting'){
-      note.innerHTML='號碼牌已取得｜請等待水晶庭夥伴帶位。帶位完成後，本頁會自動開放點餐。<br>本頁每 10 秒同步一次狀態。';
+      note.innerHTML='您已加入此桌｜請等待水晶庭夥伴帶位。帶位完成後，本頁會自動開放您的個人點餐。';
     }else if(seated){
-      note.innerHTML='已完成帶位｜現在可以開始點餐。<br>送出後，訂單將傳至店內。';
+      note.innerHTML=`已完成帶位｜現在是 ${esc(readVisit()?.guest_name||'您的')} 的點餐頁。<br>送出的餐點只會記在這位旅者名下。`;
     }
   }
 }
@@ -837,6 +812,11 @@ function update(){
     btn.textContent = "取號碼牌";
     return;
   }
+  if(!state.identityBound || !state.memberToken){
+    btn.disabled = !identityOk;
+    btn.textContent = "加入此桌";
+    return;
+  }
   if(state.joinSession?.status === 'waiting'){
     btn.disabled = true;
     btn.textContent = "等待帶位…";
@@ -847,10 +827,11 @@ function update(){
     btn.textContent = "目前無法點餐";
     return;
   }
-  const ok = identityOk && hasAnything();
+  const ok = hasAnything();
   btn.disabled = !ok;
   btn.textContent = "送出訂單";
 }
+
 $("guestName").addEventListener('input',update);
 $("guestServer").addEventListener('change',update);
 $("partySize").addEventListener('change',renderCompanions);
@@ -960,12 +941,33 @@ function visitStatusLabel(s){return s==='waiting'?'等待帶位':s==='seated'?'�
 function visitDate(v){if(!v)return '';try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v))}catch(e){return ''}}
 function visitOrderUrl(token,continueMode=false){const u=new URL('order.html',location.href);if(token)u.searchParams.set('join',token);if(continueMode)u.searchParams.set('continue','1');return u.toString()}
 function visitReceiptUrl(v,data){if(data?.receipt_available&&data?.receipt_token){const u=new URL('receipt.html',location.href);u.searchParams.set('r',data.receipt_token);return u.toString()}const u=new URL('receipt.html',location.href);if(v?.guest_name)u.searchParams.set('guest',v.guest_name);if(data?.ticket_code||v?.ticket_code)u.searchParams.set('ticket',data?.ticket_code||v.ticket_code);return u.toString()}
+let firstMenuAutoOpened=false;
+function focusDiningMenu({instant=false}={}){
+  if(!(location.pathname.endsWith('/order.html') || location.pathname.endsWith('order.html'))) return;
+  const target=document.getElementById('diningSection');
+  if(!target || target.hidden) return;
+  collapseVisitCard();
+  const run=()=>target.scrollIntoView({behavior:instant?'auto':'smooth',block:'start'});
+  setTimeout(run,60);
+}
+function maybeAutoOpenFirstMenu(data,memberData,v){
+  if(firstMenuAutoOpened) return;
+  if(data?.status!=='seated' || data?.can_order!==true || !v?.member_token) return;
+  if(!memberData || Number(memberData.member_order_count||0)!==0) return;
+  firstMenuAutoOpened=true;
+  focusDiningMenu();
+}
 async function refreshVisitCard(forceOpen=false){
   const card=document.getElementById('visitCard'),launcher=document.getElementById('visitLauncher'); if(!card||!window.sb)return;
   const v=readVisit(); if(!v?.join_token){card.classList.remove('show');launcher?.classList.remove('show');return;}
   try{
     const {data,error}=await sb.rpc('get_dining_session_public',{p_join_token:v.join_token});
     if(error)throw error;
+    let memberData=null;
+    if(v.member_token){
+      const {data:md,error:me}=await sb.rpc('get_dining_member_public',{p_join_token:v.join_token,p_member_token:v.member_token});
+      if(!me&&md){memberData=md;state.memberOrderCount=Number(md.member_order_count||0);v.guest_name=md.guest_name||v.guest_name;v.server=md.server||v.server;}
+    }
     if(!data){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
     if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
     v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; writeVisit(v);
@@ -981,72 +983,115 @@ async function refreshVisitCard(forceOpen=false){
     if(data.receipt_available){sub.textContent=`今夜已結帳 · 紀念收據保留至 ${visitDate(data.receipt_expires_at)}。`;}
     else if(data.status==='waiting'){sub.textContent=`來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size} · 請等待夥伴帶位。`;}
     else if(data.status==='seated'){
-      const hasOrders=Number(data.order_count||0)>0;
+      const hasOrders=memberData?Number(memberData.member_order_count||0)>0:Number(data.order_count||0)>0;
       sub.textContent=`已完成帶位 · ${hasOrders?'可繼續追加點餐':'可以開始點餐'}${data.pending_count?` · 尚有 ${data.pending_count} 位同行待加入`:''}。`;
     }
     else if(data.status==='cancelled'){sub.textContent='本次來店已取消。';}
     else{sub.textContent=`來店 ${data.party_size} 人 · ${visitStatusLabel(data.status)}。`;}
     const order=document.getElementById('vcOrder'),share=document.getElementById('vcShare'),receipt=document.getElementById('vcReceipt');
-    const hasOrders=Number(data.order_count||0)>0;
-    if(order) order.textContent=hasOrders?'追加點餐':'點餐';
+    const hasOrders=memberData?Number(memberData.member_order_count||0)>0:Number(data.order_count||0)>0;
+    if(order){
+      order.textContent=hasOrders?'＋ 追加點餐':'點餐';
+      order.classList.toggle('repeat-order-cta',hasOrders&&data.can_order===true);
+    }
     
     order.href=visitOrderUrl(v.join_token,true);
-    order.style.display=data.can_order?'inline-flex':'none';
+    order.style.display=(data.can_order&&!!v.member_token)?'inline-flex':'none';
     order.onclick=(ev)=>{
       if(!data.can_order)return;
       setVisitCollapsed(v,true);
       if(location.pathname.endsWith('/order.html') || location.pathname.endsWith('order.html')){
         ev.preventDefault();
         collapseVisitCard();
-        const target=document.getElementById('services')?.closest('section') || document.querySelector('main.wrap');
-        setTimeout(()=>target?.scrollIntoView({behavior:'smooth',block:'start'}),40);
+        focusDiningMenu();
       }
     };
-    share.style.display=(data.can_order&&Number(data.party_size)>1)?'inline-flex':'none';
+    share.style.display=(!!v.member_token&&['waiting','seated'].includes(String(data.status)))?'inline-flex':'none';
     share.onclick=()=>{const url=visitOrderUrl(v.join_token,false);navigator.clipboard?.writeText(url).then(()=>{share.textContent='同行連結已複製 ✓';setTimeout(()=>share.textContent='分享同行',1800)}).catch(()=>{});};
     receipt.href=visitReceiptUrl(v,data); receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true'); receipt.textContent=data.receipt_available?'查看紀念收據':'收據（結帳後）';
     document.getElementById('vcCollapse').onclick=collapseVisitCard;
     document.getElementById('vcDismiss').onclick=dismissVisitCard;
     if(launcher)launcher.onclick=openVisitCard;
-    if(forceOpen){setVisitCollapsed(v,false);setVisitUi(true)}else{setVisitUi(!isVisitCollapsed(v))}
+    maybeAutoOpenFirstMenu(data,memberData,v);
+    if(forceOpen && !(data.status==='seated' && memberData && Number(memberData.member_order_count||0)===0)){
+      setVisitCollapsed(v,false);setVisitUi(true);
+    }else if(!forceOpen){setVisitUi(!isVisitCollapsed(v))}
   }catch(e){console.warn('本次來店卡更新失敗',e)}
 }
 function syncIdentityUI(){
   const v=readVisit();
-  const sameVisit=!!(state.joinToken&&v?.join_token===state.joinToken&&v?.guest_name&&v?.server);
+  const sameVisit=!!(state.joinToken&&v?.join_token===state.joinToken&&v?.guest_name&&v?.server&&v?.member_token);
   state.identityBound=sameVisit;
-  const bound=$("identityBound"), fields=$("identityFields"), switchBtn=$("identitySwitch");
+  state.memberToken=sameVisit?String(v.member_token):null;
+  const bound=$("identityBound"), fields=$("identityFields"), switchBtn=$("identitySwitch"), addBtn=$("addGuestBtn");
   const partySize=Number(state.joinSession?.party_size||0);
   if(sameVisit){
     $("guestName").value=v.guest_name;
     $("guestServer").value=v.server;
     $("identityBoundValue").textContent=`${v.guest_name} · ${v.server}`;
     bound.classList.add('show'); fields.classList.add('hidden-for-visit');
-    if(switchBtn){
-      if(partySize>1){
-        switchBtn.textContent='切換同行旅者';
-        switchBtn.classList.add('show');
-      }else{
-        switchBtn.classList.remove('show');
-      }
+    switchBtn?.classList.add('show');
+    if(addBtn){
+      if(partySize>0 && partySize<8 && ['waiting','seated'].includes(String(state.joinSession?.status||''))) addBtn.classList.add('show');
+      else addBtn.classList.remove('show');
     }
   }else{
     bound.classList.remove('show'); fields.classList.remove('hidden-for-visit');
-    switchBtn?.classList.remove('show');
+    switchBtn?.classList.remove('show'); addBtn?.classList.remove('show');
   }
   update();
 }
 function releaseVisitIdentity(){
   const v=readVisit();
   if(v&&v.join_token===state.joinToken){
-    delete v.guest_name; delete v.server; delete v.member_id;
+    delete v.guest_name; delete v.server; delete v.member_id; delete v.member_token;
     writeVisit(v);
   }
-  state.identityBound=false;
+  state.identityBound=false; state.memberToken=null; state.memberOrderCount=0;
   $("guestName").value=''; $("guestServer").value='';
   syncIdentityUI(); $("guestName").focus();
 }
-function rememberVisit(result,order){if(!result?.join_token)return;writeVisit({join_token:String(result.join_token),ticket_code:String(result.ticket_code||''),guest_name:String(order?.guest_name||''),server:String(order?.server||''),member_id:result.member_id??null,last_status:String(result.session_status||''),saved_at:new Date().toISOString()});}
+function rememberVisit(result,order){
+  if(!result?.join_token)return;
+  const current=readVisit()||{};
+  writeVisit({
+    ...current,
+    join_token:String(result.join_token),
+    ticket_code:String(result.ticket_code||current.ticket_code||''),
+    guest_name:String(result.guest_name||order?.guest_name||current.guest_name||''),
+    server:String(result.server||order?.server||current.server||''),
+    member_id:result.member_id??current.member_id??null,
+    member_token:String(result.member_token||current.member_token||''),
+    last_status:String(result.session_status||state.joinSession?.status||current.last_status||''),
+    saved_at:new Date().toISOString()
+  });
+}
+
+async function addGuestSlot(){
+  const v=readVisit();
+  if(!state.joinToken || !v?.member_token) return;
+  const btn=$("addGuestBtn");
+  if(btn){btn.disabled=true;btn.textContent='追加中…';}
+  try{
+    const {data,error}=await sb.rpc('add_dining_session_member_slot',{
+      p_join_token:state.joinToken,p_member_token:v.member_token
+    });
+    if(error) throw error;
+    if(state.joinSession){
+      state.joinSession.party_size=Number(data.party_size||state.joinSession.party_size);
+      state.joinSession.pending_count=Number(data.pending_count||0);
+    }
+    const url=visitOrderUrl(state.joinToken,false);
+    try{await navigator.clipboard?.writeText(url);}catch(e){}
+    await refreshVisitCard(true);
+    syncIdentityUI();
+    toast(`已追加 1 位同行名額（目前 ${data.party_size} 人）。同行連結已複製，請讓新旅者自行填寫資料加入。`,null,false);
+  }catch(err){
+    toast(`追加客人失敗（${err?.message||String(err)}）`,null,true);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='追加客人';}
+  }
+}
 
 async function loadPublicStaffStatus(){
   if(!sb){
@@ -1118,6 +1163,8 @@ $("submitBtn").addEventListener('click', async ()=>{
       });
       if(error) throw error;
       state.joinToken=String(data.join_token);
+      state.memberToken=String(data.member_token||'');
+      state.memberOrderCount=0;
       state.joinSession={ticket_code:data.ticket_code,party_size:data.party_size,identified_count:data.identified_count,pending_count:data.pending_count,can_order:false,status:data.session_status};
       rememberVisit(data,{guest_name:guestName,server:guestServer});
       $("partySetup").style.display='none';
@@ -1140,15 +1187,45 @@ $("submitBtn").addEventListener('click', async ()=>{
     return;
   }
 
+  if(!state.identityBound || !state.memberToken){
+    const guestName=$("guestName").value.trim();
+    const guestServer=$("guestServer").value;
+    if(!guestName||!guestServer){toast('請先填寫自己的旅者名稱與伺服器。',null,true);return;}
+    $("submitBtn").disabled=true; $("submitBtn").textContent='加入中…';
+    try{
+      const {data,error}=await sb.rpc('join_dining_session_member',{
+        p_join_token:state.joinToken,p_guest_name:guestName,p_server:guestServer
+      });
+      if(error) throw error;
+      state.memberToken=String(data.member_token);
+      state.memberOrderCount=0;
+      if(state.joinSession){
+        state.joinSession.party_size=data.party_size;
+        state.joinSession.identified_count=data.identified_count;
+        state.joinSession.pending_count=data.pending_count;
+        state.joinSession.status=data.session_status;
+        state.joinSession.can_order=data.can_order===true;
+      }
+      rememberVisit(data,{guest_name:data.guest_name,server:data.server});
+      syncIdentityUI();
+      await refreshVisitCard(true);
+      toast(data.can_order?'已加入此桌，可以開始自己的點餐。':'已加入此桌，請等待帶位完成。',null,false);
+    }catch(err){
+      toast(`加入失敗（${err?.message||String(err)}）`,null,true);
+    }finally{update();}
+    return;
+  }
+
   if(state.joinSession?.status==='waiting' || state.joinSession?.can_order!==true){ toast('請等待水晶庭夥伴完成帶位後再點餐。',null,true); return; }
   const order=buildOrder();
   $("submitBtn").disabled=true; $("submitBtn").textContent='送出中…';
   try{
-    const {data,error}=await sb.rpc('submit_dining_order_after_seating',{
-      p_guest_name:order.guest_name,p_server:order.server,p_join_token:state.joinToken,p_host:order.host,p_services:order.services,p_items:order.items,p_note:order.note
+    const {data,error}=await sb.rpc('submit_member_dining_order',{
+      p_join_token:state.joinToken,p_member_token:state.memberToken,p_host:order.host,p_services:order.services,p_items:order.items,p_note:order.note
     });
     if(error) throw error;
     rememberVisit(data,order);
+    state.memberOrderCount=Number(data.member_order_count||state.memberOrderCount||0);
     if(state.joinSession){ state.joinSession.identified_count=data.identified_count; state.joinSession.pending_count=data.pending_count; state.joinSession.status=data.session_status; state.joinSession.can_order=data.session_status==='seated'; }
     await refreshVisitCard(true);
     toast(`訂單 ${esc(data.order_code)} 已送出。`,data,false); startSubmitCooldown();
@@ -1163,6 +1240,7 @@ $("submitBtn").addEventListener('click', async ()=>{
 });
 
 $("identitySwitch").addEventListener('click',releaseVisitIdentity);
+$("addGuestBtn").addEventListener('click',addGuestSlot);
 
 // init
 renderMembers();

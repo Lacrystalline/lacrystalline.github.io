@@ -260,6 +260,16 @@
 .visit-card .vc-btn.gold,.visit-card .vc-btn.primary{color:#f7f2e8}
 .visit-card .vc-btn[aria-disabled="true"]{opacity:.42;pointer-events:none}
 .visit-card #vcOrder,.visit-card #vcReceipt{font-size:1.56rem;letter-spacing:.06em}
+.visit-card #vcOrder.repeat-order-cta{
+  flex:1.45 1 0;
+  border:2px solid rgba(255,232,174,.92);
+  background:linear-gradient(135deg,rgba(104,76,25,.92),rgba(35,79,94,.92));
+  color:#fff4d2;
+  font-weight:800;
+  box-shadow:0 0 0 2px rgba(255,227,154,.15),0 0 24px rgba(255,215,120,.34),inset 0 0 18px rgba(255,244,210,.10);
+  transform:scale(1.035);
+}
+.visit-card #vcOrder.repeat-order-cta:hover{transform:translateY(-1px) scale(1.045)}
 .visit-card.receipt-ready .vc-ticket{color:#fff0c9}
 .visit-card .vc-checkout-signature{
   position:absolute;
@@ -364,6 +374,7 @@
   .visit-card .vc-actions{gap:6px;padding-top:1%}
   .visit-card .vc-btn{min-width:0;flex:1 1 0;padding:7px 6px;font-size:.56rem;letter-spacing:.03em}
   .visit-card #vcOrder,.visit-card #vcReceipt{font-size:1.12rem;letter-spacing:.04em}
+  .visit-card #vcOrder.repeat-order-cta{flex:1.55 1 0;font-size:1.18rem;box-shadow:0 0 0 2px rgba(255,227,154,.16),0 0 18px rgba(255,215,120,.32),inset 0 0 14px rgba(255,244,210,.10)}
   .receipt.visit-card-surface{width:96vw!important;height:auto!important;min-height:720px;background-image:url("crystal_receipt_base_md.webp")!important}
   .receipt.visit-card-surface.receipt-len-md{min-height:820px}
   .receipt.visit-card-surface.receipt-len-lg{min-height:1080px}
