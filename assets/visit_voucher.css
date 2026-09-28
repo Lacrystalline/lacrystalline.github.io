@@ -247,9 +247,11 @@
   justify-content:center;
   flex-wrap:nowrap;
   padding:1.6% 3% 0;
+  align-items:stretch;
 }
 .visit-card .vc-btn{
-  min-width:168px;
+  min-width:0;
+  flex:1 1 0;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -270,18 +272,22 @@
 .visit-card .vc-btn:hover{transform:translateY(-1px);background:rgba(24,58,79,.58);border-color:rgba(255,255,255,.80)}
 .visit-card .vc-btn.gold,.visit-card .vc-btn.primary{color:#f7f2e8}
 .visit-card .vc-btn[aria-disabled="true"]{opacity:.42;pointer-events:none}
-.visit-card #vcOrder,.visit-card #vcReceipt{font-size:1.38rem;letter-spacing:.05em}
-.visit-card #vcShare{font-size:1.06rem;letter-spacing:.05em}
+.visit-card #vcOrder,.visit-card #vcReceipt{font-size:1.26rem;letter-spacing:.05em}
+.visit-card #vcShare{font-size:1.12rem;letter-spacing:.05em}
+.visit-card #vcOrder,.visit-card #vcShare{color:#ead6ac}
 .visit-card #vcOrder.repeat-order-cta{
-  flex:1.45 1 0;
-  border:2px solid rgba(184,231,247,.92);
-  background:linear-gradient(135deg,rgba(22,71,103,.96),rgba(28,91,121,.94));
-  color:#eef9ff;
-  font-weight:800;
-  box-shadow:0 0 0 2px rgba(165,223,243,.14),0 0 24px rgba(107,193,228,.28),inset 0 0 18px rgba(223,246,255,.08);
-  transform:scale(1.035);
+  flex:1 1 0;
+  border:1px solid rgba(245,241,232,.58);
+  background:rgba(18,45,64,.42);
+  color:#ead6ac;
+  font-weight:700;
+  box-shadow:inset 0 0 12px rgba(255,255,255,.025);
+  transform:none;
 }
-.visit-card #vcOrder.repeat-order-cta:hover{transform:translateY(-1px) scale(1.045);background:linear-gradient(135deg,rgba(26,84,120,.98),rgba(31,104,138,.96))}
+.visit-card #vcOrder.repeat-order-cta:hover{
+  transform:translateY(-1px);
+  background:rgba(24,58,79,.58);
+}
 .visit-card.receipt-ready .vc-ticket{color:#fff0c9}
 .visit-card .vc-checkout-signature{
   position:absolute;
@@ -385,9 +391,10 @@
   .visit-card .vc-sub{font-size:.66rem;line-height:1.56;padding-bottom:.7%}
   .visit-card .vc-actions{gap:6px;padding-top:1%}
   .visit-card .vc-btn{min-width:0;flex:1 1 0;padding:7px 6px;font-size:.66rem;letter-spacing:.03em}
-  .visit-card #vcOrder,.visit-card #vcReceipt{font-size:1.06rem;letter-spacing:.04em}
-  .visit-card #vcShare{font-size:.78rem;letter-spacing:.03em}
-  .visit-card #vcOrder.repeat-order-cta{flex:1.55 1 0;font-size:1.10rem;box-shadow:0 0 0 2px rgba(165,223,243,.14),0 0 18px rgba(107,193,228,.28),inset 0 0 14px rgba(223,246,255,.08)}
+  .visit-card #vcOrder,.visit-card #vcReceipt{font-size:.96rem;letter-spacing:.04em}
+  .visit-card #vcShare{font-size:.82rem;letter-spacing:.03em}
+  .visit-card #vcOrder,.visit-card #vcShare{color:#ead6ac}
+  .visit-card #vcOrder.repeat-order-cta{flex:1 1 0;font-size:.96rem;box-shadow:inset 0 0 12px rgba(255,255,255,.025)}
   .receipt.visit-card-surface{width:96vw!important;height:auto!important;min-height:720px;background-image:url("crystal_receipt_base_md.webp")!important}
   .receipt.visit-card-surface.receipt-len-md{min-height:820px}
   .receipt.visit-card-surface.receipt-len-lg{min-height:1080px}
