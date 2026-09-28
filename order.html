@@ -984,7 +984,7 @@ async function refreshVisitCard(forceOpen=false){
     else if(data.status==='waiting'){sub.textContent=`來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size} · 請等待夥伴帶位。`;}
     else if(data.status==='seated'){
       const hasOrders=memberData?Number(memberData.member_order_count||0)>0:Number(data.order_count||0)>0;
-      sub.textContent=`已完成帶位 · ${hasOrders?'可繼續追加點餐':'可以開始點餐'}${data.pending_count?` · 尚有 ${data.pending_count} 位同行待加入`:''}。`;
+      sub.textContent=`已完成帶位，${hasOrders?'可繼續追加點餐':'可以開始點餐'}${data.pending_count?`；尚有 ${data.pending_count} 位同行待加入`:''}。`;
     }
     else if(data.status==='cancelled'){sub.textContent='本次來店已取消。';}
     else{sub.textContent=`來店 ${data.party_size} 人 · ${visitStatusLabel(data.status)}。`;}
@@ -1008,7 +1008,7 @@ async function refreshVisitCard(forceOpen=false){
     };
     share.style.display=(!!v.member_token&&['waiting','seated'].includes(String(data.status)))?'inline-flex':'none';
     share.onclick=()=>{const url=visitOrderUrl(v.join_token,false);navigator.clipboard?.writeText(url).then(()=>{share.textContent='同行連結已複製 ✓';setTimeout(()=>share.textContent='分享同行',1800)}).catch(()=>{});};
-    receipt.href=visitReceiptUrl(v,data); receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true'); receipt.textContent=data.receipt_available?'查看紀念收據':'收據（結帳後）';
+    receipt.href=visitReceiptUrl(v,data); receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true'); receipt.textContent=data.receipt_available?'查看收據':'收據';
     document.getElementById('vcCollapse').onclick=collapseVisitCard;
     document.getElementById('vcDismiss').onclick=dismissVisitCard;
     if(launcher)launcher.onclick=openVisitCard;
