@@ -485,3 +485,61 @@
   }
 }
 
+/* === 2026-09-29 visit-card crystal texture enhancement === */
+.visit-card .vc-actions .vc-btn,
+.visit-card #vcOrder.repeat-order-cta{
+  background:
+    linear-gradient(135deg,
+      rgba(255,255,255,.12) 0%,
+      rgba(255,255,255,0) 22%,
+      rgba(139,204,237,.10) 34%,
+      rgba(255,255,255,.06) 45%,
+      rgba(255,255,255,0) 58%),
+    linear-gradient(28deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,.09) 32%,
+      rgba(255,255,255,0) 40%,
+      rgba(150,215,245,.10) 52%,
+      rgba(255,255,255,0) 60%,
+      rgba(255,255,255,.05) 74%,
+      rgba(255,255,255,0) 80%),
+    linear-gradient(160deg,
+      rgba(113,171,214,.14) 0%,
+      rgba(113,171,214,0) 26%,
+      rgba(255,255,255,.05) 46%,
+      rgba(255,255,255,0) 62%,
+      rgba(177,224,247,.08) 78%,
+      rgba(177,224,247,0) 100%),
+    radial-gradient(circle at 24% 28%, rgba(255,255,255,.16) 0 1px, transparent 2px),
+    radial-gradient(circle at 76% 68%, rgba(255,255,255,.10) 0 1px, transparent 2px),
+    rgba(18,45,64,.42) !important;
+  text-shadow:0 1px 10px rgba(7,26,41,.24) !important;
+}
+.visit-card .vc-actions .vc-btn:hover,
+.visit-card #vcOrder.repeat-order-cta:hover{
+  background:
+    linear-gradient(135deg,
+      rgba(255,255,255,.14) 0%,
+      rgba(255,255,255,0) 22%,
+      rgba(150,214,245,.12) 34%,
+      rgba(255,255,255,.08) 45%,
+      rgba(255,255,255,0) 58%),
+    linear-gradient(28deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,.10) 32%,
+      rgba(255,255,255,0) 40%,
+      rgba(167,227,250,.12) 52%,
+      rgba(255,255,255,0) 60%,
+      rgba(255,255,255,.06) 74%,
+      rgba(255,255,255,0) 80%),
+    linear-gradient(160deg,
+      rgba(125,184,224,.15) 0%,
+      rgba(125,184,224,0) 26%,
+      rgba(255,255,255,.06) 46%,
+      rgba(255,255,255,0) 62%,
+      rgba(190,232,251,.10) 78%,
+      rgba(190,232,251,0) 100%),
+    radial-gradient(circle at 24% 28%, rgba(255,255,255,.17) 0 1px, transparent 2px),
+    radial-gradient(circle at 76% 68%, rgba(255,255,255,.11) 0 1px, transparent 2px),
+    rgba(24,58,79,.58) !important;
+}
