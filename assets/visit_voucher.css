@@ -418,3 +418,70 @@
   .receipt.visit-card-surface .receipt-head{margin-top:6.5%!important}
   .receipt.visit-card-surface .receipt-body{padding-bottom:8%!important}
 }
+
+/* === 2026-09-29 visit-card bottom action hard fix === */
+.visit-card .vc-actions{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:14px !important;
+  width:100% !important;
+  align-items:stretch !important;
+}
+.visit-card .vc-actions .vc-btn{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:none !important;
+  flex:none !important;
+  box-sizing:border-box !important;
+  padding:10px 12px !important;
+  min-height:52px !important;
+  border:1px solid rgba(245,241,232,.58) !important;
+  background:rgba(18,45,64,.42) !important;
+  box-shadow:inset 0 0 12px rgba(255,255,255,.025) !important;
+  transform:none !important;
+  font-family:var(--tc,"Noto Serif TC",serif) !important;
+  font-size:1.08rem !important;
+  font-weight:600 !important;
+  line-height:1.2 !important;
+  letter-spacing:.05em !important;
+}
+.visit-card .vc-actions .vc-btn:hover{
+  transform:translateY(-1px) !important;
+  background:rgba(24,58,79,.58) !important;
+  border-color:rgba(255,255,255,.80) !important;
+  box-shadow:inset 0 0 12px rgba(255,255,255,.035) !important;
+}
+.visit-card #vcOrder.repeat-order-cta{
+  flex:none !important;
+  width:100% !important;
+  border:1px solid rgba(245,241,232,.58) !important;
+  background:rgba(18,45,64,.42) !important;
+  box-shadow:inset 0 0 12px rgba(255,255,255,.025) !important;
+  transform:none !important;
+}
+.visit-card #vcOrder.repeat-order-cta:hover{
+  transform:translateY(-1px) !important;
+  background:rgba(24,58,79,.58) !important;
+  border-color:rgba(255,255,255,.80) !important;
+}
+.visit-card #vcOrder,
+.visit-card #vcShare{
+  color:#ead6ac !important;
+}
+.visit-card #vcReceipt{
+  color:#f7f3ea !important;
+}
+
+@media (max-width:720px){
+  .visit-card .vc-actions{
+    gap:6px !important;
+  }
+  .visit-card .vc-actions .vc-btn{
+    padding:7px 5px !important;
+    min-height:40px !important;
+    font-size:.78rem !important;
+    line-height:1.15 !important;
+    letter-spacing:.025em !important;
+  }
+}
+
