@@ -484,62 +484,107 @@
     letter-spacing:.025em !important;
   }
 }
-
 /* === 2026-09-29 visit-card crystal texture enhancement === */
 .visit-card .vc-actions .vc-btn,
 .visit-card #vcOrder.repeat-order-cta{
+  position:relative !important;
+  overflow:hidden !important;
+  isolation:isolate !important;
+  border-color:rgba(214,239,249,.72) !important;
   background:
-    linear-gradient(135deg,
-      rgba(255,255,255,.12) 0%,
-      rgba(255,255,255,0) 22%,
-      rgba(139,204,237,.10) 34%,
-      rgba(255,255,255,.06) 45%,
-      rgba(255,255,255,0) 58%),
-    linear-gradient(28deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,.09) 32%,
-      rgba(255,255,255,0) 40%,
-      rgba(150,215,245,.10) 52%,
-      rgba(255,255,255,0) 60%,
-      rgba(255,255,255,.05) 74%,
-      rgba(255,255,255,0) 80%),
-    linear-gradient(160deg,
-      rgba(113,171,214,.14) 0%,
-      rgba(113,171,214,0) 26%,
-      rgba(255,255,255,.05) 46%,
-      rgba(255,255,255,0) 62%,
-      rgba(177,224,247,.08) 78%,
-      rgba(177,224,247,0) 100%),
-    radial-gradient(circle at 24% 28%, rgba(255,255,255,.16) 0 1px, transparent 2px),
-    radial-gradient(circle at 76% 68%, rgba(255,255,255,.10) 0 1px, transparent 2px),
-    rgba(18,45,64,.42) !important;
-  text-shadow:0 1px 10px rgba(7,26,41,.24) !important;
+    linear-gradient(128deg,
+      rgba(218,246,255,.20) 0 1.2%,
+      transparent 1.4% 18%,
+      rgba(151,216,244,.18) 18.2% 19.2%,
+      transparent 19.4% 42%,
+      rgba(238,251,255,.16) 42.2% 43%,
+      transparent 43.2% 71%,
+      rgba(132,198,232,.15) 71.2% 72%,
+      transparent 72.2% 100%),
+    linear-gradient(34deg,
+      transparent 0 23%,
+      rgba(239,252,255,.17) 23.2% 24.1%,
+      transparent 24.3% 49%,
+      rgba(130,196,230,.15) 49.2% 50.1%,
+      transparent 50.3% 76%,
+      rgba(233,249,255,.13) 76.2% 77%,
+      transparent 77.2% 100%),
+    linear-gradient(155deg,
+      rgba(89,155,198,.18) 0 26%,
+      rgba(20,62,88,.05) 26.2% 48%,
+      rgba(172,226,247,.14) 48.2% 67%,
+      rgba(15,50,75,.08) 67.2% 100%),
+    rgba(18,45,64,.46) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(236,250,255,.24),
+    inset 0 -1px 0 rgba(83,155,195,.24),
+    inset 0 0 18px rgba(142,214,241,.08) !important;
+  text-shadow:0 1px 10px rgba(7,26,41,.28) !important;
+}
+.visit-card .vc-actions .vc-btn::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    conic-gradient(from 18deg at 20% 35%,
+      transparent 0 18deg,
+      rgba(232,250,255,.18) 19deg 21deg,
+      transparent 22deg 84deg,
+      rgba(120,194,230,.13) 85deg 87deg,
+      transparent 88deg 360deg),
+    conic-gradient(from 204deg at 78% 68%,
+      transparent 0 22deg,
+      rgba(232,250,255,.15) 23deg 25deg,
+      transparent 26deg 96deg,
+      rgba(120,194,230,.12) 97deg 99deg,
+      transparent 100deg 360deg);
+  opacity:.95;
+}
+.visit-card .vc-actions .vc-btn::after{
+  content:"";
+  position:absolute;
+  inset:1px;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(255,255,255,.24) 0 1px, transparent 2px),
+    radial-gradient(circle at 64% 30%, rgba(255,255,255,.18) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 72%, rgba(255,255,255,.16) 0 1px, transparent 2px);
+  opacity:.8;
 }
 .visit-card .vc-actions .vc-btn:hover,
 .visit-card #vcOrder.repeat-order-cta:hover{
+  border-color:rgba(230,248,255,.90) !important;
   background:
-    linear-gradient(135deg,
-      rgba(255,255,255,.14) 0%,
-      rgba(255,255,255,0) 22%,
-      rgba(150,214,245,.12) 34%,
-      rgba(255,255,255,.08) 45%,
-      rgba(255,255,255,0) 58%),
-    linear-gradient(28deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,.10) 32%,
-      rgba(255,255,255,0) 40%,
-      rgba(167,227,250,.12) 52%,
-      rgba(255,255,255,0) 60%,
-      rgba(255,255,255,.06) 74%,
-      rgba(255,255,255,0) 80%),
-    linear-gradient(160deg,
-      rgba(125,184,224,.15) 0%,
-      rgba(125,184,224,0) 26%,
-      rgba(255,255,255,.06) 46%,
-      rgba(255,255,255,0) 62%,
-      rgba(190,232,251,.10) 78%,
-      rgba(190,232,251,0) 100%),
-    radial-gradient(circle at 24% 28%, rgba(255,255,255,.17) 0 1px, transparent 2px),
-    radial-gradient(circle at 76% 68%, rgba(255,255,255,.11) 0 1px, transparent 2px),
+    linear-gradient(128deg,
+      rgba(226,249,255,.25) 0 1.2%,
+      transparent 1.4% 18%,
+      rgba(164,226,250,.22) 18.2% 19.2%,
+      transparent 19.4% 42%,
+      rgba(245,253,255,.20) 42.2% 43%,
+      transparent 43.2% 71%,
+      rgba(148,211,241,.19) 71.2% 72%,
+      transparent 72.2% 100%),
+    linear-gradient(34deg,
+      transparent 0 23%,
+      rgba(247,254,255,.21) 23.2% 24.1%,
+      transparent 24.3% 49%,
+      rgba(148,211,241,.18) 49.2% 50.1%,
+      transparent 50.3% 76%,
+      rgba(241,252,255,.17) 76.2% 77%,
+      transparent 77.2% 100%),
+    linear-gradient(155deg,
+      rgba(98,171,216,.22) 0 26%,
+      rgba(22,70,99,.08) 26.2% 48%,
+      rgba(188,235,252,.18) 48.2% 67%,
+      rgba(18,59,87,.10) 67.2% 100%),
     rgba(24,58,79,.58) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(246,253,255,.32),
+    inset 0 -1px 0 rgba(99,176,216,.30),
+    inset 0 0 22px rgba(155,222,246,.12),
+    0 0 12px rgba(104,184,220,.12) !important;
 }
+
