@@ -630,10 +630,10 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/visit_voucher.css">
+<link rel="stylesheet" href="assets/visit_voucher.css?v=20260930-v43">
   <link rel="stylesheet" href="assets/radio.css">
 </head>
-<body>
+<body data-build="TIERFIX-20260930-v4_3">
 <div class="crystal-veil" aria-hidden="true"></div>
 <nav class="nav" id="nav">
   <a class="nav-logo" href="#top"><img src="assets/emblem_nav.png" alt="水晶庭" class="logo-img-nav"><span class="lt">La Crystalline<small>水晶庭</small></span></a>
@@ -669,6 +669,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <div class="vc-main">
         <div class="vc-ey">CRYSTAL TAG</div>
         <div class="vc-ticket-row">
+          <div class="vc-vip-mark" id="vcVipMark" aria-hidden="true">VIP</div>
           <div class="vc-ticket" id="vcTicket">—</div>
           <img class="vc-checkout-signature" src="assets/northern_wind_signature_receipt_m15.png" alt="" aria-hidden="true">
           <div class="vc-status" id="vcStatus">—</div>
@@ -1059,6 +1060,43 @@ function visitStatusLabel(s){return s==='waiting'?'等待帶位':s==='seated'?'�
 function visitDate(v){if(!v)return '';try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v))}catch(e){return ''}}
 function visitOrderUrl(token,continueMode=false){const u=new URL('order.html',location.href);if(token)u.searchParams.set('join',token);if(continueMode)u.searchParams.set('continue','1');return u.toString()}
 function visitReceiptUrl(v,data){if(data?.receipt_available&&data?.receipt_token){const u=new URL('receipt.html',location.href);u.searchParams.set('r',data.receipt_token);return u.toString()}const u=new URL('receipt.html',location.href);if(v?.guest_name)u.searchParams.set('guest',v.guest_name);if(data?.ticket_code||v?.ticket_code)u.searchParams.set('ticket',data?.ticket_code||v.ticket_code);return u.toString()}
+// 會員等級（與 order.html 同一套判定）：首頁的本次來店卡也要依等級換底板與文字。
+function resolveMembershipTier(md){
+  if(!md) return 'standard';
+  const flag=md.is_vip===true||String(md.is_vip??'').trim().toLowerCase()==='true';
+  const raw=String(md.membership_tier??'').trim().toLowerCase();
+  if(flag||raw==='vip') return 'vip';
+  if(raw==='premier') return 'premier';
+  return 'standard';
+}
+function applyVoucherTier(tier){
+  const mobile=window.matchMedia('(max-width:720px)').matches;
+  const mark=document.getElementById('vcVipMark');
+  if(mark){
+    const on=tier==='vip'||tier==='premier';
+    mark.classList.toggle('show',on);
+    mark.classList.toggle('premier',tier==='premier');
+    mark.textContent=tier==='premier'?'Premier':'VIP';
+    mark.setAttribute('data-tier',tier);
+    mark.style.setProperty('display',on?'block':'none','important');
+    mark.style.setProperty('position','absolute','important');
+    mark.style.setProperty('left',mobile?'4%':'7%','important');
+    mark.style.setProperty('top',mobile?'3%':'5%','important');
+    mark.style.setProperty('z-index','20','important');
+    mark.style.setProperty('color','#e7c77f','important');
+    mark.style.setProperty('font-family','"Great Vibes","Cormorant Garamond",serif','important');
+    mark.style.setProperty('font-size',tier==='premier'?(mobile?'1.08rem':'1.72rem'):(mobile?'1.40rem':'2rem'),'important');
+  }
+  const surface=document.querySelector('#visitCard .visit-card-surface');
+  if(surface){
+    surface.classList.toggle('vip-card-surface',tier==='vip');
+    surface.setAttribute('data-membership-tier',tier);
+    surface.style.setProperty('background-image',tier==='vip'?'url("assets/crystal_voucher_vip_lapis_v3.webp")':'url("assets/crystal_voucher_base.webp")','important');
+    surface.style.setProperty('background-size','100% 100%','important');
+    surface.style.setProperty('background-position','center','important');
+    surface.style.setProperty('background-repeat','no-repeat','important');
+  }
+}
 async function refreshVisitCard(forceOpen=false){
   const card=document.getElementById('visitCard'),launcher=document.getElementById('visitLauncher'); if(!card||!window.sb)return;
   const v=readVisit(); if(!v?.join_token){card.classList.remove('show');launcher?.classList.remove('show');return;}
@@ -1070,6 +1108,9 @@ async function refreshVisitCard(forceOpen=false){
       const {data:md,error:me}=await sb.rpc('get_dining_member_public',{p_join_token:v.join_token,p_member_token:v.member_token});
       if(!me&&md){memberData=md;v.guest_name=md.guest_name||v.guest_name;v.server=md.server||v.server;}
     }
+    const tier=resolveMembershipTier(memberData);
+    applyVoucherTier(tier);
+    const vipCardText=String(memberData?.vip_card_text||'').trim();
     if(!data){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
     if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
     v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; writeVisit(v);
@@ -1089,7 +1130,7 @@ async function refreshVisitCard(forceOpen=false){
         stateLine.style.display='none';
       }
     }
-    const phrase=document.getElementById('vcPhrase'); if(phrase)phrase.textContent=data.visit_phrase||'願今夜的微光，留在你的記憶裡。';
+    const phrase=document.getElementById('vcPhrase'); if(phrase)phrase.textContent=(tier==='vip'&&vipCardText)?vipCardText:(data.visit_phrase||'願今夜的微光，留在你的記憶裡。');
     const owner=document.getElementById('vcOwner'); if(owner)owner.textContent=(v.guest_name&&v.server)?`${v.guest_name} · ${v.server}`:(v.guest_name||'本次旅者');
     const sub=document.getElementById('vcSub');
     if(data.receipt_available){sub.textContent=`今夜已結帳 · 紀念收據保留至 ${visitDate(data.receipt_expires_at)}。`;}

@@ -254,10 +254,10 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/visit_voucher.css?v=20260929-1534">
+<link rel="stylesheet" href="assets/visit_voucher.css?v=20260930-v43">
   <link rel="stylesheet" href="assets/radio.css">
 </head>
-<body data-build="VIPFIX-MANUALCLEAR-20260930-0221">
+<body data-build="TIERFIX-20260930-v4_3">
 <div class="crystal-veil" aria-hidden="true"></div>
 
 <nav class="nav">
@@ -540,9 +540,7 @@ async function loadJoinSession(){
         saved={...saved,guest_name:member.guest_name,server:member.server,member_id:member.member_id,member_token:member.member_token};
         state.memberToken=String(member.member_token);
         state.memberOrderCount=Number(member.member_order_count||0);
-        state.isVip=member.is_vip===true;
-        state.membershipTier=state.isVip?'vip':String(member.membership_tier||'standard');
-        state.vipCardText=String(member.vip_card_text||'').trim();
+        applyMemberTier(member);
         syncVipDiningDisplay();
         writeVisit(saved);
       }else if(saved?.guest_name && saved?.server){
@@ -823,8 +821,33 @@ function calcTotal(){
   }
   return t;
 }
+// 會員等級判定：is_vip 或 membership_tier 任一成立即可；大小寫、前後空白一律正規化。
+// 舊版只看 is_vip===true，後端若只回 membership_tier='vip'（或 'VIP'）就會被當成一般客人。
+function resolveMembershipTier(md){
+  if(!md) return 'standard';
+  const flag=md.is_vip===true||String(md.is_vip??'').trim().toLowerCase()==='true';
+  const raw=String(md.membership_tier??'').trim().toLowerCase();
+  if(flag||raw==='vip') return 'vip';
+  if(raw==='premier') return 'premier';
+  return 'standard';
+}
+function applyMemberTier(md){
+  state.membershipTier=resolveMembershipTier(md);
+  state.isVip=state.membershipTier==='vip';
+  state.vipCardText=String(md?.vip_card_text||'').trim();
+  reportTierDebug(md);
+}
+// 診斷：網址加 ?tierdebug=1 會在畫面左下角顯示後端實際回傳的等級欄位。
+function reportTierDebug(md){
+  const raw={is_vip:md?.is_vip,membership_tier:md?.membership_tier,vip_card_text:md?.vip_card_text?'(有)':'(無)',resolved:state.membershipTier};
+  console.info('[La Crystalline] get_dining_member_public tier fields:',raw);
+  if(new URLSearchParams(location.search).get('tierdebug')!=='1') return;
+  let box=document.getElementById('tierDebug');
+  if(!box){box=document.createElement('pre');box.id='tierDebug';box.style.cssText='position:fixed;left:8px;bottom:8px;z-index:999;margin:0;padding:8px 10px;font:12px/1.4 monospace;color:#0f0;background:rgba(0,0,0,.85);border:1px solid #0f0;border-radius:4px;max-width:92vw;white-space:pre-wrap';document.body.appendChild(box);}
+  box.textContent='TIER DEBUG · '+document.body.dataset.build+'\n'+JSON.stringify(raw,null,1);
+}
 function syncVipDiningDisplay(){
-  const tier=state.isVip?'vip':(state.membershipTier==='premier'?'premier':'standard');
+  const tier=state.membershipTier==='vip'||state.membershipTier==='premier'?state.membershipTier:'standard';
   const vipNote=$("vipMenuNote");
   if(vipNote) vipNote.classList.toggle('show',tier==='vip');
   const premierNote=$("premierMenuNote");
@@ -871,7 +894,7 @@ function syncVipDiningDisplay(){
     visitSurface.style.setProperty('background-repeat','no-repeat','important');
   }
 
-  console.info('[La Crystalline] membership tier applied:',tier,'VIPFIX-20260929-1534');
+  console.info('[La Crystalline] membership tier applied:',tier,'TIERFIX-20260930-v4_3');
 
   renderMenu("drinks",DRINKS);
   renderMenu("bites",BITES);
@@ -889,9 +912,7 @@ async function hydrateMemberPrivileges(memberToken=state.memberToken){
   }
   state.memberToken=String(member.member_token||memberToken);
   state.memberOrderCount=Number(member.member_order_count||0);
-  state.isVip=member.is_vip===true;
-  state.membershipTier=state.isVip?'vip':String(member.membership_tier||'standard');
-  state.vipCardText=String(member.vip_card_text||'').trim();
+  applyMemberTier(member);
   syncVipDiningDisplay();
   return member;
 }
@@ -1141,12 +1162,7 @@ async function refreshVisitCard(forceOpen=false){
       const {data:md,error:me}=await sb.rpc('get_dining_member_public',{p_join_token:v.join_token,p_member_token:v.member_token});
       if(!me&&md){
         memberData=md;state.memberOrderCount=Number(md.member_order_count||0);v.guest_name=md.guest_name||v.guest_name;v.server=md.server||v.server;
-        const nextVip=md.is_vip===true;
-        const nextTier=nextVip?'vip':String(md.membership_tier||'standard');
-        const nextVipCardText=String(md.vip_card_text||'').trim();
-        state.isVip=nextVip;
-        state.membershipTier=nextTier;
-        state.vipCardText=nextVipCardText;
+        applyMemberTier(md);
         syncVipDiningDisplay();
       }
     }
