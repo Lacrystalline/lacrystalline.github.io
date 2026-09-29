@@ -239,10 +239,10 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/visit_voucher.css">
+<link rel="stylesheet" href="assets/visit_voucher.css?v=20260929-1534">
   <link rel="stylesheet" href="assets/radio.css">
 </head>
-<body>
+<body data-build="VIPFIX-20260929-1534">
 <div class="crystal-veil" aria-hidden="true"></div>
 
 <nav class="nav">
@@ -822,10 +822,40 @@ function syncVipDiningDisplay(){
     tierMark.classList.toggle('premier',tier==='premier');
     tierMark.textContent=tier==='premier'?'Premier':'VIP';
     tierMark.setAttribute('aria-label',tier==='premier'?'Premier':'VIP');
+    tierMark.setAttribute('data-tier',tier);
+
+    // Critical tier marker styles are applied inline as a cache-safe fallback.
+    tierMark.style.setProperty('display',tier==='vip'||tier==='premier'?'block':'none','important');
+    tierMark.style.setProperty('position','absolute','important');
+    tierMark.style.setProperty('left',window.matchMedia('(max-width:720px)').matches?'4%':'7%','important');
+    tierMark.style.setProperty('top',window.matchMedia('(max-width:720px)').matches?'3%':'5%','important');
+    tierMark.style.setProperty('z-index','20','important');
+    tierMark.style.setProperty('color','#e7c77f','important');
+    tierMark.style.setProperty('font-family','"Great Vibes","Cormorant Garamond",serif','important');
+    tierMark.style.setProperty('font-size',
+      tier==='premier'
+        ? (window.matchMedia('(max-width:720px)').matches?'1.08rem':'1.72rem')
+        : (window.matchMedia('(max-width:720px)').matches?'1.40rem':'2rem'),
+      'important'
+    );
   }
 
   const visitSurface=document.querySelector('#visitCard .visit-card-surface');
-  if(visitSurface) visitSurface.classList.toggle('vip-card-surface',tier==='vip');
+  if(visitSurface){
+    visitSurface.classList.toggle('vip-card-surface',tier==='vip');
+    visitSurface.setAttribute('data-membership-tier',tier);
+
+    // Do not rely on cached CSS/class alone. Force the actual card asset here.
+    const bg=tier==='vip'
+      ? 'url("assets/crystal_voucher_vip_lapis_v3.webp")'
+      : 'url("assets/crystal_voucher_base.webp")';
+    visitSurface.style.setProperty('background-image',bg,'important');
+    visitSurface.style.setProperty('background-size','100% 100%','important');
+    visitSurface.style.setProperty('background-position','center','important');
+    visitSurface.style.setProperty('background-repeat','no-repeat','important');
+  }
+
+  console.info('[La Crystalline] membership tier applied:',tier,'VIPFIX-20260929-1534');
 
   renderMenu("drinks",DRINKS);
   renderMenu("bites",BITES);
