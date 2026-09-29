@@ -236,6 +236,11 @@
     letter-spacing:.045em;
   }
 }
+.visit-card .vc-phrase.vip-personal::before,
+.visit-card .vc-phrase.vip-personal::after{
+  content:none;
+  margin:0;
+}
 
 .visit-card .vc-phrase::before,.visit-card .vc-phrase::after{
   content:"✦";
@@ -689,10 +694,10 @@
 .visit-card .vc-vip-mark{
   display:none;
   position:absolute;
-  left:5.2%;
+  left:8.5%;
   top:-4%;
   z-index:8;
-  color:#e7c77f;
+  color:#e7d3aa;
   font-family:"Great Vibes","Cormorant Garamond",serif;
   font-size:3rem;
   font-weight:400;
@@ -701,7 +706,7 @@
   transform:rotate(-7deg);
   text-shadow:
     0 1px 0 rgba(255,245,214,.24),
-    0 0 9px rgba(218,177,94,.22),
+    0 0 9px rgba(221,196,145,.20),
     0 2px 8px rgba(6,20,32,.45);
   pointer-events:none;
   user-select:none;
@@ -709,7 +714,7 @@
 .visit-card .vc-vip-mark.show{display:block}
 @media (max-width:720px){
   .visit-card .vc-vip-mark{
-    left:3.2%;
+    left:6%;
     top:-2%;
     font-size:2.025rem;
     letter-spacing:.035em;

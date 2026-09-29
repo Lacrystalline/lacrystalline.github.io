@@ -254,10 +254,10 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/visit_voucher.css?v=20260930-v44">
+<link rel="stylesheet" href="assets/visit_voucher.css?v=20260930-v45">
   <link rel="stylesheet" href="assets/radio.css">
 </head>
-<body data-build="VIPVISUAL-20260930-v4_4">
+<body data-build="VIPVISUAL-20260930-v4_5">
 <div class="crystal-veil" aria-hidden="true"></div>
 
 <nav class="nav">
@@ -882,10 +882,10 @@ function syncVipDiningDisplay(){
     tierMark.style.setProperty('display',tier==='vip'||tier==='premier'?'block':'none','important');
     tierMark.style.setProperty('position','absolute','important');
     const tierMobile=window.matchMedia('(max-width:720px)').matches;
-    tierMark.style.setProperty('left',tier==='vip'?(tierMobile?'3.2%':'5.2%'):(tierMobile?'4%':'7%'),'important');
+    tierMark.style.setProperty('left',tier==='vip'?(tierMobile?'6%':'8.5%'):(tierMobile?'4%':'7%'),'important');
     tierMark.style.setProperty('top',tier==='vip'?(tierMobile?'-2%':'-4%'):(tierMobile?'3%':'5%'),'important');
     tierMark.style.setProperty('z-index','20','important');
-    tierMark.style.setProperty('color','#e7c77f','important');
+    tierMark.style.setProperty('color','#e7d3aa','important');
     tierMark.style.setProperty('font-family','"Great Vibes","Cormorant Garamond",serif','important');
     tierMark.style.setProperty('font-size',
       tier==='premier'
@@ -910,7 +910,7 @@ function syncVipDiningDisplay(){
     visitSurface.style.setProperty('background-repeat','no-repeat','important');
   }
 
-  console.info('[La Crystalline] membership tier applied:',tier,'VIPVISUAL-20260930-v4_4');
+  console.info('[La Crystalline] membership tier applied:',tier,'VIPVISUAL-20260930-v4_5');
 
   renderMenu("drinks",DRINKS);
   renderMenu("bites",BITES);
