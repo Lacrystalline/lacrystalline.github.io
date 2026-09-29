@@ -706,7 +706,7 @@
 /* === VIP lapis voucher surface === */
 /* Same voucher geometry; only VIP members switch to the accepted lapis/gold base asset. */
 .visit-card .visit-card-surface.vip-card-surface{
-  background-image:url("crystal_voucher_vip_lapis.webp")!important;
+  background-image:url("crystal_voucher_vip_lapis_v3.webp")!important;
   box-shadow:
     0 24px 72px rgba(0,0,0,.50),
     0 0 36px rgba(75,128,209,.16),
