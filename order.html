@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Italianno&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#0a0e14;--night:#111a2b;--deep:#0d1420;
@@ -253,11 +253,11 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   .visit-launcher-clear{top:auto;right:10px;bottom:12px;min-height:42px;padding:8px 10px}
 }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/visit_voucher.css?v=20260930-v45">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Italianno&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/visit_voucher.css?v=20260930-v46">
   <link rel="stylesheet" href="assets/radio.css">
 </head>
-<body data-build="VIPVISUAL-20260930-v4_5">
+<body data-build="VIPVISUAL-20260930-v4_6">
 <div class="crystal-veil" aria-hidden="true"></div>
 
 <nav class="nav">
@@ -874,7 +874,7 @@ function syncVipDiningDisplay(){
   if(tierMark){
     tierMark.classList.toggle('show',tier==='vip'||tier==='premier');
     tierMark.classList.toggle('premier',tier==='premier');
-    tierMark.textContent=tier==='premier'?'Premier':'VIP';
+    if(tier==='vip'){tierMark.innerHTML='<span class="vip-v">V</span><span class="vip-i">I</span><span class="vip-p">P</span>';}else{tierMark.textContent='Premier';}
     tierMark.setAttribute('aria-label',tier==='premier'?'Premier':'VIP');
     tierMark.setAttribute('data-tier',tier);
 
@@ -882,15 +882,15 @@ function syncVipDiningDisplay(){
     tierMark.style.setProperty('display',tier==='vip'||tier==='premier'?'block':'none','important');
     tierMark.style.setProperty('position','absolute','important');
     const tierMobile=window.matchMedia('(max-width:720px)').matches;
-    tierMark.style.setProperty('left',tier==='vip'?(tierMobile?'6%':'8.5%'):(tierMobile?'4%':'7%'),'important');
-    tierMark.style.setProperty('top',tier==='vip'?(tierMobile?'-2%':'-4%'):(tierMobile?'3%':'5%'),'important');
+    tierMark.style.setProperty('left',tier==='vip'?(tierMobile?'6.7%':'8.8%'):(tierMobile?'4%':'7%'),'important');
+    tierMark.style.setProperty('top',tier==='vip'?(tierMobile?'-18%':'-19%'):(tierMobile?'3%':'5%'),'important');
     tierMark.style.setProperty('z-index','20','important');
-    tierMark.style.setProperty('color','#e7d3aa','important');
-    tierMark.style.setProperty('font-family','"Great Vibes","Cormorant Garamond",serif','important');
+    tierMark.style.setProperty('color','#fff4dd','important');
+    tierMark.style.setProperty('font-family','"Italianno","Great Vibes","Cormorant Garamond",cursive','important');
     tierMark.style.setProperty('font-size',
       tier==='premier'
         ? (window.matchMedia('(max-width:720px)').matches?'1.08rem':'1.72rem')
-        : (tierMobile?'2.10rem':'3rem'),
+        : (tierMobile?'3.15rem':'4.5rem'),
       'important'
     );
   }
@@ -910,7 +910,7 @@ function syncVipDiningDisplay(){
     visitSurface.style.setProperty('background-repeat','no-repeat','important');
   }
 
-  console.info('[La Crystalline] membership tier applied:',tier,'VIPVISUAL-20260930-v4_5');
+  console.info('[La Crystalline] membership tier applied:',tier,'VIPVISUAL-20260930-v4_6');
 
   renderMenu("drinks",DRINKS);
   renderMenu("bites",BITES);
