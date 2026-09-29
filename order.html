@@ -371,8 +371,9 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   <section class="section order-stage" id="diningSection" hidden>
     <div class="s-h"><span class="no">肆</span><span class="zh">點餐</span><span class="en">Dining</span></div>
     <div class="vip-menu-note" id="vipMenuNote"><span class="vip-mark">✦</span>今夜無須低消，餐飲由水晶庭招待。願水晶的微光與月色相伴，陪您度過一個優雅而美好的夜晚。</div>
+    <div class="vip-menu-note" id="premierMenuNote"><span class="vip-mark">✦</span>今夜無須低消。願水晶的微光與月色相伴，陪您自在享受水晶庭的夜晚。</div>
     <div class="hint">調酒與餐點可自由選擇數量。</div>
-    <div class="hint" style="margin-top:6px">低消｜每位旅者至少點用一杯飲品或一份餐點。</div>
+    <div class="hint" id="minimumHint" style="margin-top:6px">低消｜每位旅者至少點用一杯飲品或一份餐點。</div>
     <div class="hint" style="margin-top:6px">※ 圖片僅供參考。異界素材在海德林之力下，於店內或會呈現不同模樣；但無論模樣如何，盛入其中的誠摯心意始終如一。</div>
     <div class="cat">特色調酒 SIGNATURES</div>
     <div class="opts" id="drinks"></div>
@@ -449,7 +450,7 @@ const BITES = [
 ];
 
 // ---- 狀態 ----
-const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null, identityBound:false, memberToken:null, memberOrderCount:0, specialServiceEnabled:null, isVip:false, vipCardText:"" };
+const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null, identityBound:false, memberToken:null, memberOrderCount:0, specialServiceEnabled:null, isVip:false, membershipTier:"standard", vipCardText:"" };
 
 const fmt = n => n.toLocaleString('en-US');
 const $ = id => document.getElementById(id);
@@ -510,6 +511,10 @@ async function loadJoinSession(){
     if(!['waiting','seated'].includes(String(data?.status||''))) throw new Error('這個號碼牌目前不能再使用');
 
     let saved=readVisit();
+
+    // 重新整理時優先驗證本機保存的 member token。
+    // 若 token 因暫時性 RPC／網路錯誤未通過，不再把角色名與伺服器一起刪除；
+    // 會立刻用同一角色名＋伺服器重新連回既有 member。
     if(saved?.join_token===token && saved?.member_token){
       const {data:member,error:memberError}=await sb.rpc('get_dining_member_public',{
         p_join_token:token,
@@ -520,12 +525,38 @@ async function loadJoinSession(){
         state.memberToken=String(member.member_token);
         state.memberOrderCount=Number(member.member_order_count||0);
         state.isVip=member.is_vip===true;
+        state.membershipTier=state.isVip?'vip':String(member.membership_tier||'standard');
         state.vipCardText=String(member.vip_card_text||'').trim();
         syncVipDiningDisplay();
         writeVisit(saved);
+      }else if(saved?.guest_name && saved?.server){
+        console.warn('member token 驗證未通過，嘗試以原旅者身分重新連結：',memberError);
+        const {data:joined,error:joinError}=await sb.rpc('join_dining_session_member',{
+          p_join_token:token,
+          p_guest_name:saved.guest_name,
+          p_server:saved.server
+        });
+        if(!joinError && joined?.member_token){
+          saved={...saved,guest_name:joined.guest_name,server:joined.server,member_id:joined.member_id,member_token:joined.member_token};
+          state.memberToken=String(joined.member_token);
+          writeVisit(saved);
+          await hydrateMemberPrivileges(state.memberToken);
+        }else{
+          // 保留角色名與伺服器，僅移除無法驗證的 token。
+          // 使用者可直接按「重新連結本次身分」，不需重新猜自己的資料。
+          delete saved.member_token;
+          delete saved.member_id;
+          writeVisit(saved);
+          state.memberToken=null;
+          console.warn('自動重新連結未成功，保留旅者資料供手動重連：',joinError);
+        }
       }else{
-        delete saved.member_token; delete saved.member_id; delete saved.guest_name; delete saved.server;
+        // 舊資料若只剩 token 而沒有旅者資料，不破壞整張來店記錄；
+        // 僅移除無法驗證的 token。
+        delete saved.member_token;
+        delete saved.member_id;
         writeVisit(saved);
+        state.memberToken=null;
       }
     }else if(saved?.join_token===token && saved?.guest_name && saved?.server){
       const {data:joined,error:joinError}=await sb.rpc('join_dining_session_member',{
@@ -535,6 +566,9 @@ async function loadJoinSession(){
         saved={...saved,guest_name:joined.guest_name,server:joined.server,member_id:joined.member_id,member_token:joined.member_token};
         state.memberToken=String(joined.member_token);
         writeVisit(saved);
+        await hydrateMemberPrivileges(state.memberToken);
+      }else{
+        console.warn('保存的旅者身分暫時無法重新連結：',joinError);
       }
     }
 
@@ -774,14 +808,46 @@ function calcTotal(){
   return t;
 }
 function syncVipDiningDisplay(){
-  const note=$("vipMenuNote");
-  if(note) note.classList.toggle('show',state.isVip===true);
-  const vipMark=$("vcVipMark");
-  if(vipMark) vipMark.classList.toggle('show',state.isVip===true);
+  const tier=state.isVip?'vip':(state.membershipTier==='premier'?'premier':'standard');
+  const vipNote=$("vipMenuNote");
+  if(vipNote) vipNote.classList.toggle('show',tier==='vip');
+  const premierNote=$("premierMenuNote");
+  if(premierNote) premierNote.classList.toggle('show',tier==='premier');
+  const minimumHint=$("minimumHint");
+  if(minimumHint) minimumHint.hidden=(tier==='vip'||tier==='premier');
+
+  const tierMark=$("vcVipMark");
+  if(tierMark){
+    tierMark.classList.toggle('show',tier==='vip'||tier==='premier');
+    tierMark.classList.toggle('premier',tier==='premier');
+    tierMark.textContent=tier==='premier'?'Premier':'VIP';
+    tierMark.setAttribute('aria-label',tier==='premier'?'Premier':'VIP');
+  }
+
   const visitSurface=document.querySelector('#visitCard .visit-card-surface');
-  if(visitSurface) visitSurface.classList.toggle('vip-card-surface',state.isVip===true);
+  if(visitSurface) visitSurface.classList.toggle('vip-card-surface',tier==='vip');
+
   renderMenu("drinks",DRINKS);
   renderMenu("bites",BITES);
+}
+
+async function hydrateMemberPrivileges(memberToken=state.memberToken){
+  if(!sb || !state.joinToken || !memberToken) return null;
+  const {data:member,error}=await sb.rpc('get_dining_member_public',{
+    p_join_token:state.joinToken,
+    p_member_token:memberToken
+  });
+  if(error || !member){
+    if(error) console.warn('會員等級讀取失敗：',error);
+    return null;
+  }
+  state.memberToken=String(member.member_token||memberToken);
+  state.memberOrderCount=Number(member.member_order_count||0);
+  state.isVip=member.is_vip===true;
+  state.membershipTier=state.isVip?'vip':String(member.membership_tier||'standard');
+  state.vipCardText=String(member.vip_card_text||'').trim();
+  syncVipDiningDisplay();
+  return member;
 }
 function hasAnything(){
   return state.member || state.services.size>0 || Object.values(state.qty).some(q=>q>0);
@@ -827,7 +893,11 @@ function syncOrderStageVisibility(){
     if(!state.joinToken){
       note.innerHTML='STEP 01｜先取號碼牌並等待帶位。同行旅者各自加入同一張號碼牌。<br>營業時間：每週六 22:00–02:00｜實際以遊戲內招募看板為準。';
     }else if(!state.identityBound){
-      note.innerHTML='請先填寫自己的旅者名稱與伺服器，加入這張號碼牌。<br>每位同行都會擁有自己的點餐身分。';
+      const saved=readVisit();
+      const reconnect=!!(saved?.join_token===state.joinToken && state.joinSession?.identified_count>0 && state.joinSession?.pending_count===0);
+      note.innerHTML=reconnect
+        ? '此裝置尚未連回您的點餐身分。請輸入原本的旅者名稱與伺服器，按「重新連結本次身分」。<br>系統會接回原本的個人訂單，不會新增同行。'
+        : '請先填寫自己的旅者名稱與伺服器，加入這張號碼牌。<br>每位同行都會擁有自己的點餐身分。';
     }else if(state.joinSession?.status==='waiting'){
       note.innerHTML='您已加入此桌｜請等待水晶庭夥伴帶位。帶位完成後，本頁會自動開放您的個人點餐。';
     }else if(seated){
@@ -863,7 +933,9 @@ function update(){
   }
   if(!state.identityBound || !state.memberToken){
     btn.disabled = !identityOk;
-    btn.textContent = "加入此桌";
+    const saved=readVisit();
+    const reconnect=!!(saved?.join_token===state.joinToken && state.joinSession?.identified_count>0 && state.joinSession?.pending_count===0);
+    btn.textContent = reconnect ? "重新連結本次身分" : "加入此桌";
     return;
   }
   if(state.joinSession?.status === 'waiting'){
@@ -1018,12 +1090,12 @@ async function refreshVisitCard(forceOpen=false){
       if(!me&&md){
         memberData=md;state.memberOrderCount=Number(md.member_order_count||0);v.guest_name=md.guest_name||v.guest_name;v.server=md.server||v.server;
         const nextVip=md.is_vip===true;
+        const nextTier=nextVip?'vip':String(md.membership_tier||'standard');
         const nextVipCardText=String(md.vip_card_text||'').trim();
-        if(nextVip!==state.isVip || nextVipCardText!==state.vipCardText){
-          state.isVip=nextVip;
-          state.vipCardText=nextVipCardText;
-          syncVipDiningDisplay();
-        }
+        state.isVip=nextVip;
+        state.membershipTier=nextTier;
+        state.vipCardText=nextVipCardText;
+        syncVipDiningDisplay();
       }
     }
     if(!data){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
@@ -1101,6 +1173,13 @@ function syncIdentityUI(){
   }else{
     bound.classList.remove('show'); fields.classList.remove('hidden-for-visit');
     switchBtn?.classList.remove('show'); addBtn?.classList.remove('show');
+
+    // 若這台裝置還留著同一張來店卡的角色資料，重新整理後直接預填，
+    // 讓使用者一鍵重新連回原本的 member，不會新增同行。
+    if(v?.join_token===state.joinToken){
+      if(v?.guest_name && !$("guestName").value) $("guestName").value=v.guest_name;
+      if(v?.server && !$("guestServer").value) $("guestServer").value=v.server;
+    }
   }
   update();
 }
@@ -1230,6 +1309,7 @@ $("submitBtn").addEventListener('click', async ()=>{
       state.memberOrderCount=0;
       state.joinSession={ticket_code:data.ticket_code,party_size:data.party_size,identified_count:data.identified_count,pending_count:data.pending_count,can_order:false,status:data.session_status};
       rememberVisit(data,{guest_name:guestName,server:guestServer});
+      await hydrateMemberPrivileges(state.memberToken);
       $("partySetup").style.display='none';
       const banner=$("joinBanner"); banner.classList.add('show');
       banner.innerHTML=`<div>水晶號碼牌已取得</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">請等待水晶庭夥伴帶位 · 帶位完成後自動開放點餐</div>`;
@@ -1270,6 +1350,7 @@ $("submitBtn").addEventListener('click', async ()=>{
         state.joinSession.can_order=data.can_order===true;
       }
       rememberVisit(data,{guest_name:data.guest_name,server:data.server});
+      await hydrateMemberPrivileges(state.memberToken);
       syncIdentityUI();
       await refreshVisitCard(true);
       toast(data.can_order?'已加入此桌，可以開始自己的點餐。':'已加入此桌，請等待帶位完成。',null,false);
