@@ -691,33 +691,46 @@
 }
 
 /* === VIP ticket mark === */
+/* VIP is rendered as live text, not baked into the voucher artwork. */
 .visit-card .vc-vip-mark{
   display:none;
   position:absolute;
-  left:8.5%;
-  top:-4%;
+  left:8.8%;
+  top:-19%;
   z-index:8;
-  color:#e7d3aa;
-  font-family:"Great Vibes","Cormorant Garamond",serif;
-  font-size:3rem;
+  color:#fff4dd; /* exactly the same ivory-gold as the GN ticket number */
+  font-family:"Italianno","Great Vibes","Cormorant Garamond",cursive;
+  font-size:4.5rem;
   font-weight:400;
-  line-height:1;
-  letter-spacing:.045em;
-  transform:rotate(-7deg);
+  line-height:.78;
+  letter-spacing:.012em;
+  transform:rotate(-3deg);
+  transform-origin:left center;
   text-shadow:
-    0 1px 0 rgba(255,245,214,.24),
-    0 0 9px rgba(221,196,145,.20),
-    0 2px 8px rgba(6,20,32,.45);
+    0 0 14px rgba(255,246,220,.12),
+    0 3px 14px rgba(5,22,34,.46);
   pointer-events:none;
   user-select:none;
+  white-space:nowrap;
 }
 .visit-card .vc-vip-mark.show{display:block}
+
+.visit-card .vc-vip-mark .vip-i{
+  display:inline-block;
+  margin:0 .015em 0 .005em;
+  font-family:"Cormorant Garamond",serif;
+  font-style:italic;
+  font-weight:500;
+  font-size:.78em;
+  line-height:1;
+  transform:translateY(-.015em);
+}
 @media (max-width:720px){
   .visit-card .vc-vip-mark{
-    left:6%;
-    top:-2%;
-    font-size:2.025rem;
-    letter-spacing:.035em;
+    left:6.7%;
+    top:-18%;
+    font-size:3.15rem;
+    letter-spacing:.008em;
   }
 }
 
