@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#0a0e14;--night:#111a2b;--deep:#0d1420;
@@ -218,6 +218,25 @@ footer{text-align:center;padding:30px 24px 40px;border-top:1px solid var(--line)
 footer .warn{color:var(--crys-dim);margin-top:.6em}
 
 
+
+.vip-menu-note{
+  display:none;
+  margin:0 0 16px;
+  padding:12px 16px;
+  border:1px solid rgba(224,200,146,.42);
+  background:linear-gradient(135deg,rgba(26,57,78,.68),rgba(11,34,52,.50));
+  color:#ead6ac;
+  font-family:var(--tc,"Noto Serif TC",serif);
+  font-size:.92rem;
+  line-height:1.8;
+  letter-spacing:.04em;
+  text-align:center;
+  box-shadow:inset 0 0 18px rgba(141,205,232,.07);
+}
+.vip-menu-note.show{display:block}
+.vip-menu-note .vip-mark{display:inline-block;margin-right:.35em;color:#f2dfb6}
+.pr.vip-treat{color:#f0ddb4;font-weight:700;letter-spacing:.05em;white-space:nowrap}
+
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/visit_voucher.css">
@@ -250,6 +269,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
       <div class="vc-main">
         <div class="vc-ey">CRYSTAL TAG</div>
         <div class="vc-ticket-row">
+          <div class="vc-vip-mark" id="vcVipMark" aria-hidden="true">VIP</div>
           <div class="vc-ticket" id="vcTicket">—</div>
           <img class="vc-checkout-signature" src="assets/northern_wind_signature_receipt_m15.png" alt="" aria-hidden="true">
           <div class="vc-status" id="vcStatus">—</div>
@@ -350,6 +370,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   <!-- STEP 4: 點餐 -->
   <section class="section order-stage" id="diningSection" hidden>
     <div class="s-h"><span class="no">肆</span><span class="zh">點餐</span><span class="en">Dining</span></div>
+    <div class="vip-menu-note" id="vipMenuNote"><span class="vip-mark">✦</span>今夜無須低消，餐飲由水晶庭招待。願水晶的微光與月色相伴，陪您度過一個優雅而美好的夜晚。</div>
     <div class="hint">調酒與餐點可自由選擇數量。</div>
     <div class="hint" style="margin-top:6px">低消｜每位旅者至少點用一杯飲品或一份餐點。</div>
     <div class="hint" style="margin-top:6px">※ 圖片僅供參考。異界素材在海德林之力下，於店內或會呈現不同模樣；但無論模樣如何，盛入其中的誠摯心意始終如一。</div>
@@ -375,7 +396,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 
 <div class="summary">
   <div class="row">
-    <div class="tot">合計 <span id="total">0</span> <small>Gil</small></div>
+    <div class="tot">合計 <span id="total">0</span> <small id="totalUnit">Gil</small></div>
     <button class="btn" id="submitBtn" disabled>取號碼牌</button>
   </div>
 </div>
@@ -428,7 +449,7 @@ const BITES = [
 ];
 
 // ---- 狀態 ----
-const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null, identityBound:false, memberToken:null, memberOrderCount:0, specialServiceEnabled:null };
+const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null, identityBound:false, memberToken:null, memberOrderCount:0, specialServiceEnabled:null, isVip:false, vipCardText:"" };
 
 const fmt = n => n.toLocaleString('en-US');
 const $ = id => document.getElementById(id);
@@ -498,6 +519,9 @@ async function loadJoinSession(){
         saved={...saved,guest_name:member.guest_name,server:member.server,member_id:member.member_id,member_token:member.member_token};
         state.memberToken=String(member.member_token);
         state.memberOrderCount=Number(member.member_order_count||0);
+        state.isVip=member.is_vip===true;
+        state.vipCardText=String(member.vip_card_text||'').trim();
+        syncVipDiningDisplay();
         writeVisit(saved);
       }else{
         delete saved.member_token; delete saved.member_id; delete saved.guest_name; delete saved.server;
@@ -705,20 +729,24 @@ function renderServices(){
 
 // ---- 渲染菜單（數量）----
 function renderMenu(listId, items){
-  $(listId).innerHTML = items.map(it=>`
-    <div class="opt menu-item" data-id="${it.id}">
+  $(listId).innerHTML = items.map(it=>{
+    const q=Number(state.qty[it.id]||0);
+    const priceHtml=state.isVip?'<span class="pr vip-treat">本店招待</span>':`<span class="pr">${fmt(it.price)}<small>Gil</small></span>`;
+    return `
+    <div class="opt menu-item${q>0?' sel':''}" data-id="${it.id}">
       <img class="thumb" src="${it.img}" alt="${it.name}">
       <div class="meta">
         <div class="nm">${it.name}<span class="en">${it.en}</span></div>
         <div class="subtxt">${it.desc||''}</div>
       </div>
       <div class="qty">
-        <span class="pr">${fmt(it.price)}<small>Gil</small></span>
+        ${priceHtml}
         <button class="qbtn" type="button" data-act="minus">−</button>
-        <span class="qn" id="qn-${it.id}">0</span>
+        <span class="qn" id="qn-${it.id}">${q}</span>
         <button class="qbtn" type="button" data-act="plus">＋</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   $(listId).querySelectorAll('.opt').forEach(el=>{
     const id=el.dataset.id;
     el.querySelectorAll('.qbtn').forEach(b=>{
@@ -740,8 +768,20 @@ function renderMenu(listId, items){
 function calcTotal(){
   let t=0;
   SERVICES.forEach(s=>{ if(state.services.has(s.id) && s.price) t+=s.price; });
-  [...DRINKS,...BITES].forEach(it=>{ t += (state.qty[it.id]||0)*it.price; });
+  if(!state.isVip){
+    [...DRINKS,...BITES].forEach(it=>{ t += (state.qty[it.id]||0)*it.price; });
+  }
   return t;
+}
+function syncVipDiningDisplay(){
+  const note=$("vipMenuNote");
+  if(note) note.classList.toggle('show',state.isVip===true);
+  const vipMark=$("vcVipMark");
+  if(vipMark) vipMark.classList.toggle('show',state.isVip===true);
+  const visitSurface=document.querySelector('#visitCard .visit-card-surface');
+  if(visitSurface) visitSurface.classList.toggle('vip-card-surface',state.isVip===true);
+  renderMenu("drinks",DRINKS);
+  renderMenu("bites",BITES);
 }
 function hasAnything(){
   return state.member || state.services.size>0 || Object.values(state.qty).some(q=>q>0);
@@ -797,7 +837,16 @@ function syncOrderStageVisibility(){
 }
 
 function update(){
-  $("total").textContent = fmt(calcTotal());
+  const total=calcTotal();
+  const hasDining=Object.values(state.qty).some(q=>Number(q)>0);
+  const hasPaidServices=SERVICES.some(s=>state.services.has(s.id) && Number(s.price)>0);
+  if(state.isVip && hasDining && !hasPaidServices){
+    $("total").textContent = "本店招待";
+    $("totalUnit").textContent = "";
+  }else{
+    $("total").textContent = fmt(total);
+    $("totalUnit").textContent = "Gil";
+  }
   syncOrderStageVisibility();
   const btn=$("submitBtn");
   const remain = cooldownRemainingMs();
@@ -845,8 +894,8 @@ function buildOrder(){
     price:s.price
   }));
   const items = [...DRINKS,...BITES].filter(it=>state.qty[it.id]>0)
-                 .map(it=>({id:it.id,name:it.name,qty:state.qty[it.id],price:it.price}));
-  const diningTotal = items.reduce((sum,it)=>sum + (Number(it.qty)||0) * (Number(it.price)||0), 0);
+                 .map(it=>({id:it.id,name:it.name,qty:state.qty[it.id],price:state.isVip?0:it.price}));
+  const diningTotal = state.isVip?0:items.reduce((sum,it)=>sum + (Number(it.qty)||0) * (Number(it.price)||0), 0);
   const serviceTotal = services.reduce((sum,s)=>sum + (Number(s.price)||0), 0);
   return {
     code: genCode(),
@@ -966,7 +1015,16 @@ async function refreshVisitCard(forceOpen=false){
     let memberData=null;
     if(v.member_token){
       const {data:md,error:me}=await sb.rpc('get_dining_member_public',{p_join_token:v.join_token,p_member_token:v.member_token});
-      if(!me&&md){memberData=md;state.memberOrderCount=Number(md.member_order_count||0);v.guest_name=md.guest_name||v.guest_name;v.server=md.server||v.server;}
+      if(!me&&md){
+        memberData=md;state.memberOrderCount=Number(md.member_order_count||0);v.guest_name=md.guest_name||v.guest_name;v.server=md.server||v.server;
+        const nextVip=md.is_vip===true;
+        const nextVipCardText=String(md.vip_card_text||'').trim();
+        if(nextVip!==state.isVip || nextVipCardText!==state.vipCardText){
+          state.isVip=nextVip;
+          state.vipCardText=nextVipCardText;
+          syncVipDiningDisplay();
+        }
+      }
     }
     if(!data){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
     if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
@@ -977,7 +1035,12 @@ async function refreshVisitCard(forceOpen=false){
     const vl=document.getElementById('vlTicket');if(vl)vl.textContent=`${data.ticket_code||v.ticket_code||'—'} · ${visitStatusLabel(data.status)}`;
     document.getElementById('vcStatus').textContent=visitStatusLabel(data.status);
     const stateLine=document.getElementById('vcStateLine'); if(stateLine)stateLine.textContent=visitStatusLabel(data.status);
-    const phrase=document.getElementById('vcPhrase'); if(phrase)phrase.textContent=data.visit_phrase||'願今夜的微光，留在你的記憶裡。';
+    const phrase=document.getElementById('vcPhrase');
+    if(phrase){
+      phrase.textContent=(state.isVip&&state.vipCardText)
+        ? state.vipCardText
+        : (data.visit_phrase||'願今夜的微光，留在你的記憶裡。');
+    }
     const owner=document.getElementById('vcOwner'); if(owner)owner.textContent=(v.guest_name&&v.server)?`${v.guest_name} · ${v.server}`:(v.guest_name||'本次旅者');
     const sub=document.getElementById('vcSub');
     if(data.receipt_available){sub.textContent=`今夜已結帳 · 紀念收據保留至 ${visitDate(data.receipt_expires_at)}。`;}
