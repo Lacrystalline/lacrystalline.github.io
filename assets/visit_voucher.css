@@ -674,9 +674,9 @@
 .visit-card .vc-vip-mark{
   display:none;
   position:absolute;
-  left:13.5%;
-  top:19%;
-  z-index:3;
+  left:7%;
+  top:6%;
+  z-index:8;
   color:#e7c77f;
   font-family:"Great Vibes","Cormorant Garamond",serif;
   font-size:2rem;
@@ -694,9 +694,9 @@
 .visit-card .vc-vip-mark.show{display:block}
 @media (max-width:720px){
   .visit-card .vc-vip-mark{
-    left:12%;
-    top:18%;
-    font-size:1.28rem;
+    left:4%;
+    top:4%;
+    font-size:1.35rem;
     letter-spacing:.035em;
   }
 }
@@ -711,4 +711,25 @@
     0 24px 72px rgba(0,0,0,.50),
     0 0 36px rgba(75,128,209,.16),
     0 0 18px rgba(215,177,88,.08)!important;
+}
+
+
+/* === Premier ticket mark === */
+.visit-card .vc-vip-mark.premier{
+  color:#e7c77f;
+  font-family:"Great Vibes","Cormorant Garamond",serif;
+  font-size:1.72rem;
+  font-weight:400;
+  letter-spacing:.025em;
+  transform:rotate(-6deg);
+  text-shadow:
+    0 1px 0 rgba(255,245,214,.22),
+    0 0 8px rgba(218,177,94,.18),
+    0 2px 8px rgba(6,20,32,.42);
+}
+@media (max-width:720px){
+  .visit-card .vc-vip-mark.premier{
+    font-size:1.08rem;
+    letter-spacing:.018em;
+  }
 }
