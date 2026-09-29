@@ -222,6 +222,21 @@
   text-align:center;
   text-shadow:0 1px 10px rgba(3,22,32,.42);
 }
+.visit-card .vc-phrase.vip-personal{
+  max-width:620px;
+  white-space:pre-line;
+  line-height:1.82;
+  letter-spacing:.065em;
+  text-wrap:balance;
+}
+@media (max-width:720px){
+  .visit-card .vc-phrase.vip-personal{
+    max-width:86%;
+    line-height:1.7;
+    letter-spacing:.045em;
+  }
+}
+
 .visit-card .vc-phrase::before,.visit-card .vc-phrase::after{
   content:"✦";
   color:var(--vc-gold);
@@ -674,12 +689,12 @@
 .visit-card .vc-vip-mark{
   display:none;
   position:absolute;
-  left:7%;
-  top:6%;
+  left:5.2%;
+  top:-4%;
   z-index:8;
   color:#e7c77f;
   font-family:"Great Vibes","Cormorant Garamond",serif;
-  font-size:2rem;
+  font-size:3rem;
   font-weight:400;
   line-height:1;
   letter-spacing:.045em;
@@ -694,9 +709,9 @@
 .visit-card .vc-vip-mark.show{display:block}
 @media (max-width:720px){
   .visit-card .vc-vip-mark{
-    left:4%;
-    top:4%;
-    font-size:1.35rem;
+    left:3.2%;
+    top:-2%;
+    font-size:2.025rem;
     letter-spacing:.035em;
   }
 }

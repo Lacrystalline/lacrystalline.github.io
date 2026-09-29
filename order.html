@@ -254,10 +254,10 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/visit_voucher.css?v=20260930-v43">
+<link rel="stylesheet" href="assets/visit_voucher.css?v=20260930-v44">
   <link rel="stylesheet" href="assets/radio.css">
 </head>
-<body data-build="TIERFIX-20260930-v4_3">
+<body data-build="VIPVISUAL-20260930-v4_4">
 <div class="crystal-veil" aria-hidden="true"></div>
 
 <nav class="nav">
@@ -823,6 +823,21 @@ function calcTotal(){
 }
 // 會員等級判定：is_vip 或 membership_tier 任一成立即可；大小寫、前後空白一律正規化。
 // 舊版只看 is_vip===true，後端若只回 membership_tier='vip'（或 'VIP'）就會被當成一般客人。
+
+function formatVipCardPhrase(value){
+  const text=String(value||'').trim();
+  if(!text) return '';
+  // Long personalized lines read more elegantly as two centered thoughts.
+  // Prefer a sentence break that falls in the first half; this places 紅月 after「花間。」.
+  if(text.length>=28){
+    const candidates=[];
+    for(let i=0;i<text.length;i++){ if('。！？'.includes(text[i])) candidates.push(i); }
+    const min=Math.floor(text.length*.22), max=Math.floor(text.length*.58);
+    const cut=candidates.find(i=>i>=min&&i<=max);
+    if(cut>=0) return text.slice(0,cut+1)+'\n'+text.slice(cut+1).trimStart();
+  }
+  return text;
+}
 function resolveMembershipTier(md){
   if(!md) return 'standard';
   const flag=md.is_vip===true||String(md.is_vip??'').trim().toLowerCase()==='true';
@@ -866,15 +881,16 @@ function syncVipDiningDisplay(){
     // Critical tier marker styles are applied inline as a cache-safe fallback.
     tierMark.style.setProperty('display',tier==='vip'||tier==='premier'?'block':'none','important');
     tierMark.style.setProperty('position','absolute','important');
-    tierMark.style.setProperty('left',window.matchMedia('(max-width:720px)').matches?'4%':'7%','important');
-    tierMark.style.setProperty('top',window.matchMedia('(max-width:720px)').matches?'3%':'5%','important');
+    const tierMobile=window.matchMedia('(max-width:720px)').matches;
+    tierMark.style.setProperty('left',tier==='vip'?(tierMobile?'3.2%':'5.2%'):(tierMobile?'4%':'7%'),'important');
+    tierMark.style.setProperty('top',tier==='vip'?(tierMobile?'-2%':'-4%'):(tierMobile?'3%':'5%'),'important');
     tierMark.style.setProperty('z-index','20','important');
     tierMark.style.setProperty('color','#e7c77f','important');
     tierMark.style.setProperty('font-family','"Great Vibes","Cormorant Garamond",serif','important');
     tierMark.style.setProperty('font-size',
       tier==='premier'
         ? (window.matchMedia('(max-width:720px)').matches?'1.08rem':'1.72rem')
-        : (window.matchMedia('(max-width:720px)').matches?'1.40rem':'2rem'),
+        : (tierMobile?'2.10rem':'3rem'),
       'important'
     );
   }
@@ -894,7 +910,7 @@ function syncVipDiningDisplay(){
     visitSurface.style.setProperty('background-repeat','no-repeat','important');
   }
 
-  console.info('[La Crystalline] membership tier applied:',tier,'TIERFIX-20260930-v4_3');
+  console.info('[La Crystalline] membership tier applied:',tier,'VIPVISUAL-20260930-v4_4');
 
   renderMenu("drinks",DRINKS);
   renderMenu("bites",BITES);
@@ -1177,8 +1193,10 @@ async function refreshVisitCard(forceOpen=false){
     const stateLine=document.getElementById('vcStateLine'); if(stateLine)stateLine.textContent=visitStatusLabel(data.status);
     const phrase=document.getElementById('vcPhrase');
     if(phrase){
-      phrase.textContent=(state.isVip&&state.vipCardText)
-        ? state.vipCardText
+      const personalized=state.isVip&&!!state.vipCardText;
+      phrase.classList.toggle('vip-personal',personalized);
+      phrase.textContent=personalized
+        ? formatVipCardPhrase(state.vipCardText)
         : (data.visit_phrase||'願今夜的微光，留在你的記憶裡。');
     }
     const owner=document.getElementById('vcOwner'); if(owner)owner.textContent=(v.guest_name&&v.server)?`${v.guest_name} · ${v.server}`:(v.guest_name||'本次旅者');
