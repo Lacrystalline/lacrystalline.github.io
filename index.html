@@ -631,7 +631,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Italianno&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/visit_voucher.css?v=20260930-v46">
+<link rel="stylesheet" href="assets/visit_voucher.css?v=20261003-viptext-fluid">
   <link rel="stylesheet" href="assets/radio.css">
 </head>
 <body data-build="VIPVISUAL-20260930-v4_6">
@@ -1095,22 +1095,13 @@ function resolveMembershipTier(md){
   return 'standard';
 }
 function applyVoucherTier(tier){
-  const mobile=window.matchMedia('(max-width:720px)').matches;
   const mark=document.getElementById('vcVipMark');
   if(mark){
     const on=tier==='vip'||tier==='premier';
     mark.classList.toggle('show',on);
     mark.classList.toggle('premier',tier==='premier');
-    if(tier==='vip'){mark.innerHTML='<span class="vip-v">V</span><span class="vip-i">I</span><span class="vip-p">P</span>';}else{mark.textContent='Premier';}
+    mark.textContent=tier==='vip'?'VIP':'Premier';
     mark.setAttribute('data-tier',tier);
-    mark.style.setProperty('display',on?'block':'none','important');
-    mark.style.setProperty('position','absolute','important');
-    mark.style.setProperty('left',tier==='vip'?(mobile?'6.7%':'8.8%'):(mobile?'4%':'7%'),'important');
-    mark.style.setProperty('top',tier==='vip'?(mobile?'-18%':'-19%'):(mobile?'3%':'5%'),'important');
-    mark.style.setProperty('z-index','20','important');
-    mark.style.setProperty('color','#fff4dd','important');
-    mark.style.setProperty('font-family','"Italianno","Great Vibes","Cormorant Garamond",cursive','important');
-    mark.style.setProperty('font-size',tier==='premier'?(mobile?'1.08rem':'1.72rem'):(mobile?'3.15rem':'4.5rem'),'important');
   }
   const surface=document.querySelector('#visitCard .visit-card-surface');
   if(surface){
