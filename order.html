@@ -126,6 +126,7 @@ img{display:block;max-width:100%}
 .opt.sel .box::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:.8rem;font-weight:700}
 .opt .nm{color:var(--mist);font-size:.95rem}
 .opt .nm .en{color:var(--crys-dim);font-style:italic;font-size:.82rem;margin-left:.4em}
+.opt .nm .svc-leadtime{display:block;font-family:var(--tc);font-size:.72rem;line-height:1.5;color:var(--mute);margin-top:4px;white-space:normal}
 .opt .pr{margin-left:auto;color:var(--gold);font-family:var(--serif);font-size:1.02rem;white-space:nowrap}
 .opt .pr small{font-size:.62em;opacity:.75;margin-left:.15em}
 .opt .pr .svc-unit{display:block;margin:2px 0 0;font-family:var(--tc);font-size:.68em;letter-spacing:.06em;color:var(--mute);text-align:right}
@@ -761,7 +762,7 @@ function renderServices(){
     return `
     <div class="opt${isContact?' contact-only':(state.services.has(s.id)?' sel':'')}" data-id="${s.id}" aria-disabled="${isContact?'true':'false'}">
       ${isContact?'<div class="contact-mark">◇</div>':'<div class="box"></div>'}
-      <div class="nm">${s.name}<span class="en">${s.en}</span></div>
+      <div class="nm">${s.name}<span class="en">${s.en}</span>${s.id==='custom'?'<span class="svc-leadtime">須事先向店長下訂・確認後製作約一週</span>':''}</div>
       <div class="pr">${isContact?'洽店長':(s.price===null?s.priceLabel:fmt(s.price)+'<small>Gil</small>'+(s.unit?'<small class="svc-unit">'+s.unit+'</small>':''))}</div>
     </div>`;
   }).join('');
