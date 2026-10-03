@@ -256,7 +256,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Italianno&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/visit_voucher.css?v=20260930-v46">
+<link rel="stylesheet" href="assets/visit_voucher.css?v=20261003-viptext-fluid">
   <link rel="stylesheet" href="assets/radio.css">
 </head>
 <body data-build="VIPVISUAL-20260930-v4_6">
@@ -876,25 +876,9 @@ function syncVipDiningDisplay(){
   if(tierMark){
     tierMark.classList.toggle('show',tier==='vip'||tier==='premier');
     tierMark.classList.toggle('premier',tier==='premier');
-    if(tier==='vip'){tierMark.innerHTML='<span class="vip-v">V</span><span class="vip-i">I</span><span class="vip-p">P</span>';}else{tierMark.textContent='Premier';}
+    tierMark.textContent=tier==='vip'?'VIP':'Premier';
     tierMark.setAttribute('aria-label',tier==='premier'?'Premier':'VIP');
     tierMark.setAttribute('data-tier',tier);
-
-    // Critical tier marker styles are applied inline as a cache-safe fallback.
-    tierMark.style.setProperty('display',tier==='vip'||tier==='premier'?'block':'none','important');
-    tierMark.style.setProperty('position','absolute','important');
-    const tierMobile=window.matchMedia('(max-width:720px)').matches;
-    tierMark.style.setProperty('left',tier==='vip'?(tierMobile?'6.7%':'8.8%'):(tierMobile?'4%':'7%'),'important');
-    tierMark.style.setProperty('top',tier==='vip'?(tierMobile?'-18%':'-19%'):(tierMobile?'3%':'5%'),'important');
-    tierMark.style.setProperty('z-index','20','important');
-    tierMark.style.setProperty('color','#fff4dd','important');
-    tierMark.style.setProperty('font-family','"Italianno","Great Vibes","Cormorant Garamond",cursive','important');
-    tierMark.style.setProperty('font-size',
-      tier==='premier'
-        ? (window.matchMedia('(max-width:720px)').matches?'1.08rem':'1.72rem')
-        : (tierMobile?'3.15rem':'4.5rem'),
-      'important'
-    );
   }
 
   const visitSurface=document.querySelector('#visitCard .visit-card-surface');
