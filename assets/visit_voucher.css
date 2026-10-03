@@ -697,7 +697,7 @@
   display:none;
   position:absolute;
   left:16%;
-  top:10%;
+  top:-11%;
   z-index:8;
   color:#fff4dd; /* exactly the same ivory-gold as the GN ticket number */
   font-family:"Italianno","Great Vibes","Cormorant Garamond",cursive;
