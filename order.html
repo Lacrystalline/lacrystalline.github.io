@@ -1180,7 +1180,7 @@ function maybeAutoOpenFirstMenu(data,memberData,v){
 }
 async function refreshVisitCard(forceOpen=false){
   const card=document.getElementById('visitCard'),launcher=document.getElementById('visitLauncher'); if(!card||!window.sb)return;
-  const v=readVisit(); if(!v?.join_token){card.classList.remove('show');launcher?.classList.remove('show');return;}
+  const v=readVisit(); if(!v?.join_token){card.classList.remove('show');launcher?.classList.remove('show');document.getElementById('visitLauncherClear')?.classList.remove('show');return;}
   try{
     const {data,error}=await sb.rpc('get_dining_session_public',{p_join_token:v.join_token});
     if(error)throw error;
