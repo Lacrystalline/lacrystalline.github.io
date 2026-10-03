@@ -1105,19 +1105,38 @@ async function loadSpecialServiceStatus(){
 
 
 const VISIT_STORAGE_KEY="la_crystalline_active_visit_v1";
+const VISIT_BACKUP_KEY="la_crystalline_active_visit_backup_v1";
 const VISIT_COLLAPSE_KEY="la_crystalline_visit_collapsed_v1";
 function readVisit(){
   try{
-    const v=JSON.parse(localStorage.getItem(VISIT_STORAGE_KEY)||'null');
+    // Recover when just the primary key was erased; all storage remains local to this browser.
+    const primary=localStorage.getItem(VISIT_STORAGE_KEY);
+    const backup=localStorage.getItem(VISIT_BACKUP_KEY);
+    let v=null;
+    try{v=primary?JSON.parse(primary):null;}catch(e){console.warn('來店卡主紀錄無法解析',e);}
+    if(!v&&backup){try{v=JSON.parse(backup);}catch(e){console.warn('來店卡備援紀錄無法解析',e);}}
     if(v && ['closed','cleared'].includes(v.last_status) && v.receipt_expires_at){
       const deadline=Date.parse(v.receipt_expires_at);
       if(Number.isFinite(deadline) && Date.now()>=deadline){clearVisit();return null;}
     }
-    return v;
-  }catch(e){return null}
+    if(v&&v.join_token&&!primary)try{localStorage.setItem(VISIT_STORAGE_KEY,JSON.stringify(v));}catch(e){}
+    return v&&v.join_token?v:null;
+  }catch(e){console.warn('無法讀取本機來店卡',e);return null;}
 }
-function writeVisit(v){try{localStorage.setItem(VISIT_STORAGE_KEY,JSON.stringify(v))}catch(e){}}
-function clearVisit(){try{localStorage.removeItem(VISIT_STORAGE_KEY);sessionStorage.removeItem(VISIT_COLLAPSE_KEY)}catch(e){}}
+function writeVisit(v){
+  const raw=JSON.stringify(v);
+  let written=false;
+  try{
+    localStorage.setItem(VISIT_STORAGE_KEY,raw);
+    written=localStorage.getItem(VISIT_STORAGE_KEY)===raw;
+  }catch(e){console.warn('來店卡保存失敗',e);}
+  try{localStorage.setItem(VISIT_BACKUP_KEY,raw);written=localStorage.getItem(VISIT_BACKUP_KEY)===raw||written;}catch(e){}
+  return written;
+}
+function clearVisit(){
+  try{localStorage.removeItem(VISIT_STORAGE_KEY);localStorage.removeItem(VISIT_BACKUP_KEY);}catch(e){}
+  try{sessionStorage.removeItem(VISIT_COLLAPSE_KEY);}catch(e){}
+}
 function isVisitCollapsed(v){try{return !!v?.join_token && sessionStorage.getItem(VISIT_COLLAPSE_KEY)===String(v.join_token)}catch(e){return false}}
 function setVisitCollapsed(v,on){try{if(on&&v?.join_token)sessionStorage.setItem(VISIT_COLLAPSE_KEY,String(v.join_token));else sessionStorage.removeItem(VISIT_COLLAPSE_KEY)}catch(e){}}
 function setVisitUi(open){
@@ -1284,7 +1303,7 @@ function releaseVisitIdentity(){
 function rememberVisit(result,order){
   if(!result?.join_token)return;
   const current=readVisit()||{};
-  writeVisit({
+  return writeVisit({
     ...current,
     join_token:String(result.join_token),
     ticket_code:String(result.ticket_code||current.ticket_code||''),
@@ -1397,7 +1416,7 @@ $("submitBtn").addEventListener('click', async ()=>{
       state.memberToken=String(data.member_token||'');
       state.memberOrderCount=0;
       state.joinSession={ticket_code:data.ticket_code,party_size:data.party_size,identified_count:data.identified_count,pending_count:data.pending_count,can_order:false,status:data.session_status};
-      rememberVisit(data,{guest_name:guestName,server:guestServer});
+      const savedToDevice=rememberVisit(data,{guest_name:guestName,server:guestServer});
       await hydrateMemberPrivileges(state.memberToken);
       $("partySetup").style.display='none';
       const banner=$("joinBanner"); banner.classList.add('show');
@@ -1410,6 +1429,7 @@ $("submitBtn").addEventListener('click', async ()=>{
       }else{
         toast(`已取得 ${esc(data.ticket_code)}，但店內候位通知暫時未送達；請直接告知水晶庭夥伴。`,null,true);
       }
+      if(!savedToDevice)toast('號碼牌已建立，但這個瀏覽器無法保存本次來店卡。請複製並保留目前含 join= 的完整網址，日後可透過連結找回。',null,true);
       startSubmitCooldown();
     }catch(err){
       console.error('取號碼牌失敗：',err);
