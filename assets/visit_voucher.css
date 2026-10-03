@@ -108,7 +108,12 @@
   text-shadow:0 1px 10px rgba(0,0,0,.32);
 }
 .visit-card .vc-tool:hover{color:#fff;border-color:rgba(252,246,230,.42);background:linear-gradient(180deg, rgba(14,31,47,.52), rgba(9,21,34,.34))}
-.visit-card .vc-tool.danger{display:none}
+.visit-card .vc-tool.danger{
+  display:inline-flex;
+  color:#e9bbc5;
+  border-color:rgba(216,122,143,.40);
+  background:rgba(26,12,19,.45);
+}
 
 .visit-card .vc-brand{
   display:flex;
