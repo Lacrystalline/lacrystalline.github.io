@@ -1122,7 +1122,16 @@ async function loadSpecialServiceStatus(){
 
 const VISIT_STORAGE_KEY="la_crystalline_active_visit_v1";
 const VISIT_COLLAPSE_KEY="la_crystalline_visit_collapsed_v1";
-function readVisit(){try{return JSON.parse(localStorage.getItem(VISIT_STORAGE_KEY)||'null')}catch(e){return null}}
+function readVisit(){
+  try{
+    const v=JSON.parse(localStorage.getItem(VISIT_STORAGE_KEY)||'null');
+    if(v && ['closed','cleared'].includes(v.last_status) && v.receipt_expires_at){
+      const deadline=Date.parse(v.receipt_expires_at);
+      if(Number.isFinite(deadline) && Date.now()>=deadline){clearVisit();return null;}
+    }
+    return v;
+  }catch(e){return null}
+}
 function writeVisit(v){try{localStorage.setItem(VISIT_STORAGE_KEY,JSON.stringify(v))}catch(e){}}
 function clearVisit(){try{localStorage.removeItem(VISIT_STORAGE_KEY);sessionStorage.removeItem(VISIT_COLLAPSE_KEY)}catch(e){}}
 function isVisitCollapsed(v){try{return !!v?.join_token && sessionStorage.getItem(VISIT_COLLAPSE_KEY)===String(v.join_token)}catch(e){return false}}
@@ -1186,7 +1195,7 @@ async function refreshVisitCard(forceOpen=false){
     }
     if(!data){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');document.getElementById('visitLauncherClear')?.classList.remove('show');return;}
     if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');document.getElementById('visitLauncherClear')?.classList.remove('show');return;}
-    v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; writeVisit(v);
+    v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; v.receipt_expires_at=data.receipt_expires_at||null; writeVisit(v);
     if(state.joinToken && String(v.join_token)===String(state.joinToken)){ state.joinSession=data; syncOrderStageVisibility(); update(); }
     card.classList.toggle('receipt-ready',!!data.receipt_available);
     document.getElementById('vcTicket').textContent=data.ticket_code||v.ticket_code||'—';
@@ -1294,7 +1303,8 @@ function rememberVisit(result,order){
     server:String(result.server||order?.server||current.server||''),
     member_id:result.member_id??current.member_id??null,
     member_token:String(result.member_token||current.member_token||''),
-    last_status:String(result.session_status||state.joinSession?.status||current.last_status||''),
+    last_status:String(result.session_status||state.joinSession?.status||(String(current.join_token)===String(result.join_token)?current.last_status:'waiting')||''),
+    receipt_expires_at:String(current.join_token)===String(result.join_token)?(current.receipt_expires_at||null):null,
     saved_at:new Date().toISOString()
   });
 }
