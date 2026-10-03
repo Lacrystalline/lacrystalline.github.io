@@ -1183,7 +1183,12 @@ async function refreshVisitCard(forceOpen=false){
   const v=readVisit(); if(!v?.join_token){card.classList.remove('show');launcher?.classList.remove('show');document.getElementById('visitLauncherClear')?.classList.remove('show');return;}
   try{
     const {data,error}=await sb.rpc('get_dining_session_public',{p_join_token:v.join_token});
-    if(error)throw error;
+    if(error){
+      if(String(error.message||'').includes('找不到這個水晶號碼牌')){
+        clearVisit();card.classList.remove('show');launcher?.classList.remove('show');document.getElementById('visitLauncherClear')?.classList.remove('show');return;
+      }
+      throw error;
+    }
     let memberData=null;
     if(v.member_token){
       const {data:md,error:me}=await sb.rpc('get_dining_member_public',{p_join_token:v.join_token,p_member_token:v.member_token});
