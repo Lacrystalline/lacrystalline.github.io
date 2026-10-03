@@ -1036,7 +1036,16 @@ const DISCORD_INVITE_URL="https://discord.gg/P7c8qTUjX9";
 
 const VISIT_STORAGE_KEY="la_crystalline_active_visit_v1";
 const VISIT_COLLAPSE_KEY="la_crystalline_visit_collapsed_v1";
-function readVisit(){try{return JSON.parse(localStorage.getItem(VISIT_STORAGE_KEY)||'null')}catch(e){return null}}
+function readVisit(){
+  try{
+    const v=JSON.parse(localStorage.getItem(VISIT_STORAGE_KEY)||'null');
+    if(v && ['closed','cleared'].includes(v.last_status) && v.receipt_expires_at){
+      const deadline=Date.parse(v.receipt_expires_at);
+      if(Number.isFinite(deadline) && Date.now()>=deadline){clearVisit();return null;}
+    }
+    return v;
+  }catch(e){return null}
+}
 function writeVisit(v){try{localStorage.setItem(VISIT_STORAGE_KEY,JSON.stringify(v))}catch(e){}}
 function clearVisit(){try{localStorage.removeItem(VISIT_STORAGE_KEY);sessionStorage.removeItem(VISIT_COLLAPSE_KEY)}catch(e){}}
 function isVisitCollapsed(v){try{return !!v?.join_token && sessionStorage.getItem(VISIT_COLLAPSE_KEY)===String(v.join_token)}catch(e){return false}}
@@ -1129,7 +1138,7 @@ async function refreshVisitCard(forceOpen=false){
     const vipCardText=String(memberData?.vip_card_text||'').trim();
     if(!data){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
     if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
-    v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; writeVisit(v);
+    v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; v.receipt_expires_at=data.receipt_expires_at||null; writeVisit(v);
     card.classList.toggle('receipt-ready',!!data.receipt_available);
     document.getElementById('vcTicket').textContent=data.ticket_code||v.ticket_code||'—';
     const vl=document.getElementById('vlTicket');if(vl)vl.textContent=`${data.ticket_code||v.ticket_code||'—'} · ${visitStatusLabel(data.status)}`;
@@ -1176,7 +1185,7 @@ async function refreshVisitCard(forceOpen=false){
     if(forceOpen){setVisitCollapsed(v,false);setVisitUi(true)}else{setVisitUi(!isVisitCollapsed(v))}
   }catch(e){console.warn('本次來店卡更新失敗',e)}
 }
-function rememberVisit(result,guestName){if(!result?.join_token)return;const cur=readVisit()||{};writeVisit({...cur,join_token:String(result.join_token),ticket_code:String(result.ticket_code||cur.ticket_code||''),guest_name:String(result.guest_name||guestName||cur.guest_name||''),server:String(result.server||cur.server||''),member_id:result.member_id??cur.member_id??null,member_token:String(result.member_token||cur.member_token||''),saved_at:new Date().toISOString()});}
+function rememberVisit(result,guestName){if(!result?.join_token)return;const cur=readVisit()||{};writeVisit({...cur,join_token:String(result.join_token),ticket_code:String(result.ticket_code||cur.ticket_code||''),guest_name:String(result.guest_name||guestName||cur.guest_name||''),server:String(result.server||cur.server||''),member_id:result.member_id??cur.member_id??null,member_token:String(result.member_token||cur.member_token||''),last_status:String(cur.join_token)===String(result.join_token)?cur.last_status:'waiting',receipt_expires_at:String(cur.join_token)===String(result.join_token)?(cur.receipt_expires_at||null):null,saved_at:new Date().toISOString()});}
 
 (function(){
   var nav=document.getElementById('nav'),t=document.getElementById('navToggle'),l=document.getElementById('navLinks');
