@@ -1,0 +1,47 @@
+name: Repair cocktail image assets
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: contains(github.event.head_commit.message, '[repair-cocktail-assets]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rebuild cocktail images
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .repair/citrine.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_citrine_moon.webp
+          cat .repair/ruby.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_ruby_reverie.webp
+          cat .repair/sapphire.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_sapphire_nocturne.webp
+          cat .repair/misty.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_misty_quartz_edge.webp
+          cp assets/drink_misty_quartz_edge.webp assets/drink_smoky_quartz_edge.webp
+          python3 - <<'PY'
+          import struct, pathlib
+          for p in [
+              'assets/drink_citrine_moon.webp',
+              'assets/drink_ruby_reverie.webp',
+              'assets/drink_sapphire_nocturne.webp',
+              'assets/drink_misty_quartz_edge.webp',
+              'assets/drink_smoky_quartz_edge.webp',
+          ]:
+              b=pathlib.Path(p).read_bytes()
+              assert len(b) > 20000, (p, len(b))
+              assert b[:4] == b'RIFF' and b[8:12] == b'WEBP', p
+              declared=struct.unpack('<I',b[4:8])[0] + 8
+              assert declared == len(b), (p, declared, len(b))
+              print(p, len(b))
+          PY
+      - name: Commit repaired binaries
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/drink_citrine_moon.webp assets/drink_ruby_reverie.webp assets/drink_sapphire_nocturne.webp assets/drink_misty_quartz_edge.webp assets/drink_smoky_quartz_edge.webp
+          git commit -m "Repair cocktail image binaries"
+          git push
