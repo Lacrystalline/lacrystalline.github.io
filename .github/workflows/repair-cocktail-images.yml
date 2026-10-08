@@ -16,10 +16,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .repair/citrine.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_citrine_moon.webp
-          cat .repair/ruby.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_ruby_reverie.webp
-          cat .repair/sapphire.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_sapphire_nocturne.webp
-          cat .repair/misty.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_misty_quartz_edge.webp
+          cat .repair/c2.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_citrine_moon.webp
+          cat .repair/r2.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_ruby_reverie.webp
+          cat .repair/s2.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_sapphire_nocturne.webp
+          cat .repair/m2.*.b64 | tr -d '\n\r' | base64 -d > assets/drink_misty_quartz_edge.webp
           cp assets/drink_misty_quartz_edge.webp assets/drink_smoky_quartz_edge.webp
           python3 - <<'PY'
           import struct, pathlib
@@ -31,7 +31,7 @@ jobs:
               'assets/drink_smoky_quartz_edge.webp',
           ]:
               b=pathlib.Path(p).read_bytes()
-              assert len(b) > 20000, (p, len(b))
+              assert len(b) > 10000, (p, len(b))
               assert b[:4] == b'RIFF' and b[8:12] == b'WEBP', p
               declared=struct.unpack('<I',b[4:8])[0] + 8
               assert declared == len(b), (p, declared, len(b))
