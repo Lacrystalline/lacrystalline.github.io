@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>藍月魅影｜Sapphire Nocturne｜水晶庭 La Crystalline</title>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="description" content="水晶庭 La Crystalline 隱藏酒單｜藍月魅影 Sapphire Nocturne">
+<meta property="og:type" content="website">
+<meta property="og:title" content="藍月魅影｜Sapphire Nocturne">
+<meta property="og:description" content="青藍夜色凝於杯中，緋紅小磚托住一彎金月；白葡萄、花香與橙皮在冷調草本間掠過，留下乾淨而幽長的夜色餘韻。">
+<meta property="og:image" content="../assets/drink_sapphire_nocturne.webp">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="../assets/emblem_nav.png">
+<link rel="apple-touch-icon" href="../assets/emblem.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0e14;--night:#111a2b;--deep:#0d1420;
+  --crys:#7fd3d6;--crys-dim:#4a8f95;--gold:#d8b87a;
+  --mist:#e8edf2;--mute:#9aa7b4;--line:rgba(127,211,214,.18);
+  --peridot:#87c9df;--peridot-dim:#4f8298;
+  --serif:"Cormorant Garamond",serif;--tc:"Noto Serif TC",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--mist);font-family:var(--tc);font-weight:300;line-height:1.9;-webkit-font-smoothing:antialiased;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-3;background:radial-gradient(900px 620px at 72% -8%,rgba(62,133,164,.22),transparent 62%),radial-gradient(900px 680px at 10% 16%,rgba(35,65,110,.28),transparent 60%),linear-gradient(180deg,#070b12,#0a1120 48%,#080d16)}
+.crystal-veil{position:fixed;inset:0;z-index:-2;pointer-events:none;background-image:url('../assets/crystal.svg');background-size:cover;opacity:.34;mix-blend-mode:screen}
+img{display:block;max-width:100%}
+.wrap{max-width:760px;margin:0 auto;padding:0 22px}
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(8,12,20,.90);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.nav-logo img{height:26px;width:auto}
+.nav-logo .lt{font-family:var(--serif);font-size:1.05rem;color:var(--mist);letter-spacing:.12em;line-height:1}
+.nav-logo .lt small{display:block;font-family:var(--tc);font-size:.58rem;color:var(--crys-dim);letter-spacing:.28em;margin-top:2px}
+.nav .mark{font-family:var(--serif);font-style:italic;color:var(--peridot);font-size:.86rem;letter-spacing:.10em}
+.head{padding:100px 0 26px;text-align:center}
+.head .ey{font-family:var(--serif);font-style:italic;color:var(--peridot);font-size:1rem;letter-spacing:.08em}
+.head h1{font-family:var(--tc);font-size:clamp(1.9rem,7vw,2.7rem);font-weight:400;letter-spacing:.12em;margin-top:.18em}
+.head .en{font-family:var(--serif);font-style:italic;font-size:1.22rem;color:var(--peridot);letter-spacing:.08em;margin-top:.15em}
+.section{padding:28px 0;border-top:1px solid var(--line)}
+.cat{color:var(--crys-dim);font-size:.78rem;letter-spacing:.2em;margin:0 0 10px;font-family:var(--serif);font-style:italic}
+.opt{border:1px solid var(--line);border-radius:4px;background:linear-gradient(145deg,rgba(17,26,43,.34),rgba(9,20,31,.24));box-shadow:inset 0 0 0 1px rgba(127,211,214,.025);overflow:hidden}
+.menu-item{display:grid;grid-template-columns:190px minmax(0,1fr);gap:20px;align-items:center;padding:18px}
+.thumb-wrap{display:flex;align-items:center;justify-content:center;min-height:188px;background:radial-gradient(circle at 50% 50%,rgba(135,201,223,.09),transparent 68%);border-right:1px solid rgba(127,211,214,.10)}
+.thumb{width:180px;height:180px;object-fit:contain;filter:drop-shadow(0 0 18px rgba(135,201,223,.16))}
+.meta{display:flex;flex-direction:column;gap:7px;min-width:0}
+.nm{font-size:1.18rem;color:var(--mist);letter-spacing:.08em}
+.nm .en{display:block;font-family:var(--serif);font-style:italic;color:var(--peridot);font-size:.95rem;letter-spacing:.06em;margin-top:1px}
+.ingredients{color:#c8d2d9;font-size:.82rem;line-height:1.65;padding-top:4px}
+.ingredients .sep{color:var(--peridot);padding:0 .28em}
+.taste{margin-top:3px;padding:9px 11px;border-left:2px solid var(--peridot-dim);background:rgba(135,201,223,.05);color:var(--mute);font-size:.8rem;line-height:1.7}
+.taste strong{color:var(--peridot);font-weight:400;letter-spacing:.08em}
+.copy{margin-top:18px;padding:18px 18px 19px;border-top:1px solid rgba(127,211,214,.10);background:rgba(8,16,26,.18);color:#cfd8df;font-size:.91rem;line-height:1.9;letter-spacing:.02em}
+.copy::before{content:"✦";color:var(--gold);margin-right:.6em}
+.note{text-align:center;color:var(--crys-dim);font-family:var(--serif);font-style:italic;font-size:.82rem;letter-spacing:.08em;margin-top:18px}
+footer{text-align:center;padding:30px 24px 42px;border-top:1px solid var(--line);color:var(--mute);font-size:.78rem;letter-spacing:.05em;margin-top:30px}
+footer .warn{color:var(--crys-dim);margin-top:.6em}
+@media(max-width:640px){
+  .nav{padding:11px 16px}
+  .nav .mark{font-size:.74rem;letter-spacing:.06em}
+  .wrap{padding:0 16px}
+  .head{padding-top:88px}
+  .menu-item{grid-template-columns:1fr;gap:8px;padding:14px 14px 16px}
+  .thumb-wrap{min-height:210px;border-right:0;border-bottom:1px solid rgba(127,211,214,.10)}
+  .thumb{width:min(74vw,250px);height:min(74vw,250px)}
+  .meta{padding:5px 3px 0}
+  .nm{font-size:1.08rem}
+  .copy{font-size:.86rem;padding:15px}
+}
+</style>
+</head>
+<body>
+<div class="crystal-veil"></div>
+<nav class="nav">
+  <a class="nav-logo" href="../index.html">
+    <img src="../assets/emblem_nav.png" alt="La Crystalline">
+    <span class="lt">La Crystalline<small>水晶庭</small></span>
+  </a>
+  <span class="mark">Hidden Selection</span>
+</nav>
+
+<header class="head wrap">
+  <div class="ey">Sapphire · Moon · Nocturne</div>
+  <h1>藍月魅影</h1>
+  <div class="en">Sapphire Nocturne</div>
+</header>
+
+<main class="wrap">
+  <section class="section">
+    <div class="cat">HIDDEN SIGNATURE · 隱藏酒單</div>
+    <article class="opt menu-item">
+      <div class="thumb-wrap">
+        <img class="thumb" src="../assets/drink_sapphire_nocturne.webp" alt="藍月魅影 Sapphire Nocturne">
+      </div>
+      <div class="meta">
+        <div class="nm">藍月魅影<span class="en">Sapphire Nocturne</span></div>
+        <div class="ingredients">蝶豆花琴酒・Dry Vermouth・Lillet Blanc・白葡萄・Blue Curaçao・接骨木花・Saline<span class="sep">｜</span>冷調草本、白葡萄與淡雅橙花香</div>
+        <div class="taste"><strong>口感</strong>｜微甜偏乾；琴酒與 Dry Vermouth 撐起乾淨草本骨架，白葡萄與 Lillet Blanc 柔化中段，Blue Curaçao 留下一抹橙皮香，接骨木花只在尾段輕輕浮現。酒感中等，收尾清爽而俐落。</div>
+      </div>
+      <div class="copy">青藍夜色凝於杯中，緋紅小磚托住一彎金月；白葡萄與淡花香掠過冷調草本，橙皮在最後留下一線明亮，像夜色深處一閃而過的魅影。</div>
+    </article>
+    <div class="note">A sapphire night, a crimson brick, and one quiet crescent above.</div>
+  </section>
+</main>
+
+<footer>
+  水晶庭 · La Crystalline ｜ 伊弗利特 - 海霧村 - 10區 45號
+  <div class="warn">未滿十八歲禁止飲酒 ｜ 飲酒過量有害健康</div>
+</footer>
+</body>
+</html>
