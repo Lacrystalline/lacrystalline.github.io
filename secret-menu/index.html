@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>隱藏酒單｜水晶庭 La Crystalline</title>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="description" content="水晶庭 La Crystalline 隱藏酒單">
+<link rel="icon" type="image/png" href="../assets/emblem_nav.png">
+<link rel="apple-touch-icon" href="../assets/emblem.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0e14;--night:#111a2b;--crys:#7fd3d6;--crys-dim:#4a8f95;
+  --gold:#d8b87a;--mist:#e8edf2;--mute:#9aa7b4;--line:rgba(127,211,214,.18);
+  --serif:"Cormorant Garamond",serif;--tc:"Noto Serif TC",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:#0a0e14;color:var(--mist);font-family:var(--tc);font-weight:300;line-height:1.8}
+body::before{content:"";position:fixed;inset:0;z-index:-3;background:radial-gradient(900px 620px at 72% -8%,rgba(62,133,164,.16),transparent 62%),radial-gradient(900px 680px at 10% 16%,rgba(35,65,110,.25),transparent 60%),linear-gradient(180deg,#070b12,#0a1120 48%,#080d16)}
+.crystal-veil{position:fixed;inset:0;z-index:-2;pointer-events:none;background:url('../assets/crystal.svg') center/cover;opacity:.34;mix-blend-mode:screen}
+img{display:block;max-width:100%}
+.wrap{max-width:920px;margin:auto;padding:0 22px}
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(8,12,20,.90);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.nav-logo img{height:26px;width:auto}
+.nav-logo .lt{font-family:var(--serif);font-size:1.05rem;color:var(--mist);letter-spacing:.12em;line-height:1}
+.nav-logo .lt small{display:block;font-family:var(--tc);font-size:.58rem;color:var(--crys-dim);letter-spacing:.28em;margin-top:2px}
+.nav .mark{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:.86rem;letter-spacing:.10em}
+.head{padding:100px 0 30px;text-align:center}
+.head .ey{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1rem;letter-spacing:.12em}
+.head h1{font-size:clamp(2rem,7vw,2.8rem);font-weight:400;letter-spacing:.14em;margin-top:.2em}
+.head .en{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1.2rem;letter-spacing:.08em}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:28px 0;border-top:1px solid var(--line)}
+.card{display:grid;grid-template-columns:145px minmax(0,1fr);gap:16px;align-items:center;padding:14px;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:4px;background:linear-gradient(145deg,rgba(17,26,43,.34),rgba(9,20,31,.24));transition:.2s ease}
+.card:hover{border-color:rgba(127,211,214,.38);transform:translateY(-1px)}
+.pic{height:145px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(127,211,214,.07),transparent 70%)}
+.pic img{width:138px;height:138px;object-fit:contain;filter:drop-shadow(0 0 14px rgba(127,211,214,.12))}
+.cn{font-size:1.08rem;letter-spacing:.08em}
+.en{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:.92rem;letter-spacing:.05em;margin-top:2px}
+.desc{color:var(--mute);font-size:.78rem;line-height:1.65;margin-top:8px}
+footer{text-align:center;padding:30px 24px 42px;border-top:1px solid var(--line);color:var(--mute);font-size:.78rem;letter-spacing:.05em;margin-top:18px}
+@media(max-width:700px){
+  .nav{padding:11px 16px}
+  .wrap{padding:0 16px}
+  .head{padding-top:88px}
+  .grid{grid-template-columns:1fr}
+  .card{grid-template-columns:120px minmax(0,1fr)}
+  .pic{height:120px}
+  .pic img{width:115px;height:115px}
+}
+</style>
+</head>
+<body>
+<div class="crystal-veil"></div>
+<nav class="nav">
+  <a class="nav-logo" href="../index.html">
+    <img src="../assets/emblem_nav.png" alt="La Crystalline">
+    <span class="lt">La Crystalline<small>水晶庭</small></span>
+  </a>
+  <span class="mark">Hidden Selection</span>
+</nav>
+
+<header class="head wrap">
+  <div class="ey">La Crystalline · Hidden Selection</div>
+  <h1>隱藏酒單</h1>
+  <div class="en">Secret Cocktails</div>
+</header>
+
+<main class="wrap">
+  <section class="grid">
+    <a class="card" href="peridot-whisper.html">
+      <div class="pic"><img src="../assets/drink_peridot_whisper.png" alt="翠芽呢喃"></div>
+      <div><div class="cn">翠芽呢喃</div><div class="en">Peridot Whisper</div><div class="desc">綠茶、青果與白花，清雅而悠長。</div></div>
+    </a>
+    <a class="card" href="ruby-moon-mischief.html">
+      <div class="pic"><img src="../assets/drink_ruby_moon_mischief.png" alt="紅月蝶戲"></div>
+      <div><div class="cn">紅月蝶戲</div><div class="en">Ruby Moon Mischief</div><div class="desc">紅月、蝶影與玫瑰，帶一點惡作劇般的甜意。</div></div>
+    </a>
+    <a class="card" href="citrine-moon.html">
+      <div class="pic"><img src="../assets/drink_citrine_moon.webp" alt="柚月凝香"></div>
+      <div><div class="cn">柚月凝香</div><div class="en">Citrine Moon</div><div class="desc">柚香、嫩茶與木質，清爽而柔和。</div></div>
+    </a>
+    <a class="card" href="ruby-reverie.html">
+      <div class="pic"><img src="../assets/drink_ruby_reverie.webp" alt="斑影蝶夢"></div>
+      <div><div class="cn">斑影蝶夢</div><div class="en">Ruby Reverie</div><div class="desc">淡金沉入緋紅，花果與微苦香料交疊。</div></div>
+    </a>
+    <a class="card" href="sapphire-nocturne.html">
+      <div class="pic"><img src="../assets/drink_sapphire_nocturne.webp" alt="藍月魅影"></div>
+      <div><div class="cn">藍月魅影</div><div class="en">Sapphire Nocturne</div><div class="desc">青藍夜色、白葡萄與冷調草本。</div></div>
+    </a>
+    <a class="card" href="smoky-quartz-edge.html">
+      <div class="pic"><img src="../assets/drink_misty_quartz_edge.webp" alt="霧晶銀鋒"></div>
+      <div><div class="cn">霧晶銀鋒</div><div class="en">Smoky Quartz Edge</div><div class="desc">威士忌、雪莉、淡可可與俐落橙皮尾韻。</div></div>
+    </a>
+  </section>
+</main>
+
+<footer>
+  水晶庭 · La Crystalline ｜ 伊弗利特 - 海霧村 - 10區 45號
+</footer>
+</body>
+</html>
