@@ -393,7 +393,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   <!-- STEP 3: 指名 -->
   <section class="section order-stage" hidden>
     <div class="s-h"><span class="no">參</span><span class="zh">接待成員</span><span class="en">Choose a Member</span></div>
-    <div class="hint" id="hostHint">若希望由特定成員接待，可於餐飲選擇後在此指名；亦可略過。</div>
+    <div class="hint" id="hostHint">如需體驗服務，請先選擇一位成員，再於下方選擇該成員提供的服務；未選服務不會建立指名。</div>
     <div class="member-carousel" aria-label="成員選擇">
       <button class="member-nav" type="button" aria-label="上一位成員" onclick="scrollMembers(-1)">‹</button>
       <div class="members" id="members"></div>
@@ -655,14 +655,14 @@ function renderMembers(){
 
   if(hostHint){
     hostHint.textContent = hostEnabled
-      ? '若希望由特定成員接待，可於此選擇。（可略過，直接點餐亦可）'
+      ? '如需體驗服務，請先選擇一位成員，再於下方選擇服務；未選服務不會建立指名。'
       : (state.specialServiceEnabled === false
           ? '接待成員選擇目前暫停受理。餐飲點單仍正常開放。'
           : '正在確認接待成員選擇狀態…');
   }
   if(memberNote){
     memberNote.textContent = hostEnabled
-      ? '左右滑動瀏覽成員・點選卡片即可選擇'
+      ? '左右滑動瀏覽成員・選人後再選擇體驗項目'
       : '目前暫不可選擇接待成員；體驗項目恢復後即可再次選擇';
     memberNote.classList.toggle('host-closed-note', !hostEnabled);
   }
@@ -693,17 +693,10 @@ function renderMembers(){
 
       if(state.member===id){
         state.member=null;
+        state.services.clear();
       }else{
         state.member=id;
-      }
-
-      // 清掉新成員不提供的服務
-      const member=MEMBERS.find(m=>m.id===state.member);
-      if(member){
-        [...state.services].forEach(sid=>{
-          if(!member.services.includes(sid)) state.services.delete(sid);
-        });
-      }else{
+        // 指名必須重新選擇服務；切換成員時不得沿用上一位的服務。
         state.services.clear();
       }
 
@@ -762,7 +755,7 @@ function renderServices(){
   if(!avail.length){
     state.services.clear();
     box.innerHTML='';
-    hint.textContent=`${member.name} 目前沒有設定體驗項目；仍可選擇由此成員接待。`;
+    hint.textContent=`${member.name} 目前沒有可選的體驗項目；不會建立服務指名。`;
     return;
   }
   hint.textContent = contactOnly.size
@@ -930,7 +923,7 @@ async function hydrateMemberPrivileges(memberToken=state.memberToken){
   return member;
 }
 function hasAnything(){
-  return state.member || state.services.size>0 || Object.values(state.qty).some(q=>q>0);
+  return state.services.size>0 || Object.values(state.qty).some(q=>q>0);
 }
 // ---- 前端送出節流：同一瀏覽器成功送出後 5 秒內不可再次送出 ----
 const SUBMIT_COOLDOWN_MS = 5000;
@@ -1054,8 +1047,8 @@ function buildOrder(){
     code: genCode(),
     guest_name: $("guestName").value.trim(),
     server: $("guestServer").value,
-    // host 目前為「指名對象」，本身不另外收費。
-    host: member ? member.name : null,
+    // 指名只隨服務成立；單純點選成員但未選服務，不寫入 host。
+    host: (member && services.length>0) ? member.name : null,
     services,
     items,
     note: $("note").value.trim() || null,
