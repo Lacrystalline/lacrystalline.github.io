@@ -165,6 +165,8 @@ img{display:block;max-width:100%}
 .member.unavailable{cursor:not-allowed;opacity:.58;filter:saturate(.72)}
 .member.unavailable:hover{border-color:var(--line);transform:none}
 .member.unavailable .pick{display:none}
+.member.unavailable.busy{opacity:.86;filter:none;border-color:rgba(216,184,122,.38);background:linear-gradient(150deg,rgba(76,58,28,.20),rgba(17,26,43,.34));box-shadow:inset 0 0 0 1px rgba(216,184,122,.06)}
+.member.unavailable.busy:hover{border-color:rgba(216,184,122,.38);transform:none}
 .member.host-disabled{cursor:not-allowed;opacity:.46;filter:saturate(.58)}
 .member.host-disabled:hover{border-color:var(--line);transform:none}
 .member.host-disabled .pick{display:none}
@@ -173,6 +175,7 @@ img{display:block;max-width:100%}
 .member .status-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
 .member .status-badge.on_duty{color:var(--crys);border-color:rgba(127,211,214,.32)}
 .member .status-badge.away{color:var(--gold);border-color:rgba(216,184,122,.30)}
+.member .status-badge.busy{color:#e6c47f;border-color:rgba(230,196,127,.46);background:rgba(90,65,24,.16)}
 .member .status-badge.offline,.member .status-badge.loading,.member .status-badge.error{color:var(--mute)}
 .member-nav{width:36px;height:48px;border:1px solid rgba(127,211,214,.24);border-radius:999px;background:rgba(7,18,29,.38);color:var(--crys);font-family:var(--serif);font-size:1.7rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.18s;backdrop-filter:blur(5px)}
 .member-nav:hover{border-color:rgba(127,211,214,.58);background:rgba(127,211,214,.08);color:#e5fdff}
@@ -611,6 +614,7 @@ async function loadJoinSession(){
 
 function staffStatusLabel(status){
   if(status === "on_duty") return "當班中・可選擇";
+  if(status === "busy") return "指名服務中・暫不可選擇";
   if(status === "away") return "暫離・目前不可選擇";
   if(status === "offline") return "未當班";
   if(status === "error") return "狀態暫時無法確認";
@@ -671,7 +675,7 @@ function renderMembers(){
     const selectable = hostEnabled && m.selectable === true;
     const status = m.status || "loading";
     return `
-    <div class="member${selectable?'':' unavailable'}${!hostEnabled?' host-disabled':''}${state.member===m.id?' sel':''}" data-id="${m.id}" aria-disabled="${selectable?'false':'true'}">
+    <div class="member${selectable?'':' unavailable'}${status==='busy'?' busy':''}${!hostEnabled?' host-disabled':''}${state.member===m.id?' sel':''}" data-id="${m.id}" aria-disabled="${selectable?'false':'true'}">
       <img class="av" src="${m.av}" alt="${m.name}" onerror="this.style.opacity=0">
       <div class="info">
         <div class="nm">${m.name}<span class="en">${m.en}</span></div>
@@ -1487,6 +1491,7 @@ $("submitBtn").addEventListener('click', async ()=>{
     if(state.joinSession){ state.joinSession.identified_count=data.identified_count; state.joinSession.pending_count=data.pending_count; state.joinSession.status=data.session_status; state.joinSession.can_order=data.session_status==='seated'; }
     await refreshVisitCard(true);
     toast(`訂單 ${esc(data.order_code)} 已送出。`,data,false); startSubmitCooldown();
+    await loadPublicStaffStatus();
     state.member=null; state.services.clear(); state.qty={};
     document.querySelectorAll('.opt').forEach(el=>el.classList.remove('sel'));
     renderMembers(); renderServices(); document.querySelectorAll('.qn').forEach(el=>el.textContent='0'); $("note").value='';
@@ -1523,7 +1528,7 @@ setTimeout(()=>refreshVisitCard(false),250);
 setInterval(refreshVisitCard,10000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshVisitCard();loadSpecialServiceStatus();}});
 setInterval(loadSpecialServiceStatus,10000);
-setInterval(loadPublicStaffStatus, 30000);
+setInterval(loadPublicStaffStatus, 10000);
 </script>
   <script src="assets/radio.js"></script>
 </body>
