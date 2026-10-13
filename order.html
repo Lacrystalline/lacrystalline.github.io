@@ -376,28 +376,9 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
     </div>
   </section>
 
-  <!-- STEP 2: 指名 -->
-  <section class="section order-stage" hidden>
-    <div class="s-h"><span class="no">貳</span><span class="zh">接待成員</span><span class="en">Choose a Member</span></div>
-    <div class="hint" id="hostHint">若希望由特定成員接待，可於此選擇。（可略過，直接點餐亦可）</div>
-    <div class="member-carousel" aria-label="成員選擇">
-      <button class="member-nav" type="button" aria-label="上一位成員" onclick="scrollMembers(-1)">‹</button>
-      <div class="members" id="members"></div>
-      <button class="member-nav" type="button" aria-label="下一位成員" onclick="scrollMembers(1)">›</button>
-    </div>
-    <div class="member-carousel-note" id="memberNote">左右滑動瀏覽成員・點選卡片即可選擇</div>
-  </section>
-
-  <!-- STEP 3: 特殊服務 -->
-  <section class="section order-stage" hidden>
-    <div class="s-h"><span class="no">參</span><span class="zh">體驗項目</span><span class="en">Experiences</span></div>
-    <div class="hint" id="svcHint">請先於上方選擇一位接待成員，即會顯示其可提供的體驗項目。</div>
-    <div class="opts" id="services"></div>
-  </section>
-
-  <!-- STEP 4: 點餐 -->
+  <!-- STEP 2: 點餐 -->
   <section class="section order-stage" id="diningSection" hidden>
-    <div class="s-h"><span class="no">肆</span><span class="zh">點餐</span><span class="en">Dining</span></div>
+    <div class="s-h"><span class="no">貳</span><span class="zh">點餐</span><span class="en">Dining</span></div>
     <div class="vip-menu-note" id="vipMenuNote"><span class="vip-mark">✦</span>今夜無須低消，餐飲由水晶庭招待。願水晶的微光與月色相伴，陪您度過一個優雅而美好的夜晚。</div>
     <div class="vip-menu-note" id="premierMenuNote"><span class="vip-mark">✦</span>今夜無須低消。願水晶的微光與月色相伴，陪您自在享受水晶庭的夜晚。</div>
     <div class="hint">調酒與餐點可自由選擇數量。</div>
@@ -409,6 +390,25 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
     <div class="opts" id="bites"></div>
   </section>
 
+  <!-- STEP 3: 指名 -->
+  <section class="section order-stage" hidden>
+    <div class="s-h"><span class="no">參</span><span class="zh">接待成員</span><span class="en">Choose a Member</span></div>
+    <div class="hint" id="hostHint">若希望由特定成員接待，可於餐飲選擇後在此指名；亦可略過。</div>
+    <div class="member-carousel" aria-label="成員選擇">
+      <button class="member-nav" type="button" aria-label="上一位成員" onclick="scrollMembers(-1)">‹</button>
+      <div class="members" id="members"></div>
+      <button class="member-nav" type="button" aria-label="下一位成員" onclick="scrollMembers(1)">›</button>
+    </div>
+    <div class="member-carousel-note" id="memberNote">左右滑動瀏覽成員・點選卡片即可選擇</div>
+  </section>
+
+  <!-- STEP 4: 體驗項目 -->
+  <section class="section order-stage" hidden>
+    <div class="s-h"><span class="no">肆</span><span class="zh">體驗項目</span><span class="en">Experiences</span></div>
+    <div class="hint" id="svcHint">請先於上方選擇一位接待成員，即會顯示其可提供的體驗項目。</div>
+    <div class="opts" id="services"></div>
+  </section>
+
   <!-- STEP 5: 備註 -->
   <section class="section order-stage" hidden>
     <div class="s-h"><span class="no">伍</span><span class="zh">備註</span><span class="en">Notes</span></div>
@@ -418,7 +418,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   </section>
 
   <div class="note" id="statusNote">
-    STEP 01｜先取號碼牌並等待帶位。完成帶位後，STEP 02 起的點餐內容會自動出現。<br>
+    STEP 01｜先取號碼牌並等待帶位。完成帶位後，會自動前往 STEP 02 點餐；往下即可選擇接待成員與體驗項目。<br>
     營業時間：每週六 22:00–02:00｜實際以遊戲內招募看板為準。
   </div>
 </main>
