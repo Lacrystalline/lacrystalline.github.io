@@ -493,19 +493,35 @@ section{padding:72px 0}
 .member-dots{display:flex;justify-content:center;gap:8px;margin:3px 0 30px}
 .member-dot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(127,211,214,.45);background:transparent;padding:0;cursor:pointer;transition:.2s}
 .member-dot.active{background:var(--crys);box-shadow:0 0 10px rgba(127,211,214,.38)}
-.member-detail{max-width:850px;margin:0 auto;padding-top:6px;animation:memberFade .26s ease}
+.member-detail{max-width:790px;margin:0 auto;padding-top:6px;animation:memberFade .26s ease}
 .member-detail:empty{display:none}
 @keyframes memberFade{from{opacity:.25;transform:translateY(4px)}to{opacity:1;transform:none}}
 .m-name{font-family:var(--serif);font-size:2.1rem;color:var(--mist);letter-spacing:.05em}
 .m-name .en{color:var(--crys-dim);font-style:italic;font-size:1.15rem;display:block;margin-top:.05em}
 .m-role{color:var(--crys);font-size:.85rem;letter-spacing:.14em;margin-top:.6em}
-.m-meta{margin-top:1em;padding:11px 14px;border-left:2px solid var(--crys-dim);background:rgba(127,211,214,.045);display:grid;gap:6px;max-width:42em}
+.m-meta{margin-top:1.05em;padding:12px 15px;border-left:2px solid var(--crys-dim);background:rgba(127,211,214,.045);display:grid;gap:7px;max-width:42em}
 .m-meta-row{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
 .m-meta-label{color:var(--crys-dim);font-family:var(--serif);font-size:.76rem;letter-spacing:.16em;min-width:6.2em}
-.m-meta-value{color:#cbd6df;font-size:.9rem;letter-spacing:.06em}
-.m-body p{color:#c3ced9;font-size:1.02rem;margin-top:1.1em;letter-spacing:.02em;max-width:50em}
-.m-quote{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1.2rem;margin-top:1.4em;letter-spacing:.03em}
-.m-foot{color:var(--mute);font-size:.92rem;margin-top:1.1em;padding-top:1.1em;border-top:1px solid var(--line);font-family:var(--serif);font-style:italic}
+.m-meta-value{color:#d3dde5;font-size:.9rem;letter-spacing:.06em}
+.m-body{margin-top:1.45em}
+.m-body p{color:#c8d2dc;font-size:1.02rem;line-height:1.95;margin:0 0 1.28em;letter-spacing:.02em;max-width:48em}
+.m-body p:last-child{margin-bottom:0}
+.m-body strong{color:var(--mist);font-weight:600}
+.m-inline-quote{
+  margin:1.1em 0 1.35em;padding:.68em 1em .72em 1.08em;
+  border-left:3px solid rgba(127,211,214,.62);
+  background:linear-gradient(90deg,rgba(127,211,214,.075),rgba(127,211,214,.015));
+  color:var(--mist);font-family:var(--serif);font-size:1.08rem;line-height:1.8;letter-spacing:.035em
+}
+.m-quote{
+  font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1.16rem;line-height:1.85;
+  margin-top:1.7em;padding:.72em 1em .76em 1.08em;border-left:3px solid rgba(127,211,214,.5);
+  background:linear-gradient(90deg,rgba(127,211,214,.055),transparent);letter-spacing:.03em
+}
+.m-foot{
+  color:#cbd6df;font-size:.95rem;line-height:1.9;margin-top:1.45em;padding-top:1.25em;
+  border-top:1px solid var(--line);font-family:var(--serif);font-style:normal;font-weight:600;letter-spacing:.02em
+}
 
 /* ---------- rules ---------- */
 .rules{max-width:44em}
@@ -1232,10 +1248,26 @@ const MEMBER_PROFILES=[
     name:"北風", en:"Northern Wind", role:"店長 / Keeper",
     meta:[["RP 擔當","店長・調酒"],["體驗項目",'光釀・裁光 <span style="color:var(--crys-dim)">｜洽店長</span>']],
     body:[
-      "你此刻見到的，是一位以斯卡提山脈山林之民模樣行走於此的旅者。他舉止文雅而從容，與初識之人總保留幾分恰到好處的距離，因此多少顯得難以看透；但真正熟悉之後，才會發現他其實相當健談。從書、工藝與音樂，到城市、山林與旅途中遇見的人事，他總有不少故事可說。",
-      "但這具身體，並不是他真正的樣子。據說他的本體流著古老的亞拉戈皇血——正是這份血脈，讓他有資格喚醒並看守這座水晶塔特異點。魂與記憶渡得過來，肉身卻總隨世界而變；如今這副山林之民的軀殼，不過是特異點為他開啟的、又一種「可能性的身體」。至於他真正的容貌、那雙傳說中的紅瞳，此刻並不在這裡。",
-      "他曾在城市生活，也走過山野與漫長旅途；做過工藝、研究過古老知識，也以冒險者的身分去過不少地方。如今比起刀光劍影，他更喜歡把時間花在酒、料理、書本與工坊裡，把一件件東西慢慢做好。",
-      "至於為何最後停在水晶庭，他自己也說不清。最初似乎只是循著某種來自水晶的指引走到這裡——他曾以為那是海德林的聲音，如今卻不再急著替它下定論。水晶庭原本只是旅途中的停留之處，最後卻成了他選擇留下、替來客點燈的地方。"
+      "你此刻見到的，是一位以斯卡提山脈山林之民模樣行走於此的旅者。",
+      "他舉止文雅而從容，與初識之人總保留幾分恰到好處的距離，因此多少顯得難以看透；但真正熟悉之後，才會發現他其實相當健談。從書、工藝與音樂，到城市、山林與旅途中遇見的人事，他總有不少故事可說。",
+      "但這具身體，並不是他真正的樣子。",
+      "據說他的本體流著古老的亞拉戈皇血——正是這份血脈，讓他有資格喚醒並看守這座水晶塔特異點。魂與記憶渡得過來，肉身卻總隨世界而變；如今這副山林之民的軀殼，不過是特異點替他開啟的、又一種「可能性的身體」。至於他真正的容貌，以及那雙傳說中的紅瞳，此刻並不在這裡。",
+      "比起單純稱自己為冒險者，北風似乎更習慣什麼都碰一點。工藝、料理、酒、音樂、書籍、裝潢，甚至一些沒有人特別交給他的雜事，最後往往都會莫名其妙落到他手上。水晶庭裡的大部分後勤、空間佈置與菜單，也是他一點一點弄出來的。",
+      {type:"quote",text:"「樣樣通，樣樣鬆而已。」"},
+      "雖然嘴上這麼說，他對「把東西做好看」這件事倒意外認真。比起實用與否，他常常還會多想一步：杯子該長什麼樣、燈光落在哪裡、字放在哪個位置、一道料理端出來時第一眼看見的是什麼。對他而言，藝術未必需要掛在牆上；有時是一件衣服，有時是一杯酒，也可能只是桌面上一道剛好的光。",
+      "酒尤其如此。除了替客人調製店內酒款，他也喜歡自己試新的配方。有些最後進了菜單，有些只留給特定的人，還有一些大概永遠只存在於某次興起的實驗裡。",
+      "至於音樂，營業時他通常還算克制。<strong>關店之後就不一定了。</strong> 當最後一位客人離開、水晶庭的燈逐漸暗下來，店裡偶爾會響起一些和原本氣氛完全搭不上邊的樂曲。",
+      {type:"quote",text:"「現在沒有客人了。」"},
+      "至於一個如此講究裝潢、菜單與各種細節的地方，到底有沒有賺錢，最好也不要問得太仔細。北風通常只有一句答案：",
+      {type:"quote",text:"「潛水艇很努力。」"},
+      "這句話究竟是在回答問題，還是在迴避問題，至今沒有人真正確認過。",
+      "他自己其實也從不認為自己很適合站在人群中央。對那些同樣不擅長熱鬧、覺得自己可能不適合接待客人的人，北風反而有一套奇怪的理論。",
+      {type:"quote",text:"「把 I 豎在額頭上，就會變成可能性。」"},
+      "據說這和艾歐澤亞某個關於「可能性之獸」的傳說多少有點關係。究竟有沒有道理並不重要；至少北風本人似乎很相信——安靜的人，也有安靜的人的待客方式。不擅長成為人群中心，和能不能好好陪一個人說話，本來就是兩件不同的事。",
+      "水晶庭最初或許只是旅途中的一處停留。如今，他會調酒、改菜單、整理後勤、調整燈光、修東修西，偶爾還得處理一些不知道為什麼最後又落到店長頭上的事情。",
+      "開店一段時間後，若有人問起感想，早期那句「替來客點燈」大概還在。只是偶爾也會多出一句：",
+      {type:"quote",text:"「……我可以把這條可能性關掉嗎？」"},
+      "然後第二天，他通常還是會把燈打開。"
     ],
     quote:"「……你也是來躲雨的嗎？坐吧。這裡的光，會等你。」",
     foot:"有些東西他只給熟人：一身親手裁的衣裳，或一杯只為你而釀的光。"
@@ -1312,7 +1344,7 @@ function renderMember(index,{scroll=true}={}){
     <div class="m-name">${m.name}<span class="en">${m.en}</span></div>
     <div class="m-role">${m.role}</div>
     <div class="m-meta">${m.meta.map(([k,v])=>`<div class="m-meta-row"><span class="m-meta-label">${k}</span><span class="m-meta-value">${v}</span></div>`).join('')}</div>
-    <div class="m-body">${m.body.map(x=>`<p>${x}</p>`).join('')}</div>
+    <div class="m-body">${m.body.map(x=>x&&typeof x==='object'&&x.type==='quote'?'<div class="m-inline-quote">'+x.text+'</div>':`<p>${x}</p>`).join('')}</div>
     <div class="m-quote">${m.quote}</div>
     <div class="m-foot">${m.foot}</div>`;
   detail.style.animation='none'; void detail.offsetWidth; detail.style.animation='';
