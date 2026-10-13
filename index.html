@@ -980,6 +980,14 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
             <div class="member-card-rp">接待・陪聊・攝影</div>
           </div>
         </button>
+        <button class="member-card" type="button" data-member="5" aria-pressed="false">
+          <div class="portrait"><img src="assets/morikami_berry_profile.webp" alt="水晶庭成員 森上莓友前" loading="lazy" decoding="async"></div>
+          <div class="member-card-copy">
+            <div class="member-card-name">森上莓友前<span class="member-card-en">阿莓</span></div>
+            <div class="member-card-role">夥伴 / Staff</div>
+            <div class="member-card-rp">接待・陪聊</div>
+          </div>
+        </button>
       </div>
       <button class="member-arrow next" id="memberNext" type="button" aria-label="下一位成員">›</button>
     </div>
@@ -990,6 +998,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <button class="member-dot" type="button" data-member="2" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="3" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="4" tabindex="-1"></button>
+      <button class="member-dot" type="button" data-member="5" tabindex="-1"></button>
     </div>
 
     <div class="member-detail" id="memberDetail" aria-live="polite"></div>
@@ -1262,7 +1271,7 @@ const MEMBER_PROFILES=[
       {type:"quote",text:"「潛水艇很努力。」"},
       "這句話究竟是在回答問題，還是在迴避問題，至今沒有人真正確認過。",
       "他自己其實也從不認為自己很適合站在人群中央。對那些同樣不擅長熱鬧、覺得自己可能不適合接待客人的人，北風反而有一套奇怪的理論。",
-      {type:"quote",text:"「把 I 豎在額頭上，就會變成可能性。」"},
+      {type:"quote",text:"「只要把 I 豎在額頭上，就能化作可能性。」"},
       "據說這和艾歐澤亞某個關於「可能性之獸」的傳說多少有點關係。究竟有沒有道理並不重要；至少北風本人似乎很相信 I 人擁有的可能性——安靜的人，也有安靜的人的待客方式。不擅長成為人群中心，和能不能好好陪一個人說話，本來就是兩件不同的事。",
       "水晶庭最初或許只是旅途中的一處停留。如今，他會調酒、改菜單、整理後勤、調整燈光、修東修西，偶爾還得處理一些不知道為什麼最後又落到店長頭上的事情。",
       "開店一段時間後，若有人問起感想，早期那句「替來客點燈」大概還在。只是偶爾也會多出一句：",
@@ -1320,6 +1329,29 @@ const MEMBER_PROFILES=[
     ],
     quote:"「你先說啊，我很好聊的。至於聊完會不會後悔，那是另外一回事。」",
     foot:"她對自己的過去總是說得含糊，對別人的事倒是很有興趣。至於腦袋裡那些奇怪點子——目前有阿莓負責承受。"
+  },
+  {
+    name:"森上莓友前", en:"阿莓", role:"夥伴 / Staff",
+    meta:[["暱稱","阿莓"],["RP 擔當","接待・陪聊"],["氣質","冷淡・神祕・溫柔・隨性"]],
+    body:[
+      "阿莓給人的第一印象，大概是安靜得有些難以靠近。話不多，神情也總是淡淡的；有人主動找他，他會很有禮貌地回應，卻不太會急著把自己說給別人聽。",
+      "若剛好聊到吃的、酒，或是哪裡值得去看看，他反而會多接幾句。以前四處跑過不少地方，做過冒險者，也過過走到哪裡就待到哪裡的日子，所以偶爾會很自然地提起一些旅途上的見聞。",
+      "至於阿莓為什麼會出現在水晶庭，故事就沒有那麼瀟灑了。",
+      "某一天，他原本還好端端地躺在床上睡覺。然後門被梅子打開了。準確一點說，是<strong>破門而入</strong>。",
+      {type:"quote",text:"「這邊好像很好玩，要不要一起？」"},
+      "據說這句話在形式上屬於詢問，也確實給了阿莓回答的機會。至於回答是否真的會影響接下來發生的事情，就很難說了。",
+      "總之，在梅子十分具有行動力的「邀請」之下，阿莓就這麼被拖去了水晶庭。若問他是不是自願加入——這部分可以略過。至少梅子本人應該會堅持，那只是一場很普通、充分尊重本人意願的邀請。",
+      "真正到了要在店裡接待客人的時候，阿莓倒提出過一個相當合理的疑問。他說自己是 <strong>I 人</strong>，大概不太適合做這種需要跟陌生人說話的工作。",
+      "店長聽完似乎沒有受到太大動搖。畢竟店長自己也是 I 人。最後只留下了一套頗有自己道理的說法：",
+      {type:"quote",text:"「只要把 I 豎在額頭上，就能化作可能性。」"},
+      "據說這套理論，似乎和艾歐澤亞某個關於「可能性之獸」的傳說有那麼一點關係。至於究竟是哪段傳說、兩者又是怎麼連在一起的，店長並沒有進一步說明。但他顯然相當相信 <strong>I 人擁有的可能性</strong>。",
+      "於是阿莓就在本人仍對自身適性抱持疑問的情況下，被很自然地納入了水晶庭的接待人員之中。",
+      "原先他大概也只是抱著「都被拖來了，那就看看吧」的心情。結果這裡剛好有酒、有吃的，也總會遇到一些值得多坐一會兒的人。對一個本來就不太在意自己一定要待在哪裡的人而言，再多留幾晚似乎也沒什麼不好。於是就留下來了。",
+      "在店裡，他其實也沒有勉強自己變成一個特別外向的人。客人想聊，他便陪著聊；對方今天只想安靜喝點東西，他也不會急著拿話題把空白填滿。偶爾碰上不知道該不該開口的時候，他大概還是會先觀察一下再說。",
+      "真正熟起來後倒是另一回事。話會明顯變多，回答也更直接，有時甚至直接得讓人懷疑最開始那個安靜又有禮貌的人去了哪裡。不過那份禮貌通常還是在的，只是會變成一種很平靜、很客氣地把實話說出來的方式。"
+    ],
+    quote:"「可以聊。你慢慢說就好。」",
+    foot:"他本來只是被人從床上拖來看看，最後卻莫名其妙地留了下來。至於下一次什麼時候又會被梅子拖去別的地方——阿莓本人可能也不知道。"
   }
 ];
 let activeMemberIndex=-1;
