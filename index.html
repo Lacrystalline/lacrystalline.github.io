@@ -956,6 +956,14 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
             <div class="member-card-rp">接待・陪聊</div>
           </div>
         </button>
+        <button class="member-card" type="button" data-member="4" aria-pressed="false">
+          <div class="portrait"><img src="assets/morikami_ume_profile.webp" alt="水晶庭成員 森上梅有前" loading="lazy" decoding="async"></div>
+          <div class="member-card-copy">
+            <div class="member-card-name">森上梅有前<span class="member-card-en">梅子</span></div>
+            <div class="member-card-role">夥伴 / Staff</div>
+            <div class="member-card-rp">接待・陪聊・攝影</div>
+          </div>
+        </button>
       </div>
       <button class="member-arrow next" id="memberNext" type="button" aria-label="下一位成員">›</button>
     </div>
@@ -965,6 +973,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <button class="member-dot" type="button" data-member="1" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="2" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="3" tabindex="-1"></button>
+      <button class="member-dot" type="button" data-member="4" tabindex="-1"></button>
     </div>
 
     <div class="member-detail" id="memberDetail" aria-live="polite"></div>
@@ -1266,6 +1275,19 @@ const MEMBER_PROFILES=[
     ],
     quote:"「想聊就聊吧。若一時想不到話題，我也可以先替你想一個——只是未必很正經。」",
     foot:"他似乎確實為了某件事停在這裡，只是比起追問答案，今晚先把酒喝完或許更重要。"
+  },
+  {
+    name:"森上梅有前", en:"梅子", role:"夥伴 / Staff",
+    meta:[["暱稱","梅子"],["RP 擔當","接待・陪聊・攝影"],["氣質","活潑・神祕・毒舌・隨性"]],
+    body:[
+      "梅子不是那種會把自己的故事從頭到尾好好講完的人。你問她以前去過哪裡，她大概能說上半天；真要問她從哪裡來、以前發生過什麼，她反而很會把話題拐到別人身上。不是刻意擺出神祕的樣子，只是有些事情，她覺得沒必要逢人就交代。",
+      "她以前就是個到處跑的冒險者。哪裡有工作就去哪裡，哪裡待得舒服就多留幾天，膩了便收拾東西繼續走。她對很多事情都抱著「先看看再說」的態度，唯獨錢和自由相當認真——錢要賺，自由也不能丟。一路下來看過不少地方，也碰過不少人，因此聊天時常會突然冒出一些不知道從哪裡累積來的見聞；有時有用，有時只是拿來吐槽。",
+      "她會留在水晶庭，本來也不像是經過什麼慎重決定。那天只是莫名覺得「好像該往這邊走」，結果一路晃到了店門口。後來問她當時到底在想什麼，她自己也說不出個所以然，只覺得既然來了，就先看看。這一看便看到了現在。究竟真有什麼把她帶來，還是純粹一時興起，她本人似乎也懶得追究。",
+      "在店裡，她通常比客人更不怕沒話講。接待時會自己找話題，陪聊時也不太走拘謹路線；拍照則意外地有耐心，會為了角度和畫面多繞兩步。跟她熟一點以後，那點原本還算客氣的分寸會迅速變薄，玩笑更多、吐槽更直接。",
+      "私底下的梅子偶爾還會冒出一些旁人很難預料的奇妙想法。至於內容到底有多奇妙，店長最後只留下了一條很簡單的規定：「那些東西，只准對阿莓使用。」 本人對此似乎也沒有特別反省，只是很自然地接受了這條規則，然後繼續思考下一個點子。"
+    ],
+    quote:"「你先說啊，我很好聊的。至於聊完會不會後悔，那是另外一回事。」",
+    foot:"她對自己的過去總是說得含糊，對別人的事倒是很有興趣。至於腦袋裡那些奇怪點子——目前有阿莓負責承受。"
   }
 ];
 let activeMemberIndex=-1;
