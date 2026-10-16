@@ -1452,6 +1452,7 @@ function renderMember(index,{scroll=true}={}){
   dots.forEach((d,i)=>d.addEventListener('click',()=>renderMember(i)));
   document.getElementById('memberPrev')?.addEventListener('click',()=>renderMember(activeMemberIndex<0?cards.length-1:activeMemberIndex-1));
   document.getElementById('memberNext')?.addEventListener('click',()=>renderMember(activeMemberIndex<0?0:activeMemberIndex+1));
+  renderMember(0,{scroll:false});
 })();
 
 refreshVisitCard();
