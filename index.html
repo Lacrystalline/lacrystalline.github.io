@@ -522,6 +522,7 @@ section{padding:72px 0}
   color:#cbd6df;font-size:.95rem;line-height:1.9;margin-top:1.45em;padding-top:1.25em;
   border-top:1px solid var(--line);font-family:var(--serif);font-style:normal;font-weight:600;letter-spacing:.02em
 }
+.m-quote:empty,.m-foot:empty{display:none}
 
 /* ---------- rules ---------- */
 .rules{max-width:44em}
@@ -996,6 +997,14 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
             <div class="member-card-rp">接待・調酒・料理・陪聊</div>
           </div>
         </button>
+        <button class="member-card" type="button" data-member="7" aria-pressed="false">
+          <div class="portrait"><img src="assets/xi_zai_profile.webp" alt="水晶庭成員 西·札伊" loading="lazy" decoding="async"></div>
+          <div class="member-card-copy">
+            <div class="member-card-name">西·札伊<span class="member-card-en">Xi·Zai</span></div>
+            <div class="member-card-role">夥伴 / Staff</div>
+            <div class="member-card-rp">攝影</div>
+          </div>
+        </button>
       </div>
       <button class="member-arrow next" id="memberNext" type="button" aria-label="下一位成員">›</button>
     </div>
@@ -1008,6 +1017,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <button class="member-dot" type="button" data-member="4" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="5" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="6" tabindex="-1"></button>
+      <button class="member-dot" type="button" data-member="7" tabindex="-1"></button>
     </div>
 
     <div class="member-detail" id="memberDetail" aria-live="polite"></div>
@@ -1429,6 +1439,29 @@ const MEMBER_PROFILES=[
     ],
     quote:"「我今天真的什麼都還沒做。」",
     foot:"關鍵大概不在「真的」，而在那個「還」。"
+  },
+  {
+    name:"西·札伊", en:"Xi·Zai", role:"夥伴 / Staff",
+    meta:[["RP 擔當","攝影"],["體驗項目","留影"],["氣質","活潑・神祕・優雅・異域風格"]],
+    body:[
+      "距今一千八百年前，薩納蘭區域有一個沙漠之國，崇尚天空，會觀星、觀日、觀月，去做祭祀，國家內有一名貓魅族神官名為 「西·札伊·提亞」，年紀十八歲，主要負責祭祀跟傳達神諭。",
+      "有天這國家的國王，想對外發動戰爭，但為了讓人民心甘情願當兵，甚至以為國家犧牲而為榮，國王希望札伊神官公布說：",
+      {type:"quote",text:"「神希望這個國家強大，因此要對其他國家發動戰爭侵略。」"},
+      "但札伊神官並不願意，他覺得這是偽造神諭，而且會造成百姓及無辜的人受傷及不幸，所以拒絕了國王。",
+      "國王聽了只是嘆了一口氣，並未說什麼，只是揮了揮手讓札伊退下，當天晚上，國王派人拿了一瓶美酒去給札伊神官，札伊知道這並不是美酒更不是賞賜，而是毒酒，一個懲罰，也是一個可以用來發動戰爭的好理由。",
+      "即便札伊掙扎過，但依舊被強硬灌下毒酒，當晚在臥室內離世，隔天國王對國家說神官被別國的人暗殺，藉此發動戰爭，為札伊興建了一個豪華的墓地遺跡。",
+      "札伊死後，靈魂並未被神帶走，也沒被死神帶去輪迴，而是被困在那座豪華淒涼的遺跡墓地內，獨自一人留守幾百年。",
+      "直到現代，有個身患絕症的貓魅族男性，他聽說有個古代神官的墓在烏爾達哈城附近，他想著自己都活不久了，還不如闖一次試試，就前去尋找遺跡了。",
+      "還真被他找到遺跡所在處，走了進去後，找到一個石質棺材，看到棺材上有刻字，他伸手掃掉沙塵，看到上面寫著：",
+      {type:"quote",text:"「西·札伊·提亞 神官在此長眠，但凡干擾者，將會受到詛咒。」"},
+      "當他抬頭時，看到一個半透明的貓魅族男性蹲坐在棺材上，眨了眨那雙異色瞳看著他。",
+      {type:"quote",text:"「這還真是......意外的相遇呢。」"},
+      "他笑了笑，對這貓神官幽靈說著自己活不久了，如果札伊神官不介意，看要不要離開這枯燥的地方，陪同自己去這世界的各個地方冒險遊玩，等到他死後，這副軀殼就贈送給札伊了，讓札伊得以繼續生活在這世上。",
+      "札伊聽到後，表示好像可以，便跟著他，去這世界遊玩，並看看這一千八百年世界有何變化，也陪著這位患有絕症的貓魅族男性度過剩下的時光。",
+      "過了一陣子，這貓魅族男性去世了，札伊哭了一整天，隨後進入了這男子的身軀，奇怪的是進入後，這男子的外貌就變成了札伊的樣子，札伊也將這位貓魅族男性的一件衣物埋在自己的遺跡的棺材內，然後踏上旅程，完成諾言，活在這世上，也替這位貓魅族男性繼續冒險，每當這位貓魅族的忌日到了，札伊就會回到那遺跡，帶著酒，掃墓並坐在棺材旁訴說這一年遇到的冒險經歷。"
+    ],
+    quote:"",
+    foot:""
   }
 ];
 let activeMemberIndex=-1;
