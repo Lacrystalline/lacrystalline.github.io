@@ -807,3 +807,18 @@
     padding-top:.3% !important;
   }
 }
+
+
+/* Mobile stacking: keep visit voucher controls above the Radio player. */
+@media(max-width:720px){
+  body:has(.lc-radio-compact.show) .visit-launcher,
+  body:has(.lc-radio-launch.show) .visit-launcher,
+  body:has(.lc-radio-panel.show) .visit-launcher{
+    bottom:max(96px,calc(env(safe-area-inset-bottom) + 86px)) !important;
+  }
+  body:has(.lc-radio-compact.show) .visit-launcher-clear,
+  body:has(.lc-radio-launch.show) .visit-launcher-clear,
+  body:has(.lc-radio-panel.show) .visit-launcher-clear{
+    bottom:max(96px,calc(env(safe-area-inset-bottom) + 86px)) !important;
+  }
+}
