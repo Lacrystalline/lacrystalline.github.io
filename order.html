@@ -348,8 +348,8 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Italianno&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/visit_voucher.css?v=20261019-mobile-actions">
-  <link rel="stylesheet" href="assets/radio.css?v=20261019-mobile-stack">
+<link rel="stylesheet" href="assets/visit_voucher.css?v=20261019-voucher-above-radio">
+  <link rel="stylesheet" href="assets/radio.css?v=20261019-radio-bottom">
 </head>
 <body data-build="VIPVISUAL-20260930-v4_6">
 <div class="crystal-veil" aria-hidden="true"></div>
@@ -1361,7 +1361,6 @@ function setVisitUi(open){
   const compactVisible=!!v?.join_token&&!open;
   if(launcher)launcher.classList.toggle('show',compactVisible);
   if(launcherClear)launcherClear.classList.toggle('show',compactVisible);
-  document.body.classList.toggle('lc-has-visit-launcher',compactVisible);
 }
 function collapseVisitCard(){const v=readVisit();setVisitCollapsed(v,true);setVisitUi(false)}
 function openVisitCard(){const v=readVisit();if(!v?.join_token)return;setVisitCollapsed(v,false);setVisitUi(true)}
