@@ -545,7 +545,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
       <button class="feedback-close" id="feedbackClose" type="button" aria-label="關閉">×</button>
     </div>
     <div class="feedback-copy">
-      無論稱讚、建議或不滿，都歡迎直接告訴我們。回覆會連同本次號碼牌與旅者名稱送至水晶庭 Discord，供店內改善服務使用。
+      無論稱讚、建議或不滿，都歡迎直接告訴我們。回覆會連同本次號碼牌與旅者名稱保存，經自動檢查後再送至水晶庭 Discord，供店內改善服務使用。
     </div>
     <textarea id="feedbackText" maxlength="600" placeholder="想對水晶庭說些什麼？"></textarea>
     <div class="feedback-foot">
@@ -1405,7 +1405,6 @@ function feedbackClientCheck(value){
   const text=String(value||'').trim();
   if(!text)return '請先填寫意見內容。';
   if(text.length>600)return '內容請控制在 600 字內。';
-  if(/(.)\1{11,}/u.test(text))return '內容含有過多重複字元，請整理後再送出。';
   return '';
 }
 async function submitGuestFeedback(){
@@ -1419,7 +1418,7 @@ async function submitGuestFeedback(){
 
   btn.disabled=true;
   btn.textContent='送出中…';
-  setFeedbackStatus('正在送往水晶庭…');
+  setFeedbackStatus('正在保存回覆…');
   try{
     const res=await fetch(GUEST_FEEDBACK_URL,{
       method:'POST',
@@ -1432,7 +1431,7 @@ async function submitGuestFeedback(){
     });
     const data=await res.json().catch(()=>null);
     if(!res.ok||data?.ok!==true)throw new Error(data?.error||'送出失敗');
-    setFeedbackStatus('謝謝您的回覆，水晶庭已收到。','ok');
+    setFeedbackStatus('謝謝您的回覆，水晶庭已收到；系統會在稍後完成檢查。','ok');
     if(textEl)textEl.disabled=true;
     btn.textContent='已送出';
     setTimeout(()=>closeFeedbackModal(),1500);
