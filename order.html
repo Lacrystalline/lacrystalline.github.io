@@ -203,6 +203,44 @@ img{display:block;max-width:100%}
   .opt.menu-item .qty{grid-column:1/-1;justify-content:flex-end}
 }
 
+
+/* 晶響｜付費點歌（獨立於餐飲訂單） */
+.song-request-card{
+  padding:16px 16px 14px;
+  border:1px solid rgba(127,211,214,.24);
+  border-radius:5px;
+  background:linear-gradient(145deg,rgba(25,49,67,.28),rgba(13,20,32,.38));
+}
+.song-request-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:8px}
+.song-request-name{font-family:var(--serif);font-size:1.2rem;color:var(--mist);letter-spacing:.06em}
+.song-request-name .en{color:var(--crys-dim);font-style:italic;font-size:.82rem;margin-left:.45em}
+.song-request-price{color:var(--gold);font-family:var(--serif);font-size:1.05rem;white-space:nowrap}
+.song-request-copy{color:var(--mute);font-size:.82rem;line-height:1.75;margin-bottom:10px}
+.song-request-card .field{margin:10px 0}
+.song-request-actions{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+.song-request-btn{
+  border:1px solid rgba(127,211,214,.42);
+  border-radius:3px;
+  padding:9px 18px;
+  background:rgba(127,211,214,.08);
+  color:var(--crys);
+  font-family:var(--tc);
+  font-size:.88rem;
+  letter-spacing:.08em;
+  cursor:pointer;
+  transition:.18s;
+}
+.song-request-btn:hover{border-color:var(--crys);background:rgba(127,211,214,.13)}
+.song-request-btn:disabled{opacity:.42;cursor:not-allowed}
+.song-request-status{color:var(--mute);font-size:.78rem;line-height:1.6}
+.song-request-status.ok{color:var(--crys)}
+.song-request-status.err{color:#e7a8b7}
+@media(max-width:640px){
+  .song-request-head{flex-direction:column;gap:2px}
+  .song-request-actions{display:grid;grid-template-columns:1fr}
+  .song-request-btn{width:100%}
+}
+
 /* summary + submit */
 .summary{position:sticky;bottom:0;margin-top:26px;background:linear-gradient(to top,rgba(8,12,20,.97),rgba(8,12,20,.9));border-top:1px solid var(--line);padding:16px 22px;backdrop-filter:blur(8px)}
 .summary .row{display:flex;justify-content:space-between;align-items:center;max-width:760px;margin:0 auto}
@@ -391,6 +429,30 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
     <div class="opts" id="drinks"></div>
     <div class="cat">精選餐點 BITES</div>
     <div class="opts" id="bites"></div>
+
+    <div class="cat">晶響 CRYSTAL RESONANCE</div>
+    <div class="song-request-card">
+      <div class="song-request-head">
+        <div class="song-request-name">晶響<span class="en">Crystal Resonance</span></div>
+        <div class="song-request-price">50,000 <small>Gil / 首</small></div>
+      </div>
+      <div class="song-request-copy">
+        把今夜想聽的一首歌交給水晶庭。貼上 YouTube 網址即可送出申請；曲目經店內確認後才成立費用。<br>
+        <strong>審核通過前不計費；通過後獨立收款，不列入本頁餐飲／體驗合計。</strong>
+      </div>
+      <div class="field">
+        <label>歌曲網址 <span class="req">*</span></label>
+        <input id="songRequestUrl" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." maxlength="300">
+      </div>
+      <div class="field">
+        <label>想說的話</label>
+        <textarea id="songRequestNote" placeholder="想附上的一句話或備註（選填）" maxlength="200"></textarea>
+      </div>
+      <div class="song-request-actions">
+        <button class="song-request-btn" id="songRequestBtn" type="button">送出晶響</button>
+        <div class="song-request-status" id="songRequestStatus">正在確認今晚是否接受點歌…</div>
+      </div>
+    </div>
   </section>
 
   <!-- STEP 3: 指名 -->
@@ -451,6 +513,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
    ============================================================ */
 const SUPABASE_URL = "https://idqysanzhafayovieqig.supabase.co";      // ← 換成你的 Project URL
 const SUPABASE_ANON_KEY = "sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T"; // ← 換成你的 anon public key
+const RADIO_WEB_REQUEST_URL = SUPABASE_URL + "/functions/v1/radio-web-request";
 /* ============================================================ */
 
 // ---- 資料：成員 / 服務 / 菜單（改這裡即可增減）----
@@ -932,6 +995,84 @@ async function hydrateMemberPrivileges(memberToken=state.memberToken){
 function hasAnything(){
   return state.services.size>0 || Object.values(state.qty).some(q=>q>0);
 }
+
+// ---- 晶響｜網頁點歌 → 既有 Discord Radio 審核佇列 ----
+let songRequestsEnabled = null;
+
+function setSongRequestStatus(message, type=""){
+  const box=$("songRequestStatus");
+  if(!box) return;
+  box.textContent=message;
+  box.classList.remove("ok","err");
+  if(type) box.classList.add(type);
+}
+
+async function loadSongRequestStatus(){
+  const btn=$("songRequestBtn");
+  if(!btn) return;
+  try{
+    const res=await fetch(RADIO_WEB_REQUEST_URL,{method:"GET",cache:"no-store"});
+    const data=await res.json();
+    if(!res.ok || data?.ok!==true) throw new Error(data?.error||"無法取得點歌狀態");
+    songRequestsEnabled=data.requests_enabled===true;
+    btn.disabled=!songRequestsEnabled;
+    setSongRequestStatus(
+      songRequestsEnabled
+        ? "今晚接受晶響｜審核通過後 50,000 Gil，另行收取。"
+        : "今晚晶響暫停受理。",
+      songRequestsEnabled ? "" : "err"
+    );
+  }catch(err){
+    songRequestsEnabled=null;
+    btn.disabled=true;
+    setSongRequestStatus("暫時無法確認晶響狀態，請稍後再試。","err");
+  }
+}
+
+async function submitSongRequest(){
+  const btn=$("songRequestBtn");
+  const url=$("songRequestUrl")?.value.trim()||"";
+  const note=$("songRequestNote")?.value.trim()||"";
+  if(!state.joinToken || !state.memberToken || state.joinSession?.status!=="seated"){
+    setSongRequestStatus("請先完成取號與帶位，再使用晶響。","err");
+    return;
+  }
+  if(!url){
+    setSongRequestStatus("請先貼上 YouTube 歌曲網址。","err");
+    $("songRequestUrl")?.focus();
+    return;
+  }
+
+  btn.disabled=true;
+  btn.textContent="送出中…";
+  setSongRequestStatus("正在送往水晶庭音樂台審核…");
+  try{
+    const res=await fetch(RADIO_WEB_REQUEST_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        join_token:state.joinToken,
+        member_token:state.memberToken,
+        youtube_url:url,
+        note:note||null
+      })
+    });
+    const data=await res.json();
+    if(!res.ok || data?.ok!==true) throw new Error(data?.error||"送出失敗");
+    $("songRequestUrl").value="";
+    $("songRequestNote").value="";
+    setSongRequestStatus(
+      "已送出｜"+String(data.title||"此曲")+"。店員審核通過後才成立 50,000 Gil 費用。",
+      "ok"
+    );
+  }catch(err){
+    setSongRequestStatus(err?.message||String(err),"err");
+  }finally{
+    btn.textContent="送出晶響";
+    btn.disabled=songRequestsEnabled!==true;
+  }
+}
+
 // ---- 前端送出節流：同一瀏覽器成功送出後 5 秒內不可再次送出 ----
 const SUBMIT_COOLDOWN_MS = 5000;
 const SUBMIT_COOLDOWN_KEY = "la_crystalline_last_order_submit_at";
@@ -1507,6 +1648,7 @@ $("submitBtn").addEventListener('click', async ()=>{
 
 $("identitySwitch").addEventListener('click',releaseVisitIdentity);
 $("addGuestBtn").addEventListener('click',addGuestSlot);
+$("songRequestBtn")?.addEventListener('click',submitSongRequest);
 
 // init
 renderMembers();
@@ -1516,6 +1658,7 @@ renderMenu("drinks", DRINKS);
 renderMenu("bites", BITES);
 renderCompanions();
 update();
+loadSongRequestStatus();
 loadPublicStaffStatus();
 loadJoinSession();
 const continueIntent=new URL(location.href).searchParams.get('continue')==='1';
@@ -1529,7 +1672,7 @@ if(continueIntent){
 }
 setTimeout(()=>refreshVisitCard(false),250);
 setInterval(refreshVisitCard,10000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshVisitCard();loadSpecialServiceStatus();}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshVisitCard();loadSpecialServiceStatus();loadSongRequestStatus();}});
 setInterval(loadSpecialServiceStatus,10000);
 setInterval(loadPublicStaffStatus, 10000);
 </script>
