@@ -63,11 +63,3 @@
 }
 
 
-/* Mobile stacking: keep Radio above the collapsed visit voucher / clear controls. */
-@media(max-width:720px){
-  body.lc-has-visit-launcher .lc-radio-launch,
-  body.lc-has-visit-launcher .lc-radio-compact,
-  body.lc-has-visit-launcher .lc-radio-panel{
-    bottom:max(74px,calc(env(safe-area-inset-bottom) + 64px));
-  }
-}
