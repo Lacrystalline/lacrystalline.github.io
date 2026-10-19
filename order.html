@@ -251,6 +251,47 @@ img{display:block;max-width:100%}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .note{color:var(--mute);font-size:.8rem;text-align:center;margin-top:20px;letter-spacing:.02em;line-height:1.8}
 
+
+/* 結帳後意見回覆 */
+.feedback-modal{
+  position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;
+  padding:22px;background:rgba(3,7,12,.78);backdrop-filter:blur(7px)
+}
+.feedback-modal.show{display:flex}
+.feedback-panel{
+  width:min(560px,94vw);border:1px solid rgba(127,211,214,.34);border-radius:6px;
+  background:linear-gradient(155deg,rgba(17,30,45,.99),rgba(8,14,23,.99));
+  box-shadow:0 24px 70px rgba(0,0,0,.52);padding:22px
+}
+.feedback-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:12px}
+.feedback-title{font-family:var(--serif);font-size:1.55rem;color:var(--mist);letter-spacing:.08em}
+.feedback-title small{display:block;font-family:var(--tc);font-size:.72rem;color:var(--crys-dim);letter-spacing:.12em;margin-top:2px}
+.feedback-close{border:0;background:transparent;color:var(--mute);font-size:1.35rem;cursor:pointer;padding:0 4px}
+.feedback-copy{color:var(--mute);font-size:.82rem;line-height:1.75;margin-bottom:12px}
+.feedback-panel textarea{
+  width:100%;min-height:150px;resize:vertical;background:rgba(8,14,23,.72);
+  border:1px solid var(--line);border-radius:4px;color:var(--mist);font-family:var(--tc);
+  font-size:.92rem;line-height:1.75;padding:12px 13px;outline:none
+}
+.feedback-panel textarea:focus{border-color:var(--crys-dim)}
+.feedback-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:12px}
+.feedback-count{color:var(--mute);font-size:.74rem}
+.feedback-submit{
+  border:1px solid rgba(127,211,214,.46);border-radius:3px;background:rgba(127,211,214,.10);
+  color:var(--crys);font-family:var(--tc);font-size:.88rem;letter-spacing:.08em;
+  padding:9px 18px;cursor:pointer
+}
+.feedback-submit:hover{background:rgba(127,211,214,.16);border-color:var(--crys)}
+.feedback-submit:disabled{opacity:.42;cursor:not-allowed}
+.feedback-status{min-height:1.5em;margin-top:10px;color:var(--mute);font-size:.78rem;line-height:1.6}
+.feedback-status.ok{color:var(--crys)}
+.feedback-status.err{color:#e7a8b7}
+@media(max-width:640px){
+  .feedback-panel{padding:18px}
+  .feedback-foot{align-items:stretch;flex-direction:column}
+  .feedback-submit{width:100%}
+}
+
 /* toast/result */
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:rgba(17,26,43,.97);border:1px solid var(--crys-dim);border-radius:4px;padding:16px 22px;color:var(--mist);opacity:0;visibility:hidden;transition:.35s;z-index:80;max-width:90vw;text-align:center}
 .toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
@@ -497,6 +538,24 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 
 <div class="toast" id="toast" onclick="if(event.target.id==='toast')this.className='toast'"></div>
 
+<div class="feedback-modal" id="feedbackModal" aria-hidden="true">
+  <div class="feedback-panel" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+    <div class="feedback-head">
+      <div class="feedback-title" id="feedbackTitle">意見回覆<small>AFTERGLOW · 留下今夜的聲音</small></div>
+      <button class="feedback-close" id="feedbackClose" type="button" aria-label="關閉">×</button>
+    </div>
+    <div class="feedback-copy">
+      無論稱讚、建議或不滿，都歡迎直接告訴我們。回覆會連同本次號碼牌與旅者名稱送至水晶庭 Discord，供店內改善服務使用。
+    </div>
+    <textarea id="feedbackText" maxlength="600" placeholder="想對水晶庭說些什麼？"></textarea>
+    <div class="feedback-foot">
+      <div class="feedback-count"><span id="feedbackCount">0</span> / 600</div>
+      <button class="feedback-submit" id="feedbackSubmit" type="button">送出回覆</button>
+    </div>
+    <div class="feedback-status" id="feedbackStatus"></div>
+  </div>
+</div>
+
 <footer>
   水晶庭 · La Crystalline ｜ 伊弗利特 - 海霧村 - 10區 45號
   <div class="warn">未滿十八歲禁止飲酒 ｜ 飲酒過量有害健康</div>
@@ -514,6 +573,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 const SUPABASE_URL = "https://idqysanzhafayovieqig.supabase.co";      // ← 換成你的 Project URL
 const SUPABASE_ANON_KEY = "sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T"; // ← 換成你的 anon public key
 const RADIO_WEB_REQUEST_URL = SUPABASE_URL + "/functions/v1/radio-web-request";
+const GUEST_FEEDBACK_URL = SUPABASE_URL + "/functions/v1/guest-feedback";
 /* ============================================================ */
 
 // ---- 資料：成員 / 服務 / 菜單（改這裡即可增減）----
@@ -1318,6 +1378,73 @@ function visitStatusLabel(s){return s==='waiting'?'等待帶位':s==='seated'?'�
 function visitDate(v){if(!v)return '';try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v))}catch(e){return ''}}
 function visitOrderUrl(token,continueMode=false){const u=new URL('order.html',location.href);if(token)u.searchParams.set('join',token);if(continueMode)u.searchParams.set('continue','1');return u.toString()}
 function visitReceiptUrl(v,data){if(data?.receipt_available&&data?.receipt_token){const u=new URL('receipt.html',location.href);u.searchParams.set('r',data.receipt_token);return u.toString()}const u=new URL('receipt.html',location.href);if(v?.guest_name)u.searchParams.set('guest',v.guest_name);if(data?.ticket_code||v?.ticket_code)u.searchParams.set('ticket',data?.ticket_code||v.ticket_code);return u.toString()}
+
+function setFeedbackStatus(message,type=""){
+  const el=document.getElementById('feedbackStatus');
+  if(!el)return;
+  el.textContent=message||'';
+  el.classList.remove('ok','err');
+  if(type)el.classList.add(type);
+}
+function openFeedbackModal(){
+  const modal=document.getElementById('feedbackModal');
+  const text=document.getElementById('feedbackText');
+  if(!modal)return;
+  setFeedbackStatus('');
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  setTimeout(()=>text?.focus(),50);
+}
+function closeFeedbackModal(){
+  const modal=document.getElementById('feedbackModal');
+  if(!modal)return;
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+}
+function feedbackClientCheck(value){
+  const text=String(value||'').trim();
+  if(!text)return '請先填寫意見內容。';
+  if(text.length>600)return '內容請控制在 600 字內。';
+  if(/(.)\1{11,}/u.test(text))return '內容含有過多重複字元，請整理後再送出。';
+  return '';
+}
+async function submitGuestFeedback(){
+  const v=readVisit();
+  const textEl=document.getElementById('feedbackText');
+  const btn=document.getElementById('feedbackSubmit');
+  const feedback=String(textEl?.value||'').trim();
+  const localError=feedbackClientCheck(feedback);
+  if(localError){setFeedbackStatus(localError,'err');return;}
+  if(!v?.join_token||!v?.member_token){setFeedbackStatus('無法確認本次來店身分。','err');return;}
+
+  btn.disabled=true;
+  btn.textContent='送出中…';
+  setFeedbackStatus('正在送往水晶庭…');
+  try{
+    const res=await fetch(GUEST_FEEDBACK_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        join_token:v.join_token,
+        member_token:v.member_token,
+        feedback
+      })
+    });
+    const data=await res.json().catch(()=>null);
+    if(!res.ok||data?.ok!==true)throw new Error(data?.error||'送出失敗');
+    setFeedbackStatus('謝謝您的回覆，水晶庭已收到。','ok');
+    if(textEl)textEl.disabled=true;
+    btn.textContent='已送出';
+    setTimeout(()=>closeFeedbackModal(),1500);
+    const order=document.getElementById('vcOrder');
+    if(order){order.textContent='意見已送出';order.onclick=(ev)=>ev.preventDefault();order.style.opacity='.62';}
+  }catch(err){
+    setFeedbackStatus(err?.message||String(err),'err');
+    btn.disabled=false;
+    btn.textContent='送出回覆';
+  }
+}
+
 let firstMenuAutoOpened=false;
 function focusDiningMenu({instant=false}={}){
   if(!(location.pathname.endsWith('/order.html') || location.pathname.endsWith('order.html'))) return;
@@ -1384,21 +1511,32 @@ async function refreshVisitCard(forceOpen=false){
     const order=document.getElementById('vcOrder'),share=document.getElementById('vcShare'),receipt=document.getElementById('vcReceipt');
     const hasOrders=memberData?Number(memberData.member_order_count||0)>0:Number(data.order_count||0)>0;
     if(order){
-      order.textContent=hasOrders?'＋ 追加點餐':'點餐';
-      order.classList.toggle('repeat-order-cta',hasOrders&&data.can_order===true);
-    }
-    
-    order.href=visitOrderUrl(v.join_token,true);
-    order.style.display=(data.can_order&&!!v.member_token)?'inline-flex':'none';
-    order.onclick=(ev)=>{
-      if(!data.can_order)return;
-      setVisitCollapsed(v,true);
-      if(location.pathname.endsWith('/order.html') || location.pathname.endsWith('order.html')){
-        ev.preventDefault();
-        collapseVisitCard();
-        focusDiningMenu();
+      const feedbackReady=!!v.member_token&&['closed','cleared'].includes(String(data.status))&&!!data.receipt_available;
+      if(feedbackReady){
+        order.textContent='意見回覆';
+        order.classList.remove('repeat-order-cta');
+        order.href='#';
+        order.style.display='inline-flex';
+        order.onclick=(ev)=>{
+          ev.preventDefault();
+          openFeedbackModal();
+        };
+      }else{
+        order.textContent=hasOrders?'＋ 追加點餐':'點餐';
+        order.classList.toggle('repeat-order-cta',hasOrders&&data.can_order===true);
+        order.href=visitOrderUrl(v.join_token,true);
+        order.style.display=(data.can_order&&!!v.member_token)?'inline-flex':'none';
+        order.onclick=(ev)=>{
+          if(!data.can_order)return;
+          setVisitCollapsed(v,true);
+          if(location.pathname.endsWith('/order.html') || location.pathname.endsWith('order.html')){
+            ev.preventDefault();
+            collapseVisitCard();
+            focusDiningMenu();
+          }
+        };
       }
-    };
+    }
     share.style.display=(!!v.member_token&&['waiting','seated'].includes(String(data.status)))?'inline-flex':'none';
     share.onclick=()=>{const url=visitOrderUrl(v.join_token,false);navigator.clipboard?.writeText(url).then(()=>{share.textContent='同行連結已複製 ✓';setTimeout(()=>share.textContent='分享同行',1800)}).catch(()=>{});};
     receipt.href=visitReceiptUrl(v,data); receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true'); receipt.textContent=data.receipt_available?'查看收據':'收據';
@@ -1649,6 +1787,14 @@ $("submitBtn").addEventListener('click', async ()=>{
 $("identitySwitch").addEventListener('click',releaseVisitIdentity);
 $("addGuestBtn").addEventListener('click',addGuestSlot);
 $("songRequestBtn")?.addEventListener('click',submitSongRequest);
+$("feedbackClose")?.addEventListener('click',closeFeedbackModal);
+$("feedbackSubmit")?.addEventListener('click',submitGuestFeedback);
+$("feedbackText")?.addEventListener('input',(ev)=>{
+  const n=String(ev.target.value||'').length;
+  const c=$("feedbackCount");if(c)c.textContent=String(n);
+});
+$("feedbackModal")?.addEventListener('click',(ev)=>{if(ev.target?.id==='feedbackModal')closeFeedbackModal();});
+document.addEventListener('keydown',(ev)=>{if(ev.key==='Escape')closeFeedbackModal();});
 
 // init
 renderMembers();
