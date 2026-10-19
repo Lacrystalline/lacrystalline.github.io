@@ -776,3 +776,34 @@
     letter-spacing:.018em;
   }
 }
+
+
+/* Mobile post-checkout voucher: keep feedback / receipt actions inside the 4:3 card. */
+@media(max-width:720px){
+  .visit-card .vc-actions.post-visit{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+  .visit-card .vc-actions.post-visit .vc-btn{
+    min-height:36px !important;
+    padding:6px 5px !important;
+    font-size:.74rem !important;
+  }
+  .visit-card.receipt-ready .vc-inner{
+    padding:6.4% 7.8% 5.0%;
+  }
+  .visit-card.receipt-ready .vc-ticket-row{
+    min-height:72px;
+  }
+  .visit-card.receipt-ready .vc-phrase-wrap{
+    min-height:38px;
+    padding-top:0;
+  }
+  .visit-card.receipt-ready .vc-sub{
+    font-size:.60rem;
+    line-height:1.35;
+    padding:0 0 .3%;
+  }
+  .visit-card.receipt-ready .vc-actions{
+    padding-top:.3% !important;
+  }
+}
