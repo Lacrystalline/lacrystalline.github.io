@@ -394,7 +394,7 @@
 
 @media(max-width:720px){
   .visit-card{padding:62px 8px 10px;align-items:flex-start}
-  .visit-launcher{top:auto;right:10px;bottom:12px}
+  .visit-launcher{top:72px;right:10px;bottom:auto}
   .visit-card .vc-shell{width:96vw;aspect-ratio:4/3;max-height:none}
   .visit-card .vc-inner{padding:7.5% 8.6% 7%}
   .visit-card .vc-tools{top:4.8%;right:5.8%;gap:6px}
@@ -809,16 +809,3 @@
 }
 
 
-/* Mobile stacking: keep visit voucher controls above the Radio player. */
-@media(max-width:720px){
-  body:has(.lc-radio-compact.show) .visit-launcher,
-  body:has(.lc-radio-launch.show) .visit-launcher,
-  body:has(.lc-radio-panel.show) .visit-launcher{
-    bottom:max(96px,calc(env(safe-area-inset-bottom) + 86px)) !important;
-  }
-  body:has(.lc-radio-compact.show) .visit-launcher-clear,
-  body:has(.lc-radio-launch.show) .visit-launcher-clear,
-  body:has(.lc-radio-panel.show) .visit-launcher-clear{
-    bottom:max(96px,calc(env(safe-area-inset-bottom) + 86px)) !important;
-  }
-}
