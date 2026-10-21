@@ -647,6 +647,48 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 
 
 
+.recipe-details{
+  order:8;
+  width:min(100%,720px);
+  justify-self:center;
+  margin-top:.75em;
+  color:var(--mute);
+  text-align:left;
+}
+.recipe-details summary{
+  width:max-content;
+  max-width:100%;
+  margin:0 auto;
+  cursor:pointer;
+  list-style:none;
+  color:var(--crys-dim);
+  font-family:var(--tc);
+  font-size:.78rem;
+  letter-spacing:.14em;
+  padding:.35em .9em;
+  border:1px solid rgba(127,211,214,.16);
+  border-radius:999px;
+  transition:border-color .2s ease,color .2s ease,background .2s ease;
+}
+.recipe-details summary::-webkit-details-marker{display:none}
+.recipe-details summary::after{content:"＋";margin-left:.6em;color:var(--gold)}
+.recipe-details[open] summary::after{content:"−"}
+.recipe-details summary:hover{
+  color:var(--crys);
+  border-color:rgba(127,211,214,.34);
+  background:rgba(127,211,214,.04);
+}
+.recipe-copy{
+  margin:1em auto 0;
+  padding:1em 1.15em;
+  border-left:1px solid rgba(127,211,214,.22);
+  color:#aeb9c4;
+  font-size:.84rem;
+  line-height:1.9;
+}
+.recipe-copy span{color:var(--gold);letter-spacing:.08em}
+.recipe-copy p{margin:.65em 0 0}
+
 .menu-mini-divider{display:flex;align-items:center;gap:12px;margin:18px 0 12px;color:var(--crys-dim);font-size:.72rem;letter-spacing:.16em}
 .menu-mini-divider::before,.menu-mini-divider::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(127,211,214,.28),transparent)}
 .menu-mini-divider span{white-space:nowrap;opacity:.86}
@@ -847,10 +889,17 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
         <img class="d-thumb" src="assets/bite_secret_burrito.webp?v=20261021-verified" alt="私房墨西哥捲餅" loading="lazy" decoding="async">
         <div class="d-main d-name"><span class="cn">私房墨西哥捲餅</span><span class="en">Secret Burrito</span></div>
         <div class="d-price">40,000<span class='gil'>Gil</span></div>
-        <div class="d-desc">由阿木手工揉製的謎之肉，佐上不外傳的私房密醬，捲入餅皮之中。至於謎之肉究竟是什麼肉——</div>
+        <div class="d-desc">阿木親手揉製的謎之肉，與星外洋蔥、亞斯拉尼蒜頭一同煸出焦甜肉香；孜然、薩維奈紅椒、牛至與龍息椒接續入鍋，讓溫熱辛香一層層甦醒，再以血番茄慢慢收成濃郁紅醬。起鍋前添上太陽檸檬的明亮酸香與些許香菜，裹進微炙餅皮。入口先是厚實肉香與番茄甘甜，隨後辛香漸暖、辣意輕追，最後由清新的柑橘氣息收尾——正好替今晚添上一點暖意。</div>
         <div class="d-poem">店長：「都說是謎了，別問 :D」</div>
         <div class="d-flavor">期間限定！材料有限・每日限量 20 份</div>
         <div class="d-flavor">※ 利姆薩・羅敏薩烹調師行會衛生檢核合格。</div>
+        <details class="recipe-details">
+          <summary>私房做法 · PREPARATION</summary>
+          <div class="recipe-copy">
+            <div><span>調味</span>｜星外洋蔥・亞斯拉尼蒜頭・孜然・薩維奈紅椒・牛至・龍息椒・黑胡椒・血番茄・太陽檸檬・香菜</div>
+            <p>星外洋蔥與亞斯拉尼蒜頭先煸至微焦甜香，再加入謎之肉大火炒出焦色。撒入孜然、薩維奈紅椒、牛至、龍息椒與黑胡椒，趁熱翻炒至香氣附著肉餡；加入切碎的血番茄慢慢收濃，起鍋前以太陽檸檬與香菜提亮。最後填入微炙餅皮，捲緊後佐上少量私房紅醬。</p>
+          </div>
+        </details>
       </div>
 
       <div class="menu-mini-divider" aria-hidden="true"><span>常設餐點 · REGULAR BITES</span></div>
