@@ -646,6 +646,10 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
 }
 
 
+
+.menu-mini-divider{display:flex;align-items:center;gap:12px;margin:18px 0 12px;color:var(--crys-dim);font-size:.72rem;letter-spacing:.16em}
+.menu-mini-divider::before,.menu-mini-divider::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(127,211,214,.28),transparent)}
+.menu-mini-divider span{white-space:nowrap;opacity:.86}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Italianno&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/visit_voucher.css?v=20261003-expanded-clear">
@@ -840,14 +844,16 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
     <div style="margin-top:24px">
 
       <div class="drink">
-        <img class="d-thumb" src="assets/bite_secret_burrito.webp" alt="私墨西哥捲餅" loading="lazy" decoding="async">
-        <div class="d-main d-name"><span class="cn">私墨西哥捲餅</span><span class="en">Secret Burrito</span></div>
-        <div class="d-price">25,000<span class='gil'>Gil</span></div>
+        <img class="d-thumb" src="assets/bite_secret_burrito.webp" alt="私房墨西哥捲餅" loading="lazy" decoding="async">
+        <div class="d-main d-name"><span class="cn">私房墨西哥捲餅</span><span class="en">Secret Burrito</span></div>
+        <div class="d-price">40,000<span class='gil'>Gil</span></div>
         <div class="d-desc">由阿木手工揉製的謎之肉，佐上不外傳的私房密醬，捲入餅皮之中。至於謎之肉究竟是什麼肉——</div>
         <div class="d-poem">店長：「都說是謎了，別問 :D」</div>
         <div class="d-flavor">期間限定！材料有限・每日限量 20 份</div>
         <div class="d-flavor">※ 利姆薩・羅敏薩烹調師行會衛生檢核合格。</div>
       </div>
+
+      <div class="menu-mini-divider" aria-hidden="true"><span>常設餐點 · REGULAR BITES</span></div>
 
       <div class="drink">
         <img class="d-thumb" src="assets/bite_stardust.png" alt="星屑" loading="lazy" decoding="async">
