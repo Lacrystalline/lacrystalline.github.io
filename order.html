@@ -920,10 +920,13 @@ function renderMenu(listId, items){
   $(listId).innerHTML = items.map((it,idx)=>{
     const q=Number(state.qty[it.id]||0);
     const priceHtml=state.isVip?'<span class="pr vip-treat">本店招待</span>':`<span class="pr">${fmt(it.price)}<small>Gil</small></span>`;
-    const divider=(idx>0 && items[idx-1]?.limited===true && it.limited!==true)
+    const limitedDivider=(idx===0 && it.limited===true)
+      ? '<div class="menu-mini-divider"><span>期間限定 · LIMITED BITES</span></div>'
+      : '';
+    const regularDivider=(idx>0 && items[idx-1]?.limited===true && it.limited!==true)
       ? '<div class="menu-mini-divider"><span>常設餐點 · REGULAR BITES</span></div>'
       : '';
-    return divider+`
+    return limitedDivider+regularDivider+`
     <div class="opt menu-item${q>0?' sel':''}" data-id="${it.id}">
       <img class="thumb" src="${it.img}" alt="${it.name}">
       <div class="meta">
