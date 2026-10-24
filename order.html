@@ -598,6 +598,7 @@ const SERVICES = [
   { id:"photo",   name:"留影", en:"Portrait",     price:500000, unit:"一人・一張" },
 ];
 const DRINKS = [
+  { id:"moonstone_serenade", name:"守月長曲", en:"Moonstone Serenade", price:35000, img:"assets/drink_moonstone_serenade.webp", limited:true, desc:"守護天節限定・白蔓越莓、紫羅蘭、琴酒與辛口清酒，清爽微甜、尾韻微乾。" },
   { id:"crystal", name:"水晶之光", en:"Crystal",      price:25000, img:"assets/drink_crystal.png", desc:"琴酒・接骨木花・檸檬・氣泡｜清爽花香。" },
   { id:"lapis",   name:"深邃青金", en:"Lapis Lazuli", price:15000, img:"assets/drink_lapis.png", desc:"琴酒・伏特加・藍柑橘・藍莓｜莓果酸甜。" },
   { id:"ruby",    name:"熾焰紅寶", en:"Ruby",         price:15000, img:"assets/drink_ruby.png", desc:"琴酒・覆盆莓・玫瑰・蔓越莓｜明亮酸甜。" },
@@ -920,11 +921,12 @@ function renderMenu(listId, items){
   $(listId).innerHTML = items.map((it,idx)=>{
     const q=Number(state.qty[it.id]||0);
     const priceHtml=state.isVip?'<span class="pr vip-treat">本店招待</span>':`<span class="pr">${fmt(it.price)}<small>Gil</small></span>`;
+    const isDrinkMenu = listId==="drinks";
     const limitedDivider=(idx===0 && it.limited===true)
-      ? '<div class="menu-mini-divider"><span>期間限定 · LIMITED BITES</span></div>'
+      ? '<div class="menu-mini-divider"><span>'+(isDrinkMenu?'期間限定 · LIMITED DRINKS':'期間限定 · LIMITED BITES')+'</span></div>'
       : '';
     const regularDivider=(idx>0 && items[idx-1]?.limited===true && it.limited!==true)
-      ? '<div class="menu-mini-divider"><span>常設餐點 · REGULAR BITES</span></div>'
+      ? '<div class="menu-mini-divider"><span>'+(isDrinkMenu?'常設調酒 · REGULAR DRINKS':'常設餐點 · REGULAR BITES')+'</span></div>'
       : '';
     return limitedDivider+regularDivider+`
     <div class="opt menu-item${q>0?' sel':''}" data-id="${it.id}">
