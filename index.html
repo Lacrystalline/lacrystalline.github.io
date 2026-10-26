@@ -1091,6 +1091,14 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
           </div>
         </button>
         <button class="member-card" type="button" data-member="4" aria-pressed="false">
+          <div class="portrait"><img src="assets/xia_yuanxing_profile.webp" onerror="this.onerror=null;this.src='assets/emblem.png'" alt="水晶庭成員 夏遠星" loading="lazy" decoding="async"></div>
+          <div class="member-card-copy">
+            <div class="member-card-name">夏遠星<span class="member-card-en">Xia·Yuanxing</span></div>
+            <div class="member-card-role">夥伴 / Staff</div>
+            <div class="member-card-rp">接待・陪聊・店務支援</div>
+          </div>
+        </button>
+        <button class="member-card" type="button" data-member="5" aria-pressed="false">
           <div class="portrait"><img src="assets/morikami_ume_profile.webp" alt="水晶庭成員 森上梅有前" loading="lazy" decoding="async"></div>
           <div class="member-card-copy">
             <div class="member-card-name">森上梅有前<span class="member-card-en">梅子</span></div>
@@ -1098,7 +1106,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
             <div class="member-card-rp">接待・密談・攝影</div>
           </div>
         </button>
-        <button class="member-card" type="button" data-member="5" aria-pressed="false">
+        <button class="member-card" type="button" data-member="6" aria-pressed="false">
           <div class="portrait"><img src="assets/morikami_berry_profile.webp" alt="水晶庭成員 森上莓友前" loading="lazy" decoding="async"></div>
           <div class="member-card-copy">
             <div class="member-card-name">森上莓友前<span class="member-card-en">阿莓</span></div>
@@ -1106,7 +1114,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
             <div class="member-card-rp">接待・密談</div>
           </div>
         </button>
-        <button class="member-card" type="button" data-member="6" aria-pressed="false">
+        <button class="member-card" type="button" data-member="7" aria-pressed="false">
           <div class="portrait"><img src="assets/o7_profile.webp" alt="水晶庭成員 零柒" loading="lazy" decoding="async"></div>
           <div class="member-card-copy">
             <div class="member-card-name">零柒<span class="member-card-en">o7</span></div>
@@ -1114,7 +1122,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
             <div class="member-card-rp">接待・調酒・料理・密談</div>
           </div>
         </button>
-        <button class="member-card" type="button" data-member="7" aria-pressed="false">
+        <button class="member-card" type="button" data-member="8" aria-pressed="false">
           <div class="portrait"><img src="assets/xi_zai_profile.webp" alt="水晶庭成員 西·札伊" loading="lazy" decoding="async"></div>
           <div class="member-card-copy">
             <div class="member-card-name">西·札伊<span class="member-card-en">Xi·Zai</span></div>
@@ -1135,6 +1143,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <button class="member-dot" type="button" data-member="5" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="6" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="7" tabindex="-1"></button>
+      <button class="member-dot" type="button" data-member="8" tabindex="-1"></button>
     </div>
 
     <div class="member-detail" id="memberDetail" aria-live="polite"></div>
@@ -1495,6 +1504,38 @@ const MEMBER_PROFILES=[
     ],
     quote:"「咦？我沒有在偷懶啦……只是稍微曬一下太陽而已。啊，店裡忙起來了？我這就來！」",
     foot:"溫柔隨和，天然得有些可愛，偶爾也會冒出一句毒舌。至於總愛曬太陽這件事——畢竟是阿木，光合作用可不能少。"
+  },
+  {
+    name:"夏遠星", en:"Xia·Yuanxing", role:"夥伴 / Staff",
+    meta:[["RP 擔當","接待・陪聊・店務支援"],["體驗項目","密談・其它"],["氣質","爽朗大方・重情重義・隨性豪邁"]],
+    body:[
+      "夏遠星給人的第一印象，與其說是精明的商人，倒更像個很好相處的大姐頭。",
+      "她說話直爽，待人熱情，喜歡結交朋友，也很擅長把原本互不認識的人聚在一起。無論是做生意、逛店，還是臨時起意的聚會，只要覺得有趣，她往往就會興致勃勃地參上一腳。",
+      "她確實很會賺錢，但對她而言，錢從來不是最重要的目的。賺來的錢能拿來照顧朋友、養店員，讓身邊的人過得開心，似乎比單純看著帳面上的數字增加更有意思。",
+      "夏遠星尤其講義氣。",
+      "對她來說，既然認了朋友，就沒有必要事事計較。平時可以互相吐槽、開玩笑，甚至鬧得不可開交；但真遇上麻煩，她也不會放著自己人不管。能幫的忙就幫，能出的人就出，事情先解決再說。至於事後要不要算帳、順便笑話對方幾句，那又是另一回事了。",
+      "大概也是這種性格，讓她身邊總不缺朋友。一路做生意、認識人，也陸續有了屬於自己的店。",
+      "不過，說到開店，就不得不提她一項頗為出名的個人愛好。",
+      "<strong>招募敖龍族男性。</strong>",
+      "這件事她倒是從不掩飾。路上遇見順眼的敖龍族男性，總忍不住想上前搭個話，看看有沒有機會拐回自家店裡工作。至於究竟是慧眼識才，還是單純個人喜好，熟悉她的人大概都有自己的答案。",
+      "但真正讓人印象深刻的，還是那次招募硌獅族男性的事。",
+      "據說她曾經獨自跑到一間有硌獅族男性店員的店裡，直接找上老闆，問能不能幫忙詢問，有沒有硌獅族男性願意到自己店裡打工。",
+      "沒有偷偷摸摸，也沒有什麼驚天動地的挖角計畫，就是這麼大大方方地開口。",
+      "結果還真的讓她一口氣招到了<strong>六名硌獅族男性</strong>。",
+      "這件事後來成了朋友間津津樂道的話題。有人佩服她的人脈，有人佩服她的行動力，也有人覺得，能這麼理直氣壯地跑到別人店裡招募員工，大概也只有夏遠星做得出來。",
+      "至於本人，倒是一點也不覺得有什麼問題。",
+      {type:"quote",text:"「我有先問人家老闆耶！」"},
+      "除了經營店舖與招募員工，她過去也曾是個熱衷於帶領隊伍攻略各種艱難挑戰的人。據說跟著她打本，氣氛總像一群朋友出門郊遊，偏偏又能打得舒服順利。",
+      "只是帶隊久了，難免也有累的時候。如今她早已宣布自己不想再坐牢，比起整天忙著攻略，更樂意把時間花在生意、朋友，以及那些突然冒出來的新點子上。",
+      "她會出現在水晶庭，也沒什麼特別複雜的理由。",
+      "對夏遠星來說，店不只是做生意的地方，也是讓人認識彼此、交到朋友的場所。看著原本陌生的人漸漸熟絡，甚至成為能互相照應的夥伴，本身就是件很有意思的事。",
+      "因此，她偶爾會來幫忙接待，偶爾替店裡出點主意，也可能只是來看看大家最近過得怎麼樣。她不一定事事親自參與，但真有需要幫忙的地方，只要力所能及，她通常不會袖手旁觀。",
+      "說到底，她想要的生活其實很簡單。",
+      "生意做得下去，朋友過得開心，大家有空就聚在一起吃吃喝喝；遇到事情能互相幫忙，平時則各自過得自在。",
+      "當然，如果還能順便多招幾個敖龍族男性店員，那就更好了。"
+    ],
+    quote:"「自己人有事就說啊，能幫的我一定幫。啊，對了，你有沒有認識想找工作的敖龍族男性？」",
+    foot:"爽朗大方，重情重義，喜歡交朋友，也喜歡替朋友張羅大小事。至於路上遇見的敖龍族男性會不會被她拐去打工，那就不好說了。"
   },
   {
     name:"森上梅有前", en:"梅子", role:"夥伴 / Staff",
