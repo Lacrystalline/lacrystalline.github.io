@@ -359,7 +359,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 
 <nav class="nav">
   <a class="nav-logo" href="index.html"><img src="assets/emblem_nav.png" alt="水晶庭"><span class="lt">La Crystalline<small>水晶庭</small></span></a>
-  <div style="display:flex;gap:16px;align-items:center"><a class="back" href="receipt.html">訂單查詢</a><a class="back" href="index.html">← 返回主頁</a></div>
+  <div style="display:flex;gap:16px;align-items:center"><a class="back" href="receipt.html">即時憑單</a><a class="back" href="index.html">← 返回主頁</a></div>
 </nav>
 
 
@@ -395,7 +395,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
       <div class="vc-actions">
         <a class="vc-btn primary" id="vcOrder" href="order.html">點餐</a>
         <button class="vc-btn" id="vcShare" type="button">分享同行</button>
-        <a class="vc-btn gold" id="vcReceipt" href="receipt.html" aria-disabled="true">收據（結帳後）</a>
+        <a class="vc-btn gold" id="vcReceipt" href="receipt.html" aria-disabled="true">即時憑單（帶位後）</a>
       </div>
     </div>
   </section>
@@ -1399,7 +1399,7 @@ function readVisit(){
     let v=null;
     try{v=primary?JSON.parse(primary):null;}catch(e){console.warn('來店卡主紀錄無法解析',e);}
     if(!v&&backup){try{v=JSON.parse(backup);}catch(e){console.warn('來店卡備援紀錄無法解析',e);}}
-    if(v && ['closed','cleared'].includes(v.last_status) && v.receipt_expires_at){
+    if(v && ['closed','cleared','archived'].includes(v.last_status) && v.receipt_expires_at){
       const deadline=Date.parse(v.receipt_expires_at);
       if(Number.isFinite(deadline) && Date.now()>=deadline){clearVisit();return null;}
     }
@@ -1445,7 +1445,7 @@ function dismissVisitCard(){
   const cleanUrl=new URL('order.html',location.href);
   location.replace(cleanUrl.toString());
 }
-function visitStatusLabel(s){return s==='waiting'?'等待帶位':s==='seated'?'已帶位':s==='closed'?'已結帳':s==='cleared'?'已清台':s==='cancelled'?'已取消':'處理中'}
+function visitStatusLabel(s){return s==='waiting'?'等待帶位':s==='seated'?'已帶位':s==='closed'?'已完成':s==='cleared'?'已完成':s==='archived'?'已歸檔':s==='cancelled'?'已取消':'處理中'}
 function visitDate(v){if(!v)return '';try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v))}catch(e){return ''}}
 function visitOrderUrl(token,continueMode=false){const u=new URL('order.html',location.href);if(token)u.searchParams.set('join',token);if(continueMode)u.searchParams.set('continue','1');return u.toString()}
 function visitReceiptUrl(v,data){if(data?.receipt_available&&data?.receipt_token){const u=new URL('receipt.html',location.href);u.searchParams.set('r',data.receipt_token);return u.toString()}const u=new URL('receipt.html',location.href);if(v?.guest_name)u.searchParams.set('guest',v.guest_name);if(data?.ticket_code||v?.ticket_code)u.searchParams.set('ticket',data?.ticket_code||v.ticket_code);return u.toString()}
@@ -1552,7 +1552,7 @@ async function refreshVisitCard(forceOpen=false){
       }
     }
     if(!data){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');document.getElementById('visitLauncherClear')?.classList.remove('show');return;}
-    if((data.status==='closed'||data.status==='cleared')&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');document.getElementById('visitLauncherClear')?.classList.remove('show');return;}
+    if(['closed','cleared','archived'].includes(data.status)&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');document.getElementById('visitLauncherClear')?.classList.remove('show');return;}
     v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; v.receipt_expires_at=data.receipt_expires_at||null; writeVisit(v);
     if(state.joinToken && String(v.join_token)===String(state.joinToken)){ state.joinSession=data; syncOrderStageVisibility(); update(); }
     card.classList.toggle('receipt-ready',!!data.receipt_available);
@@ -1570,7 +1570,8 @@ async function refreshVisitCard(forceOpen=false){
     }
     const owner=document.getElementById('vcOwner'); if(owner)owner.textContent=(v.guest_name&&v.server)?`${v.guest_name} · ${v.server}`:(v.guest_name||'本次旅者');
     const sub=document.getElementById('vcSub');
-    if(data.receipt_available){sub.textContent=`今夜已結帳 · 紀念收據保留至 ${visitDate(data.receipt_expires_at)}。`;}
+    if(data.status==='archived'&&data.receipt_available){sub.textContent=`本次來店已歸檔 · 水晶憑單可查閱至 ${visitDate(data.receipt_expires_at)}。`;}
+    else if(data.status==='seated'&&data.receipt_available){const hasOrders=memberData?Number(memberData.member_order_count||0)>0:Number(data.order_count||0)>0;sub.textContent=`已完成帶位 · ${hasOrders?'可繼續追加點餐':'可以開始點餐'} · 即時憑單隨時可查閱。`;}
     else if(data.status==='waiting'){sub.textContent=`來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size} · 請等待夥伴帶位。`;}
     else if(data.status==='seated'){
       const hasOrders=memberData?Number(memberData.member_order_count||0)>0:Number(data.order_count||0)>0;
@@ -1613,7 +1614,7 @@ async function refreshVisitCard(forceOpen=false){
     receipt.href=visitReceiptUrl(v,data);
     receipt.style.display=data.receipt_available?'inline-flex':'none';
     receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true');
-    receipt.textContent=data.receipt_available?'查看收據':'收據';
+    receipt.textContent=data.receipt_available?'查看即時憑單':'憑單（帶位後）';
     document.getElementById('vcCollapse').onclick=collapseVisitCard;
     document.getElementById('vcDismiss').onclick=dismissVisitCard;
     const launcherClear=document.getElementById('visitLauncherClear');
