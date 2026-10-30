@@ -481,8 +481,8 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
         <div class="song-request-price">50,000 <small>Gil / 首</small></div>
       </div>
       <div class="song-request-copy">
-        把今夜想聽的一首歌交給水晶庭。貼上 YouTube 網址即可送出申請；曲目經店內確認後才成立費用。<br>
-        <strong>審核通過前不計費；通過後獨立收款，不列入本頁餐飲／體驗合計。</strong>
+        每位旅者本次來店最多可點播 <strong>2 首歌曲</strong>，每首 50,000 Gil，可分次送出申請。審核通過後才成立費用，並獨立收取，不列入餐飲／體驗合計。<br>
+        為保留水晶庭原有的音樂氛圍，每播放 <strong>2 首店內選曲</strong>，才會穿插至多 1 首旅者點歌。曲目將由店長或經理審核；若與當晚風格不符，可能無法安排播放，還請見諒。
       </div>
       <div class="field">
         <label>歌曲網址 <span class="req">*</span></label>
@@ -739,6 +739,7 @@ async function loadJoinSession(){
     banner.innerHTML=`<div>${data.status==='waiting'?'等待帶位':'已完成帶位'}</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size}${data.pending_count?` · 尚有 ${data.pending_count} 位待自行加入`:''}${data.status==='waiting'?' · 帶位後開放點餐':' · 每位旅者各自點餐'}</div>`;
     syncOrderStageVisibility();
     update();
+    await loadSongRequestStatus();
   }catch(err){
     console.error('號碼牌讀取失敗',err);
     banner.innerHTML='<div>無法讀取這張水晶號碼牌。</div>';
@@ -1090,6 +1091,8 @@ function hasAnything(){
 
 // ---- 晶響｜網頁點歌 → 既有 Discord Radio 審核佇列 ----
 let songRequestsEnabled = null;
+let songRequestsUsed = null;
+let songRequestsMax = 2;
 
 function setSongRequestStatus(message, type=""){
   const box=$("songRequestStatus");
@@ -1102,22 +1105,49 @@ function setSongRequestStatus(message, type=""){
 async function loadSongRequestStatus(){
   const btn=$("songRequestBtn");
   if(!btn) return;
+  songRequestsUsed=null;
   try{
     const res=await fetch(RADIO_WEB_REQUEST_URL,{method:"GET",cache:"no-store"});
     const data=await res.json();
     if(!res.ok || data?.ok!==true) throw new Error(data?.error||"無法取得點歌狀態");
     songRequestsEnabled=data.requests_enabled===true;
-    btn.disabled=!songRequestsEnabled;
-    setSongRequestStatus(
-      songRequestsEnabled
-        ? "今晚接受晶響｜審核通過後 50,000 Gil，另行收取。"
-        : "今晚晶響暫停受理。",
-      songRequestsEnabled ? "" : "err"
-    );
+    songRequestsMax=Number(data.max_requests)||2;
+    if(!songRequestsEnabled){
+      btn.disabled=true;
+      setSongRequestStatus("今晚晶響暫停受理。","err");
+      return;
+    }
+
+    if(state.joinToken && state.memberToken && state.joinSession?.status==="seated"){
+      const statusRes=await fetch(RADIO_WEB_REQUEST_URL,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          action:"status",
+          join_token:state.joinToken,
+          member_token:state.memberToken
+        })
+      });
+      const usage=await statusRes.json();
+      if(!statusRes.ok || usage?.ok!==true) throw new Error(usage?.error||"無法確認剩餘點歌名額");
+      songRequestsUsed=Number(usage.used_count)||0;
+      songRequestsMax=Number(usage.max_requests)||2;
+      const remaining=Math.max(0,songRequestsMax-songRequestsUsed);
+      btn.disabled=remaining<=0;
+      setSongRequestStatus(
+        remaining
+          ? `今晚接受晶響｜已點播 ${songRequestsUsed}/${songRequestsMax} 首，還可點 ${remaining} 首。`
+          : `本次已點滿 ${songRequestsMax} 首，謝謝您分享喜愛的音樂。`,
+        remaining ? "" : "ok"
+      );
+    }else{
+      btn.disabled=false;
+      setSongRequestStatus("今晚接受晶響｜每位旅者最多 2 首，完成帶位後即可送出。");
+    }
   }catch(err){
-    songRequestsEnabled=null;
+    songRequestsUsed=null;
     btn.disabled=true;
-    setSongRequestStatus("暫時無法確認晶響狀態，請稍後再試。","err");
+    setSongRequestStatus("暫時無法確認晶響狀態或剩餘名額，請稍後再試。","err");
   }
 }
 
@@ -1127,6 +1157,11 @@ async function submitSongRequest(){
   const note=$("songRequestNote")?.value.trim()||"";
   if(!state.joinToken || !state.memberToken || state.joinSession?.status!=="seated"){
     setSongRequestStatus("請先完成取號與帶位，再使用晶響。","err");
+    return;
+  }
+  if(songRequestsUsed!==null && songRequestsUsed>=songRequestsMax){
+    setSongRequestStatus("本次來店已點滿兩首歌曲。","err");
+    btn.disabled=true;
     return;
   }
   if(!url){
@@ -1153,15 +1188,18 @@ async function submitSongRequest(){
     if(!res.ok || data?.ok!==true) throw new Error(data?.error||"送出失敗");
     $("songRequestUrl").value="";
     $("songRequestNote").value="";
+    songRequestsUsed=Number(data.used_count)||0;
+    songRequestsMax=Number(data.max_requests)||2;
     setSongRequestStatus(
-      "已送出｜"+String(data.title||"此曲")+"。店員審核通過後才成立 50,000 Gil 費用。",
+      "已送出｜"+String(data.title||"此曲")+"。本次已點播 "+songRequestsUsed+"/"+songRequestsMax+" 首；由店長或經理審核，通過後才成立 50,000 Gil 費用。",
       "ok"
     );
   }catch(err){
     setSongRequestStatus(err?.message||String(err),"err");
+    await loadSongRequestStatus();
   }finally{
     btn.textContent="送出晶響";
-    btn.disabled=songRequestsEnabled!==true;
+    btn.disabled=songRequestsEnabled!==true || (songRequestsUsed!==null && songRequestsUsed>=songRequestsMax);
   }
 }
 
@@ -1789,6 +1827,7 @@ $("submitBtn").addEventListener('click', async ()=>{
       await hydrateMemberPrivileges(state.memberToken);
       syncIdentityUI();
       await refreshVisitCard(true);
+      await loadSongRequestStatus();
       toast(data.can_order?'已加入此桌，可以開始自己的點餐。':'已加入此桌，請等待帶位完成。',null,false);
     }catch(err){
       toast(`加入失敗（${err?.message||String(err)}）`,null,true);
@@ -1857,6 +1896,7 @@ setInterval(refreshVisitCard,10000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshVisitCard();loadSpecialServiceStatus();loadSongRequestStatus();}});
 setInterval(loadSpecialServiceStatus,10000);
 setInterval(loadPublicStaffStatus, 10000);
+setInterval(()=>{if(!document.hidden && state.joinSession?.status==='seated') loadSongRequestStatus();},30000);
 </script>
   <script src="assets/radio.js"></script>
 </body>
