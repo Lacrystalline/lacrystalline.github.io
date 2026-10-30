@@ -1585,6 +1585,7 @@ async function refreshVisitCard(forceOpen=false){
     if(['closed','cleared','archived'].includes(data.status)&&data.receipt_exists&&!data.receipt_available){clearVisit();card.classList.remove('show');launcher?.classList.remove('show');return;}
     v.ticket_code=data.ticket_code||v.ticket_code; v.last_status=data.status; v.receipt_expires_at=data.receipt_expires_at||null; writeVisit(v);
     card.classList.toggle('receipt-ready',!!data.receipt_available);
+    card.classList.toggle('receipt-final',['closed','cleared'].includes(String(data.status))&&!!data.receipt_available);
     document.getElementById('vcTicket').textContent=data.ticket_code||v.ticket_code||'—';
     const vl=document.getElementById('vlTicket');if(vl)vl.textContent=`${data.ticket_code||v.ticket_code||'—'} · ${visitStatusLabel(data.status)}`;
     document.getElementById('vcStatus').textContent=visitStatusLabel(data.status);
