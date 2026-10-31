@@ -379,6 +379,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 .opt .pr .svc-unit{font-family:var(--tc);font-size:.74em;font-weight:400}
 .summary #total{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:1.52rem;font-weight:650;font-variant-numeric:tabular-nums;color:#f1d9aa}
 .summary .tot small{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:.69em;color:#d4c2a1}
+.summary #total.vip-treat-total{font-family:var(--tc,"Noto Serif TC",serif);font-size:1.28rem;font-weight:400;letter-spacing:.06em;color:#ead6ac}
 .song-request-estimate{font-size:.84rem;color:#e6cda0}
 @media(max-width:640px){.summary{padding:14px}.summary .row{gap:10px}.summary .tot{font-size:1.04rem;white-space:nowrap}.summary #total{font-size:1.35rem}.summary .btn{padding:11px 15px;font-size:.88rem;letter-spacing:.06em}}
 </style>
@@ -1364,9 +1365,11 @@ function update(){
   const hasDining=Object.values(state.qty).some(q=>Number(q)>0);
   const hasPaidServices=SERVICES.some(s=>state.services.has(s.id) && Number(s.price)>0);
   if(state.isVip && hasDining && !hasPaidServices){
+    $("total").classList.add("vip-treat-total");
     $("total").textContent = "本店招待";
     $("totalUnit").textContent = "";
   }else{
+    $("total").classList.remove("vip-treat-total");
     $("total").textContent = fmt(total);
     $("totalUnit").textContent = "Gil";
   }
