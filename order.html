@@ -238,6 +238,8 @@ img{display:block;max-width:100%}
 .song-request-status{color:var(--mute);font-size:.78rem;line-height:1.6}
 .song-request-status.ok{color:var(--crys)}
 .song-request-status.err{color:#e7a8b7}
+.song-request-optional{color:var(--crys-dim);font-size:.78em;margin-left:.4em;font-weight:400}
+.song-request-estimate{font-size:.78rem;color:var(--gold);line-height:1.6;margin:4px 0 0;letter-spacing:.02em}
 @media(max-width:640px){
   .song-request-head{flex-direction:column;gap:2px}
   .song-request-actions{display:grid;grid-template-columns:1fr}
@@ -481,13 +483,18 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
         <div class="song-request-price">50,000 <small>Gil / 首</small></div>
       </div>
       <div class="song-request-copy">
-        每位旅者本次來店最多可點播 <strong>2 首歌曲</strong>，每首 50,000 Gil，可分次送出申請。審核通過後才成立費用，並獨立收取，不列入餐飲／體驗合計。<br>
+        <strong>每次可申請 1～2 首歌曲</strong>，不限本次來店的申請次數。每首 50,000 Gil，審核通過後才成立費用，並獨立收取，不列入餐飲／體驗合計。<br>
         為保留水晶庭原有的音樂氛圍，每播放 <strong>2 首店內選曲</strong>，才會穿插至多 1 首旅者點歌。曲目將由店長或經理審核；若與當晚風格不符，可能無法安排播放，還請見諒。
       </div>
       <div class="field">
-        <label>歌曲網址 <span class="req">*</span></label>
+        <label for="songRequestUrl">第一首｜YouTube 網址 <span class="req">*</span></label>
         <input id="songRequestUrl" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." maxlength="300">
       </div>
+      <div class="field">
+        <label for="songRequestUrl2">第二首｜YouTube 網址 <span class="song-request-optional">選填</span></label>
+        <input id="songRequestUrl2" type="url" inputmode="url" placeholder="想一次點兩首，再填這裡" maxlength="300">
+      </div>
+      <div class="song-request-estimate" id="songRequestEstimate">每次可點 1～2 首，送出後分別審核與收款。</div>
       <div class="field">
         <label>想說的話</label>
         <textarea id="songRequestNote" placeholder="想附上的一句話或備註（選填）" maxlength="200"></textarea>
@@ -1091,8 +1098,8 @@ function hasAnything(){
 
 // ---- 晶響｜網頁點歌 → 既有 Discord Radio 審核佇列 ----
 let songRequestsEnabled = null;
-let songRequestsUsed = null;
-let songRequestsMax = 2;
+let songRequestsSending = false;
+let songRequestSuccessUntil = 0;
 
 function setSongRequestStatus(message, type=""){
   const box=$("songRequestStatus");
@@ -1102,77 +1109,70 @@ function setSongRequestStatus(message, type=""){
   if(type) box.classList.add(type);
 }
 
+function updateSongRequestEstimate(){
+  const first=$("songRequestUrl")?.value.trim()||"";
+  const second=$("songRequestUrl2")?.value.trim()||"";
+  const label=$("songRequestEstimate");
+  if(!label)return;
+  if(!first){
+    label.textContent="填寫第一首即可送出；也可以追加第二首一起申請。";
+    return;
+  }
+  const n=second?2:1;
+  label.textContent="本次選擇 "+n+" 首｜若全部核准，費用共 "+(n*50000).toLocaleString("en-US")+" Gil";
+}
+
 async function loadSongRequestStatus(){
   const btn=$("songRequestBtn");
-  if(!btn) return;
-  songRequestsUsed=null;
+  if(!btn || songRequestsSending)return;
   try{
     const res=await fetch(RADIO_WEB_REQUEST_URL,{method:"GET",cache:"no-store"});
     const data=await res.json();
     if(!res.ok || data?.ok!==true) throw new Error(data?.error||"無法取得點歌狀態");
     songRequestsEnabled=data.requests_enabled===true;
-    songRequestsMax=Number(data.max_requests)||2;
+    btn.disabled=!songRequestsEnabled || !state.joinToken || !state.memberToken || state.joinSession?.status!=="seated";
     if(!songRequestsEnabled){
-      btn.disabled=true;
       setSongRequestStatus("今晚晶響暫停受理。","err");
-      return;
-    }
-
-    if(state.joinToken && state.memberToken && state.joinSession?.status==="seated"){
-      const statusRes=await fetch(RADIO_WEB_REQUEST_URL,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          action:"status",
-          join_token:state.joinToken,
-          member_token:state.memberToken
-        })
-      });
-      const usage=await statusRes.json();
-      if(!statusRes.ok || usage?.ok!==true) throw new Error(usage?.error||"無法確認剩餘點歌名額");
-      songRequestsUsed=Number(usage.used_count)||0;
-      songRequestsMax=Number(usage.max_requests)||2;
-      const remaining=Math.max(0,songRequestsMax-songRequestsUsed);
-      btn.disabled=remaining<=0;
-      setSongRequestStatus(
-        remaining
-          ? `今晚接受晶響｜已點播 ${songRequestsUsed}/${songRequestsMax} 首，還可點 ${remaining} 首。`
-          : `本次已點滿 ${songRequestsMax} 首，謝謝您分享喜愛的音樂。`,
-        remaining ? "" : "ok"
-      );
-    }else{
-      btn.disabled=false;
-      setSongRequestStatus("今晚接受晶響｜每位旅者最多 2 首，完成帶位後即可送出。");
+    }else if(Date.now()>=songRequestSuccessUntil){
+      setSongRequestStatus("今晚接受晶響｜每次可點一或兩首，之後仍能再次申請。");
     }
   }catch(err){
-    songRequestsUsed=null;
+    songRequestsEnabled=null;
     btn.disabled=true;
-    setSongRequestStatus("暫時無法確認晶響狀態或剩餘名額，請稍後再試。","err");
+    if(Date.now()>=songRequestSuccessUntil)setSongRequestStatus("暫時無法確認晶響狀態，請稍後再試。","err");
   }
 }
 
 async function submitSongRequest(){
   const btn=$("songRequestBtn");
-  const url=$("songRequestUrl")?.value.trim()||"";
+  if(songRequestsSending)return;
+  const url1=$("songRequestUrl")?.value.trim()||"";
+  const url2=$("songRequestUrl2")?.value.trim()||"";
   const note=$("songRequestNote")?.value.trim()||"";
   if(!state.joinToken || !state.memberToken || state.joinSession?.status!=="seated"){
     setSongRequestStatus("請先完成取號與帶位，再使用晶響。","err");
     return;
   }
-  if(songRequestsUsed!==null && songRequestsUsed>=songRequestsMax){
-    setSongRequestStatus("本次來店已點滿兩首歌曲。","err");
-    btn.disabled=true;
+  if(songRequestsEnabled!==true){
+    setSongRequestStatus("今晚晶響目前無法受理，請稍後再試。","err");
     return;
   }
-  if(!url){
-    setSongRequestStatus("請先貼上 YouTube 歌曲網址。","err");
+  if(!url1){
+    setSongRequestStatus("請先貼上第一首的 YouTube 歌曲網址。","err");
     $("songRequestUrl")?.focus();
     return;
   }
+  if(url2 && url1===url2){
+    setSongRequestStatus("兩個欄位請填寫不同的曲目。","err");
+    $("songRequestUrl2")?.focus();
+    return;
+  }
+  const urls=[url1,...(url2?[url2]:[])];
 
+  songRequestsSending=true;
   btn.disabled=true;
   btn.textContent="送出中…";
-  setSongRequestStatus("正在送往水晶庭音樂台審核…");
+  setSongRequestStatus("正在送出 "+urls.length+" 首晶響，交由水晶庭音樂台審核…");
   try{
     const res=await fetch(RADIO_WEB_REQUEST_URL,{
       method:"POST",
@@ -1180,28 +1180,36 @@ async function submitSongRequest(){
       body:JSON.stringify({
         join_token:state.joinToken,
         member_token:state.memberToken,
-        youtube_url:url,
+        youtube_urls:urls,
         note:note||null
       })
     });
     const data=await res.json();
     if(!res.ok || data?.ok!==true) throw new Error(data?.error||"送出失敗");
+    const requests=Array.isArray(data.requests)?data.requests:[{title:data.title||"此曲"}];
     $("songRequestUrl").value="";
+    $("songRequestUrl2").value="";
     $("songRequestNote").value="";
-    songRequestsUsed=Number(data.used_count)||0;
-    songRequestsMax=Number(data.max_requests)||2;
+    updateSongRequestEstimate();
+    songRequestSuccessUntil=Date.now()+20000;
+    const summary=requests.map(x=>String(x.title||"歌曲")).join("、");
+    const deliveryWarning=data.order_notification===false?"；部分 Discord 通知未送達，請洽店員確認":"";
     setSongRequestStatus(
-      "已送出｜"+String(data.title||"此曲")+"。本次已點播 "+songRequestsUsed+"/"+songRequestsMax+" 首；由店長或經理審核，通過後才成立 50,000 Gil 費用。",
-      "ok"
+      "已送出 "+requests.length+" 首｜"+summary+"。曲目各自審核，通過後每首收取 50,000 Gil"+deliveryWarning+"。",
+      data.order_notification===false?"err":"ok"
     );
   }catch(err){
+    songRequestSuccessUntil=0;
     setSongRequestStatus(err?.message||String(err),"err");
-    await loadSongRequestStatus();
   }finally{
+    songRequestsSending=false;
     btn.textContent="送出晶響";
-    btn.disabled=songRequestsEnabled!==true || (songRequestsUsed!==null && songRequestsUsed>=songRequestsMax);
+    btn.disabled=songRequestsEnabled!==true;
   }
 }
+["songRequestUrl","songRequestUrl2"].forEach(id=>$(id)?.addEventListener("input",updateSongRequestEstimate));
+updateSongRequestEstimate();
+
 
 // ---- 前端送出節流：同一瀏覽器成功送出後 5 秒內不可再次送出 ----
 const SUBMIT_COOLDOWN_MS = 5000;
