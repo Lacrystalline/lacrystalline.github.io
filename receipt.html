@@ -61,6 +61,21 @@ img{display:block;max-width:100%}.wrap{max-width:820px;margin:0 auto;padding:0 2
 .order-state.pending{color:#d5b78b}
 .order-subtotal .pending-note{display:block;color:var(--crys-dim);font-size:.72rem;margin-top:3px}
 #pendingRow{border-top:1px solid rgba(210,184,135,.16);margin-top:5px;padding-top:10px}
+
+/* 金額辨識度：維持水晶庭配色，但數字改用清晰等寬字 */
+.line .price,.order-head .price,.order-subtotal,.tot-row strong,.grand .v{
+  font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+  font-weight:600;
+  letter-spacing:.005em;
+}
+.line .price,.order-head .price{font-size:1.04rem;color:#f1d9aa}
+.order-subtotal{font-size:.97rem;color:#f1d9aa}
+.order-subtotal .pending-note{font-family:var(--tc);font-weight:400;color:#9ec8cf}
+.tot-row strong{color:#f0e3c7;font-size:1.01rem}
+.grand .v{font-size:1.82rem;color:#ffe0a9}
+@media(max-width:640px){.line .price{font-size:1.06rem}.grand .v{font-size:1.65rem}.tot-row{gap:10px}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Italianno&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/visit_voucher.css?v=20260930-v46">
