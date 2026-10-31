@@ -351,6 +351,36 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
   .visit-launcher{top:72px!important;right:74px!important;bottom:auto!important}
   .visit-launcher-clear{top:72px;right:10px;bottom:auto;min-height:42px;padding:8px 10px}
 }
+
+/* 同行加入引導與清晰金額（維持原站配色） */
+.party-guide[hidden],.party-guide-fallback[hidden]{display:none!important}
+.party-guide{margin:14px 0 20px;padding:19px 21px;border:1px solid rgba(127,211,214,.34);border-radius:5px;background:linear-gradient(145deg,rgba(27,57,75,.35),rgba(10,21,35,.62))}
+.party-guide-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.party-guide-ey{font-family:var(--serif);font-size:.8rem;letter-spacing:.14em;color:#8ec9cc}
+.party-guide-heading{font-size:1.12rem;font-weight:500;line-height:1.5;color:#eef5f6;margin:4px 0 9px}
+.party-guide-progress-label{font:600 .9rem/1.6 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-variant-numeric:tabular-nums;color:#e4d1a8;white-space:nowrap}
+.party-guide-track{height:5px;margin:4px 0 14px;border-radius:99px;background:rgba(183,220,227,.14);overflow:hidden}
+.party-guide-track>div{height:100%;width:0;background:linear-gradient(90deg,#65b9c1,#d8b87a);border-radius:99px;transition:width .25s}
+.party-guide-lead{color:#f1d9aa;font-size:.93rem;line-height:1.7;margin-bottom:4px}
+.party-guide-copy{color:#d4e2e8;font-size:.86rem;line-height:1.85;margin:4px 0 12px}
+.party-guide-btn{display:block;width:100%;min-height:46px;padding:11px 17px;border:1px solid rgba(216,184,122,.67);border-radius:3px;background:rgba(216,184,122,.14);color:#f3dfb7;font-family:var(--tc);font-size:.95rem;font-weight:500;cursor:pointer}
+.party-guide-btn:hover{background:rgba(216,184,122,.22);border-color:#e7cf9e}
+.party-guide-btn:focus-visible{outline:2px solid var(--crys);outline-offset:3px}
+.party-guide-feedback{min-height:1.4em;margin:4px 0;font-size:.79rem;color:#94d4d5}
+.party-guide-fallback label{display:block;color:#d4e2e8;font-size:.8rem;margin-bottom:5px}
+.party-guide-fallback input{width:100%;border:1px solid rgba(127,211,214,.36);background:rgba(8,15,25,.85);color:#eef5f6;padding:10px;border-radius:3px;font-size:.88rem}
+.party-guide-foot{font-size:.8rem;line-height:1.75;color:#abbec9;margin-top:8px}
+.party-guide-steps{display:flex;flex-wrap:wrap;gap:7px}
+.party-guide-steps span{border:1px solid rgba(127,211,214,.23);padding:5px 9px;color:#b8dce0;border-radius:3px;font-size:.75rem}
+.join-guide{border-color:rgba(216,184,122,.35)}
+@media(max-width:640px){.party-guide{padding:15px}.party-guide-header{flex-direction:column;gap:2px}}
+.opt .pr:not(.vip-treat),.song-request-price{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:1.1rem;font-weight:600;line-height:1.45;font-variant-numeric:tabular-nums;color:#f1d9aa;letter-spacing:.005em}
+.opt .pr small,.song-request-price small{font-size:.72em;color:#d6c6a5;opacity:1;font-weight:500}
+.opt .pr .svc-unit{font-family:var(--tc);font-size:.74em;font-weight:400}
+.summary #total{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:1.52rem;font-weight:650;font-variant-numeric:tabular-nums;color:#f1d9aa}
+.summary .tot small{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:.69em;color:#d4c2a1}
+.song-request-estimate{font-size:.84rem;color:#e6cda0}
+@media(max-width:640px){.summary{padding:14px}.summary .row{gap:10px}.summary .tot{font-size:1.04rem;white-space:nowrap}.summary #total{font-size:1.35rem}.summary .btn{padding:11px 15px;font-size:.88rem;letter-spacing:.06em}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Italianno&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/visit_voucher.css?v=20261019-mobile-top-right">
@@ -396,7 +426,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
       <div class="vc-sub" id="vcSub">—</div>
       <div class="vc-actions">
         <a class="vc-btn primary" id="vcOrder" href="order.html">點餐</a>
-        <button class="vc-btn" id="vcShare" type="button">分享同行</button>
+        <button class="vc-btn" id="vcShare" type="button" title="複製同行加入連結">邀請同行</button>
         <a class="vc-btn gold" id="vcReceipt" href="receipt.html" aria-disabled="true">即時憑單（帶位後）</a>
       </div>
     </div>
@@ -433,6 +463,13 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
         <button class="ib-switch" id="identitySwitch" type="button">更換使用者</button>
       </div>
     </div>
+    <div id="joinIntro" class="party-guide join-guide" hidden>
+      <div class="party-guide-ey">JOIN THIS TABLE · 同行加入</div>
+      <div class="party-guide-heading">您受邀加入 <span id="joinIntroTicket">—</span> 桌</div>
+      <div class="party-guide-progress-label" id="joinIntroCount">正在確認同行人數…</div>
+      <p class="party-guide-copy" id="joinIntroText">請填寫角色資料，加入本次來店。</p>
+      <div class="party-guide-steps"><span>1 · 填寫角色資料</span><span>2 · 加入此桌</span><span>3 · 帶位後各自點餐</span></div>
+    </div>
     <div id="identityFields" class="identity-fields">
       <div class="field">
         <label>旅者名稱 <span class="req">*</span></label>
@@ -448,6 +485,22 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
       </div>
     </div>
     <div id="joinBanner" class="join-banner"></div>
+    <div id="companionInvite" class="party-guide" hidden>
+      <div class="party-guide-header">
+        <div><div class="party-guide-ey">INVITE COMPANIONS · 同行邀請</div><div class="party-guide-heading">邀請同行加入同一桌</div></div>
+        <div class="party-guide-progress-label" id="companionInviteCount">—</div>
+      </div>
+      <div class="party-guide-track" id="companionInviteTrack" role="progressbar" aria-label="同行已加入人數" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"><div id="companionInviteFill"></div></div>
+      <p class="party-guide-lead" id="companionInviteLead">請將連結分享給同行旅者。</p>
+      <p class="party-guide-copy">將連結傳給同行朋友；每人用自己的裝置開啟，填寫角色名稱與伺服器後按「加入此桌」。</p>
+      <button class="party-guide-btn" type="button" id="companionInviteBtn">複製同行加入連結</button>
+      <div class="party-guide-feedback" id="companionInviteStatus" role="status" aria-live="polite"></div>
+      <div class="party-guide-fallback" id="companionCopyFallback" hidden>
+        <label for="companionCopyUrl">請手動複製以下邀請連結</label>
+        <input type="text" id="companionCopyUrl" readonly aria-label="同行加入連結">
+      </div>
+      <p class="party-guide-foot">同行者不需重新取號。帶位後每位旅者可各自點餐，訂單歸屬同一桌。</p>
+    </div>
     <div id="partySetup">
       <div class="field">
         <label>本次來店人數 <span class="req">*</span>（最多 8 人）</label>
@@ -457,7 +510,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
           <option value="5">5 人</option><option value="6">6 人</option><option value="7">7 人</option><option value="8">8 人</option>
         </select>
       </div>
-      <div class="hint" style="margin-top:2px">您是第 1 位旅者；其餘同行請各自開啟「分享同行」連結，填寫自己的角色名與伺服器後加入此桌。</div>
+      <div class="hint" style="margin-top:2px">選擇本次來店總人數。取號後請將「同行加入連結」傳給朋友，讓每位同行使用自己的裝置加入同桌並各自點餐。</div>
       <div id="companions" class="companions"></div>
       <div id="partyStatus" class="party-status" style="display:none"></div>
     </div>
@@ -632,6 +685,47 @@ const SERVER_OPTIONS = ["伊弗利特","利維坦","巴哈姆特","泰坦","迦�
 
 function esc(v){
   return String(v ?? "").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
+}
+
+
+function renderPartyGuidance(){
+  const session=state.joinSession;
+  const active=!!state.joinToken&&!!session&&['waiting','seated'].includes(String(session.status||''));
+  const total=Math.max(0,Number(session?.party_size||0));
+  const joined=Math.max(0,Math.min(total,Number(session?.identified_count||0)));
+  const remaining=Math.max(0,total-joined);
+  const showInvite=active&&state.identityBound&&total>1;
+  const showIntro=active&&!state.identityBound;
+  $("companionInvite").hidden=!showInvite;
+  $("joinIntro").hidden=!showIntro;
+  if(showInvite){
+    $("companionInviteCount").textContent=`已加入 ${joined} / ${total} 人`;
+    $("companionInviteLead").textContent=remaining>0?`尚有 ${remaining} 位同行尚未加入`:"同行已全數加入，帶位後即可各自點餐。";
+    $("companionInviteTrack").setAttribute("aria-valuemax",String(total));
+    $("companionInviteTrack").setAttribute("aria-valuenow",String(joined));
+    $("companionInviteFill").style.width=`${total?joined/total*100:0}%`;
+  }
+  if(showIntro){
+    $("joinIntroTicket").textContent=String(session.ticket_code||readVisit()?.ticket_code||"—");
+    $("joinIntroCount").textContent=`已加入 ${joined} / ${total} 人`;
+    $("joinIntroText").textContent=remaining>0
+      ?"請在下方填寫自己的角色名稱與伺服器，再按「加入此桌」。帶位後就能獨立點餐，不需另外取號。"
+      :"本桌人員已登錄完成。如您先前已加入，請填寫原角色資料重新連結；若是新同行，請先請原旅者追加名額。";
+  }
+}
+async function copyCompanionInvitation(){
+  if(!state.joinToken)return;
+  const url=visitOrderUrl(state.joinToken,false),status=$("companionInviteStatus"),fallback=$("companionCopyFallback");
+  try{
+    if(!navigator.clipboard?.writeText)throw new Error("clipboard unavailable");
+    await navigator.clipboard.writeText(url);
+    fallback.hidden=true;
+    status.textContent="連結已複製，請貼給同行旅者。";
+  }catch(e){
+    fallback.hidden=false;
+    const input=$("companionCopyUrl");input.value=url;input.focus();input.select();
+    status.textContent="瀏覽器無法自動複製，請手動複製下方連結。";
+  }
 }
 
 function renderCompanions(){
@@ -1277,6 +1371,7 @@ function update(){
     $("totalUnit").textContent = "Gil";
   }
   syncOrderStageVisibility();
+  renderPartyGuidance();
   const btn=$("submitBtn");
   const remain = cooldownRemainingMs();
   if(remain > 0){
@@ -1315,6 +1410,7 @@ function update(){
 $("guestName").addEventListener('input',update);
 $("guestServer").addEventListener('change',update);
 $("partySize").addEventListener('change',renderCompanions);
+$("companionInviteBtn").addEventListener('click',copyCompanionInvitation);
 
 // ---- 組訂單物件 ----
 function buildOrder(){
@@ -1619,7 +1715,7 @@ async function refreshVisitCard(forceOpen=false){
       }
     }
     share.style.display=(!!v.member_token&&['waiting','seated'].includes(String(data.status)))?'inline-flex':'none';
-    share.onclick=()=>{const url=visitOrderUrl(v.join_token,false);navigator.clipboard?.writeText(url).then(()=>{share.textContent='同行連結已複製 ✓';setTimeout(()=>share.textContent='分享同行',1800)}).catch(()=>{});};
+    share.onclick=async()=>{try{if(!navigator.clipboard?.writeText)throw new Error('clipboard unavailable');await navigator.clipboard.writeText(visitOrderUrl(v.join_token,false));share.textContent='已複製 ✓';setTimeout(()=>share.textContent='邀請同行',1800);}catch(e){share.textContent='請至點餐頁複製';setTimeout(()=>share.textContent='邀請同行',2600);}};
     receipt.href=visitReceiptUrl(v,data);
     receipt.style.display=data.receipt_available?'inline-flex':'none';
     receipt.setAttribute('aria-disabled',data.receipt_available?'false':'true');
@@ -1706,11 +1802,11 @@ async function addGuestSlot(){
       state.joinSession.party_size=Number(data.party_size||state.joinSession.party_size);
       state.joinSession.pending_count=Number(data.pending_count||0);
     }
-    const url=visitOrderUrl(state.joinToken,false);
-    try{await navigator.clipboard?.writeText(url);}catch(e){}
-    await refreshVisitCard(true);
+    setVisitCollapsed(readVisit(),true);
+    await refreshVisitCard(false);
     syncIdentityUI();
-    toast(`已追加 1 位同行名額（目前 ${data.party_size} 人）。同行連結已複製，請讓新旅者自行填寫資料加入。`,null,false);
+    $("companionInvite")?.scrollIntoView({behavior:'smooth',block:'center'});
+    toast(`已追加 1 位同行名額（目前 ${data.party_size} 人）。請使用下方「複製同行加入連結」邀請新旅者。`,null,false);
   }catch(err){
     toast(`追加客人失敗（${err?.message||String(err)}）`,null,true);
   }finally{
@@ -1797,7 +1893,12 @@ $("submitBtn").addEventListener('click', async ()=>{
       const banner=$("joinBanner"); banner.classList.add('show');
       banner.innerHTML=`<div>水晶號碼牌已取得</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">請等待水晶庭夥伴帶位 · 帶位完成後自動開放點餐</div>`;
       const url=new URL(location.href); url.searchParams.set('join',state.joinToken); history.replaceState(null,'',url);
-      syncIdentityUI(); syncOrderStageVisibility(); await refreshVisitCard(true);
+      syncIdentityUI(); syncOrderStageVisibility();
+      if(Number(data.party_size)>1){
+        setVisitCollapsed(readVisit(),true);
+        await refreshVisitCard(false);
+        $("companionInvite")?.scrollIntoView({behavior:'smooth',block:'center'});
+      }else{await refreshVisitCard(true);}
       const notified=await notifyWaitingSession(state.joinToken);
       if(notified){
         toast(`已取得 ${esc(data.ticket_code)}。請等待帶位，完成後本頁會自動開放點餐。`,null,false);
