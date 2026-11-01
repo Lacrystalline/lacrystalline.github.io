@@ -376,6 +376,7 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 @media(max-width:640px){.party-guide{padding:15px}.party-guide-header{flex-direction:column;gap:2px}}
 .opt .pr:not(.vip-treat),.song-request-price{font-family:var(--serif);font-size:1.1875rem;font-weight:600;line-height:1.45;font-variant-numeric:tabular-nums;color:#f1d9aa;letter-spacing:.005em}
 .opt .pr small,.song-request-price small{font-size:.72em;color:#d6c6a5;opacity:1;font-weight:500}
+.opt .pr .price-leading{font-family:inherit;font-size:1.11em;font-weight:600;line-height:1;vertical-align:baseline}
 .opt .pr .svc-unit{font-family:var(--tc);font-size:.74em;font-weight:400}
 .summary #total{font-family:var(--serif);font-size:1.5625rem;font-weight:600;font-variant-numeric:tabular-nums;color:#f1d9aa}
 .summary .tot small{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:.69em;color:#d4c2a1}
@@ -679,6 +680,12 @@ const BITES = [
 const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null, identityBound:false, memberToken:null, memberOrderCount:0, specialServiceEnabled:null, isVip:false, membershipTier:"standard", vipCardText:"" };
 
 const fmt = n => n.toLocaleString('en-US');
+// 僅菜單／體驗價目：千位分隔符前的首段數字略放大，維持價格數值不變。
+const fmtMenuPrice = n => {
+  const value=fmt(Number(n));
+  const i=value.indexOf(',');
+  return i<0 ? value : `<span class="price-leading">${value.slice(0,i)}</span>${value.slice(i)}`;
+};
 const $ = id => document.getElementById(id);
 
 
@@ -1010,7 +1017,7 @@ function renderServices(){
     <div class="opt${isContact?' contact-only':(state.services.has(s.id)?' sel':'')}" data-id="${s.id}" aria-disabled="${isContact?'true':'false'}">
       ${isContact?'<div class="contact-mark">◇</div>':'<div class="box"></div>'}
       <div class="nm">${s.name}<span class="en">${s.en}</span>${s.id==='custom'?'<span class="svc-leadtime">須事先向店長下訂・確認後製作約一週</span>':''}</div>
-      <div class="pr">${isContact?'洽店長':(s.price===null?s.priceLabel:fmt(s.price)+'<small>Gil</small>'+(s.unit?'<small class="svc-unit">'+s.unit+'</small>':''))}</div>
+      <div class="pr">${isContact?'洽店長':(s.price===null?s.priceLabel:fmtMenuPrice(s.price)+'<small>Gil</small>'+(s.unit?'<small class="svc-unit">'+s.unit+'</small>':''))}</div>
     </div>`;
   }).join('');
   box.querySelectorAll('.opt:not(.contact-only)').forEach(el=>{
@@ -1043,7 +1050,7 @@ function renderServices(){
 function renderMenu(listId, items){
   $(listId).innerHTML = items.map((it,idx)=>{
     const q=Number(state.qty[it.id]||0);
-    const priceHtml=state.isVip?'<span class="pr vip-treat">本店招待</span>':`<span class="pr">${fmt(it.price)}<small>Gil</small></span>`;
+    const priceHtml=state.isVip?'<span class="pr vip-treat">本店招待</span>':`<span class="pr">${fmtMenuPrice(it.price)}<small>Gil</small></span>`;
     const isDrinkMenu = listId==="drinks";
     const limitedDivider=(idx===0 && it.limited===true)
       ? '<div class="menu-mini-divider"><span>'+(isDrinkMenu?'期間限定 · LIMITED DRINKS':'期間限定 · LIMITED BITES')+'</span></div>'
