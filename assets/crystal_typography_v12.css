@@ -1,0 +1,78 @@
+/* La Crystalline — V12 text legibility over animated crystal.
+   Preserve Cormorant Garamond / Noto Serif TC, sizes, weights and layout.
+   Only quiet-text contrast and very restrained dark text edging change. */
+
+.hero .slogan,
+.hero .fr,
+.hero .tagline,
+.about p,
+.drinks .d-name,
+.bites .d-name,
+.drinks .d-price,
+.bites .d-price,
+.drinks .d-spec,
+.bites .d-spec,
+.drinks .d-desc,
+.bites .d-desc,
+.drinks .d-poem,
+.bites .d-poem,
+.drinks .d-flavor,
+.bites .d-flavor,
+.menu-note,
+.rule .rt,
+.rule .rd,
+.member-card-name,
+.member-card-en,
+.member-card-role,
+.member-card-rp,
+.m-body p,
+.m-meta-label,
+.m-meta-value,
+.m-quote,
+.recipe-copy,
+.recipe-details summary,
+.hidden-blk p,
+.menu-mini-divider span{
+  text-shadow:0 1px 3px rgba(3,8,17,.67);
+}
+
+/* Same blue-grey, crystal teal and antique-gold visual hierarchy. */
+.drinks .d-desc,
+.bites .d-desc,
+.menu-note,
+.rule .rd,
+.hidden-blk p,
+.recipe-details,
+.member-card-rp{
+  color:#b9c6d1;
+}
+.drinks .d-name .en,
+.bites .d-name .en,
+.drinks .d-poem,
+.bites .d-poem,
+.m-name .en,
+.member-card-en,
+.menu-mini-divider,
+.section-mark .mini,
+.recipe-details summary{
+  color:#80b4b8;
+}
+.drinks .d-flavor,
+.bites .d-flavor,
+.recipe-copy{
+  color:#bdcbd6;
+}
+
+/* Extra separation at phone widths; no panels or type changes. */
+@media(max-width:680px){
+  .drinks .d-desc,
+  .bites .d-desc,
+  .drinks .d-spec,
+  .bites .d-spec,
+  .drinks .d-poem,
+  .bites .d-poem,
+  .about p,
+  .m-body p{
+    text-shadow:0 1px 3px rgba(2,7,16,.80);
+  }
+}
