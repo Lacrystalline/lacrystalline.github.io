@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="811" viewBox="0 0 1440 811">
+<desc>La Crystalline V26 — gravity-hung silk shifted one-quarter of the canvas to the right. Whole uninterrupted lines, no clipping or grid.</desc>
+<defs>
+<linearGradient id="strand0" gradientUnits="userSpaceOnUse" x1="1061" y1="-100" x2="1068" y2="930">
+<stop offset="0%" stop-color="#7ca8b6" stop-opacity="0"/>
+<stop offset="9%" stop-color="#7ca8b6" stop-opacity=".80"/>
+<stop offset="36%" stop-color="#bed0cd" stop-opacity=".94"/>
+<stop offset="67%" stop-color="#cbb58f" stop-opacity=".94"/>
+<stop offset="91%" stop-color="#bed0cd" stop-opacity=".80"/>
+<stop offset="100%" stop-color="#7ca8b6" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="strand1" gradientUnits="userSpaceOnUse" x1="1196" y1="-95" x2="1191" y2="930">
+<stop offset="0%" stop-color="#7096ad" stop-opacity="0"/>
+<stop offset="9%" stop-color="#7096ad" stop-opacity=".80"/>
+<stop offset="36%" stop-color="#b9cdcf" stop-opacity=".94"/>
+<stop offset="67%" stop-color="#d4bd96" stop-opacity=".94"/>
+<stop offset="91%" stop-color="#b9cdcf" stop-opacity=".80"/>
+<stop offset="100%" stop-color="#7096ad" stop-opacity="0"/>
+</linearGradient>
+</defs>
+<g opacity="0.69">
+<path d="M 1061 -100 C 1061 -70 1060.67 24.17 1061 80 C 1061.33 135.83 1062.5 178.33 1063 235 C 1063.5 291.67 1063.33 352.5 1064 420 C 1064.67 487.5 1066.33 555 1067 640 C 1067.67 725 1067.83 881.67 1068 930" fill="none" stroke="url(#strand0)" stroke-width="1.76" opacity=".14" stroke-linecap="round"/>
+<path d="M 1061 -100 C 1061 -70 1060.67 24.17 1061 80 C 1061.33 135.83 1062.5 178.33 1063 235 C 1063.5 291.67 1063.33 352.5 1064 420 C 1064.67 487.5 1066.33 555 1067 640 C 1067.67 725 1067.83 881.67 1068 930" fill="none" stroke="url(#strand0)" stroke-width="0.78" opacity=".95" stroke-linecap="round"/>
+<path d="M 1061 -100 C 1061 -70 1060.67 24.17 1061 80 C 1061.33 135.83 1062.5 178.33 1063 235 C 1063.5 291.67 1063.33 352.5 1064 420 C 1064.67 487.5 1066.33 555 1067 640 C 1067.67 725 1067.83 881.67 1068 930" fill="none" stroke="#e3e8dc" stroke-width=".26" opacity=".14" stroke-linecap="round"/>
+</g>
+<g opacity="0.72">
+<path d="M 1196 -95 C 1195.83 -63.83 1195.17 33.17 1195 92 C 1194.83 150.83 1195.33 198.67 1195 258 C 1194.67 317.33 1193.67 382.67 1193 448 C 1192.33 513.33 1191.33 569.67 1191 650 C 1190.67 730.33 1191 883.33 1191 930" fill="none" stroke="url(#strand1)" stroke-width="1.85" opacity=".14" stroke-linecap="round"/>
+<path d="M 1196 -95 C 1195.83 -63.83 1195.17 33.17 1195 92 C 1194.83 150.83 1195.33 198.67 1195 258 C 1194.67 317.33 1193.67 382.67 1193 448 C 1192.33 513.33 1191.33 569.67 1191 650 C 1190.67 730.33 1191 883.33 1191 930" fill="none" stroke="url(#strand1)" stroke-width="0.82" opacity=".95" stroke-linecap="round"/>
+<path d="M 1196 -95 C 1195.83 -63.83 1195.17 33.17 1195 92 C 1194.83 150.83 1195.33 198.67 1195 258 C 1194.67 317.33 1193.67 382.67 1193 448 C 1192.33 513.33 1191.33 569.67 1191 650 C 1190.67 730.33 1191 883.33 1191 930" fill="none" stroke="#e3e8dc" stroke-width=".26" opacity=".14" stroke-linecap="round"/>
+</g>
+</svg>
