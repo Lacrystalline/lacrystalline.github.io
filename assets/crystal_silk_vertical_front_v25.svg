@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="811" viewBox="0 0 1440 811">
+<desc>La Crystalline V25 — sparse gravity-hung central silk threads. Whole uninterrupted lines, no clipping or grid.</desc>
+<defs>
+<linearGradient id="strand0" gradientUnits="userSpaceOnUse" x1="738" y1="-100" x2="746" y2="950">
+<stop offset="0%" stop-color="#84b0be" stop-opacity="0"/>
+<stop offset="9%" stop-color="#84b0be" stop-opacity=".80"/>
+<stop offset="36%" stop-color="#d0dbd2" stop-opacity=".94"/>
+<stop offset="67%" stop-color="#e0c59c" stop-opacity=".94"/>
+<stop offset="91%" stop-color="#d0dbd2" stop-opacity=".80"/>
+<stop offset="100%" stop-color="#84b0be" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="strand1" gradientUnits="userSpaceOnUse" x1="783" y1="-110" x2="786" y2="950">
+<stop offset="0%" stop-color="#7cabc0" stop-opacity="0"/>
+<stop offset="9%" stop-color="#7cabc0" stop-opacity=".80"/>
+<stop offset="36%" stop-color="#d3d7ca" stop-opacity=".94"/>
+<stop offset="67%" stop-color="#e3c79f" stop-opacity=".94"/>
+<stop offset="91%" stop-color="#d3d7ca" stop-opacity=".80"/>
+<stop offset="100%" stop-color="#7cabc0" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="strand2" gradientUnits="userSpaceOnUse" x1="807" y1="-90" x2="811" y2="944">
+<stop offset="0%" stop-color="#6d9db3" stop-opacity="0"/>
+<stop offset="9%" stop-color="#6d9db3" stop-opacity=".80"/>
+<stop offset="36%" stop-color="#c0d3ce" stop-opacity=".94"/>
+<stop offset="67%" stop-color="#c9b692" stop-opacity=".94"/>
+<stop offset="91%" stop-color="#c0d3ce" stop-opacity=".80"/>
+<stop offset="100%" stop-color="#6d9db3" stop-opacity="0"/>
+</linearGradient>
+</defs>
+<g opacity="0.85">
+<path d="M 738 -100 C 738.17 -70.67 738.67 17.67 739 76 C 739.33 134.33 739.67 186.67 740 250 C 740.33 313.33 740.33 384.33 741 456 C 741.67 527.67 743.17 597.67 744 680 C 744.83 762.33 745.67 905 746 950" fill="none" stroke="url(#strand0)" stroke-width="2.05" opacity=".14" stroke-linecap="round"/>
+<path d="M 738 -100 C 738.17 -70.67 738.67 17.67 739 76 C 739.33 134.33 739.67 186.67 740 250 C 740.33 313.33 740.33 384.33 741 456 C 741.67 527.67 743.17 597.67 744 680 C 744.83 762.33 745.67 905 746 950" fill="none" stroke="url(#strand0)" stroke-width="0.91" opacity=".95" stroke-linecap="round"/>
+<path d="M 738 -100 C 738.17 -70.67 738.67 17.67 739 76 C 739.33 134.33 739.67 186.67 740 250 C 740.33 313.33 740.33 384.33 741 456 C 741.67 527.67 743.17 597.67 744 680 C 744.83 762.33 745.67 905 746 950" fill="none" stroke="#e3e8dc" stroke-width=".26" opacity=".14" stroke-linecap="round"/>
+</g>
+<g opacity="0.91">
+<path d="M 783 -110 C 783.17 -78.67 784 12.17 784 78 C 784 143.83 782.83 217.17 783 285 C 783.17 352.83 784.67 413.83 785 485 C 785.33 556.17 784.83 634.5 785 712 C 785.17 789.5 785.83 910.33 786 950" fill="none" stroke="url(#strand1)" stroke-width="2.16" opacity=".14" stroke-linecap="round"/>
+<path d="M 783 -110 C 783.17 -78.67 784 12.17 784 78 C 784 143.83 782.83 217.17 783 285 C 783.17 352.83 784.67 413.83 785 485 C 785.33 556.17 784.83 634.5 785 712 C 785.17 789.5 785.83 910.33 786 950" fill="none" stroke="url(#strand1)" stroke-width="0.96" opacity=".95" stroke-linecap="round"/>
+<path d="M 783 -110 C 783.17 -78.67 784 12.17 784 78 C 784 143.83 782.83 217.17 783 285 C 783.17 352.83 784.67 413.83 785 485 C 785.33 556.17 784.83 634.5 785 712 C 785.17 789.5 785.83 910.33 786 950" fill="none" stroke="#e3e8dc" stroke-width=".26" opacity=".14" stroke-linecap="round"/>
+</g>
+<g opacity="0.79">
+<path d="M 807 -90 C 807 -60.67 806.67 26.33 807 86 C 807.33 145.67 809 203.67 809 268 C 809 332.33 806.83 397.67 807 472 C 807.17 546.33 809.33 635.33 810 714 C 810.67 792.67 810.83 905.67 811 944" fill="none" stroke="url(#strand2)" stroke-width="1.91" opacity=".14" stroke-linecap="round"/>
+<path d="M 807 -90 C 807 -60.67 806.67 26.33 807 86 C 807.33 145.67 809 203.67 809 268 C 809 332.33 806.83 397.67 807 472 C 807.17 546.33 809.33 635.33 810 714 C 810.67 792.67 810.83 905.67 811 944" fill="none" stroke="url(#strand2)" stroke-width="0.85" opacity=".95" stroke-linecap="round"/>
+<path d="M 807 -90 C 807 -60.67 806.67 26.33 807 86 C 807.33 145.67 809 203.67 809 268 C 809 332.33 806.83 397.67 807 472 C 807.17 546.33 809.33 635.33 810 714 C 810.67 792.67 810.83 905.67 811 944" fill="none" stroke="#e3e8dc" stroke-width=".26" opacity=".14" stroke-linecap="round"/>
+</g>
+</svg>
