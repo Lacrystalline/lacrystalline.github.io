@@ -27,3 +27,7 @@ This file defines the only production resources that may be modified when operat
 ## Purpose
 
 Prevent accidental cross-project writes when multiple GitHub/Supabase accounts or projects are connected.
+
+## ChatGPT / coding-agent workflow
+
+For this project, also read `AGENTS.md`. It records the user's standing instruction to execute already-authorized website changes directly, check the existing GitHub connection before claiming an access problem, and verify real commits. It grants no additional permissions and does not override this resource whitelist.
