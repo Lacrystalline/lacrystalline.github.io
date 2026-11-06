@@ -147,7 +147,8 @@
     const keys=new Float32Array(12);
     const faceList=isSmall()?faceCentersPhone:faceCentersDesktop;
     const count=isSmall()?2:3;
-    const cycle=portraitPreview?34:138;
+    const cycle=portraitPreview?34:165;
+    const displayWindow=portraitPreview?29:80;
     const active=enabled?count:0;
     const usedFacets=new Set();
     const usedPortraits=new Set();
@@ -158,7 +159,7 @@
       const epoch=Math.floor((t+offset)/cycle);
       const phase=((t+offset)%cycle+cycle)%cycle;
       const fadeIn=Math.min(1,phase/(portraitPreview?4:18));
-      const fadeOut=Math.min(1,(cycle-phase)/(portraitPreview?4:25));
+      const fadeOut=Math.min(1,(displayWindow-phase)/(portraitPreview?4:22));
       const fade=Math.max(0,Math.min(fadeIn,fadeOut));
       let candidateIndex=(Math.floor(random01(epoch*37.17+i*98.1)*faceList.length)+i*3)%faceList.length;
       while(usedFacets.has(candidateIndex))candidateIndex=(candidateIndex+1)%faceList.length;
