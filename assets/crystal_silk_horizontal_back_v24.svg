@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="811" viewBox="0 0 1440 811">
+<desc>La Crystalline V24: irregular hand-laid silk, individual uninterrupted organic curves; no grid</desc>
+<defs>
+<linearGradient id="strand0" gradientUnits="userSpaceOnUse" x1="-130" y1="136" x2="1510" y2="318">
+<stop offset="0%" stop-color="#668eae" stop-opacity="0"/>
+<stop offset="9%" stop-color="#668eae" stop-opacity=".88"/>
+<stop offset="35%" stop-color="#8fb9c1" stop-opacity=".98"/>
+<stop offset="63%" stop-color="#cfb895" stop-opacity=".92"/>
+<stop offset="91%" stop-color="#8fb9c1" stop-opacity=".85"/>
+<stop offset="100%" stop-color="#668eae" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="strand1" gradientUnits="userSpaceOnUse" x1="-110" y1="584" x2="955" y2="563">
+<stop offset="0%" stop-color="#88b8c4" stop-opacity="0"/>
+<stop offset="9%" stop-color="#88b8c4" stop-opacity=".88"/>
+<stop offset="35%" stop-color="#bdc6bf" stop-opacity=".98"/>
+<stop offset="63%" stop-color="#cbb58d" stop-opacity=".92"/>
+<stop offset="91%" stop-color="#bdc6bf" stop-opacity=".85"/>
+<stop offset="100%" stop-color="#88b8c4" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="strand2" gradientUnits="userSpaceOnUse" x1="595" y1="715" x2="1550" y2="640">
+<stop offset="0%" stop-color="#668da8" stop-opacity="0"/>
+<stop offset="9%" stop-color="#668da8" stop-opacity=".88"/>
+<stop offset="35%" stop-color="#d2c49f" stop-opacity=".98"/>
+<stop offset="63%" stop-color="#9bc6cb" stop-opacity=".92"/>
+<stop offset="91%" stop-color="#d2c49f" stop-opacity=".85"/>
+<stop offset="100%" stop-color="#668da8" stop-opacity="0"/>
+</linearGradient>
+</defs>
+<g opacity="0.7">
+<path d="M -130 136 C -91.67 142 10.83 156.67 100 172 C 189.17 187.33 303.33 228.33 405 228 C 506.67 227.67 600 165.5 710 170 C 820 174.5 931.67 230.33 1065 255 C 1198.33 279.67 1435.83 307.5 1510 318" fill="none" stroke="url(#strand0)" stroke-width="1.92" opacity=".115" stroke-linecap="round"/>
+<path d="M -130 136 C -91.67 142 10.83 156.67 100 172 C 189.17 187.33 303.33 228.33 405 228 C 506.67 227.67 600 165.5 710 170 C 820 174.5 931.67 230.33 1065 255 C 1198.33 279.67 1435.83 307.5 1510 318" fill="none" stroke="url(#strand0)" stroke-width="0.80" opacity=".94" stroke-linecap="round"/>
+<path d="M -130 136 C -91.67 142 10.83 156.67 100 172 C 189.17 187.33 303.33 228.33 405 228 C 506.67 227.67 600 165.5 710 170 C 820 174.5 931.67 230.33 1065 255 C 1198.33 279.67 1435.83 307.5 1510 318" fill="none" stroke="#e2e7df" stroke-width=".26" opacity=".12" stroke-linecap="round"/>
+</g>
+<g opacity="0.68">
+<path d="M -110 584 C -63.33 594.33 80.83 646.67 170 646 C 259.17 645.33 333.33 602.33 425 580 C 516.67 557.67 631.67 514.83 720 512 C 808.33 509.17 915.83 554.5 955 563" fill="none" stroke="url(#strand1)" stroke-width="1.80" opacity=".115" stroke-linecap="round"/>
+<path d="M -110 584 C -63.33 594.33 80.83 646.67 170 646 C 259.17 645.33 333.33 602.33 425 580 C 516.67 557.67 631.67 514.83 720 512 C 808.33 509.17 915.83 554.5 955 563" fill="none" stroke="url(#strand1)" stroke-width="0.75" opacity=".94" stroke-linecap="round"/>
+<path d="M -110 584 C -63.33 594.33 80.83 646.67 170 646 C 259.17 645.33 333.33 602.33 425 580 C 516.67 557.67 631.67 514.83 720 512 C 808.33 509.17 915.83 554.5 955 563" fill="none" stroke="#e2e7df" stroke-width=".26" opacity=".12" stroke-linecap="round"/>
+</g>
+<g opacity="0.76">
+<path d="M 595 715 C 638.33 704.17 771.67 653 855 650 C 938.33 647 1014.17 703.5 1095 697 C 1175.83 690.5 1264.17 620.5 1340 611 C 1415.83 601.5 1515 635.17 1550 640" fill="none" stroke="url(#strand2)" stroke-width="1.87" opacity=".115" stroke-linecap="round"/>
+<path d="M 595 715 C 638.33 704.17 771.67 653 855 650 C 938.33 647 1014.17 703.5 1095 697 C 1175.83 690.5 1264.17 620.5 1340 611 C 1415.83 601.5 1515 635.17 1550 640" fill="none" stroke="url(#strand2)" stroke-width="0.78" opacity=".94" stroke-linecap="round"/>
+<path d="M 595 715 C 638.33 704.17 771.67 653 855 650 C 938.33 647 1014.17 703.5 1095 697 C 1175.83 690.5 1264.17 620.5 1340 611 C 1415.83 601.5 1515 635.17 1550 640" fill="none" stroke="#e2e7df" stroke-width=".26" opacity=".12" stroke-linecap="round"/>
+</g>
+</svg>
