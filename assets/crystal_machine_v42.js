@@ -265,7 +265,7 @@
 
     vec4 operatingScene(vec2 uv){
       float t=u_seconds*(1.-u_reduced);
-      vec3 painting=texture2D(u_art,uv).rgb;
+      vec3 painting=texture2D(u_art,uv).rgb*.80; /* V44: darken base painting only; gears and silk unchanged */
       /* Composition approved earlier:
          upper-left cropped eight-spoke gear, right-edge six-spoke gear,
          lower-left just a corner of the smaller six-spoke wheel.
@@ -396,7 +396,9 @@
                           *(.83+.23*illumination);
       vec2 bend=facetN*refractAmount;
       vec3 base=operatingScene(clamp(coords+bend,vec2(.003),vec2(.997))).rgb;
-      /* V42: visibly moving, broad-area softbox light with a muted
+      /* V44: 50% brighter crystal curtain reflection on a darker painting.
+         Retain the existing sweep geometry, normals, motion and satin hues.
+         V42: visibly moving, broad-area softbox light with a muted
          microfacet response. The light shifts slowly over each normal-map
          plane instead of drawing independent spots on the page. */
       vec2 softboxDir=normalize(vec2(.72+.18*sin(t*.091),-.42+.16*cos(t*.075)));
@@ -410,12 +412,12 @@
       /* The highlight tracks both the raised plane AND its seam. Diffuse
          strength is capped; even the brightest facet stays milky, not white. */
       float specularEnergy=(.035+.125*broadSpecular*sweep
-                            +.065*ridgeLight*(.42+.58*sweep))*slowBreath;
-      base=mix(base,vec3(.56,.75,.88),min(specularEnergy,.19));
+                            +.065*ridgeLight*(.42+.58*sweep))*slowBreath*1.5;
+      base=mix(base,vec3(.56,.75,.88),min(specularEnergy,.285));
       base+=vec3(.025,.044,.062)*ridge*(.34+.66*incidence)
-            *(.56+.44*illumination);
+            *(.56+.44*illumination)*1.5;
       base+=mix(vec3(.18,.35,.55),vec3(.48,.44,.34),facetShade)
-            *(.008+.011*incidence)*illumination;
+            *(.008+.011*incidence)*illumination*1.5;
       float centerShade=1.-smoothstep(.22,1.00,length((v_uv-.5)*vec2(1.3,1.)));
       base*=mix(.77,.93,centerShade);
       /* Low-contrast face-to-face shading maintains dimensionality in the dark. */
