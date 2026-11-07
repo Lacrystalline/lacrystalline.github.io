@@ -1,4 +1,4 @@
-/* La Crystalline — Crystal Engine V39: genuine separated wheel + thread layers.
+/* La Crystalline — Crystal Engine V41: genuine separated wheel + thread layers.
    Static atmospheric base has no moving gear pixels. Three RGBA wheel sprites rotate
    independently through the full 360 degrees, while one separate woven-filament
    layers gently undulate. The complete animated composite is refracted through the
@@ -367,26 +367,39 @@
       vec2 facetN=(ftex.rg-vec2(.5))*2.;
       float facetShade=ftex.b;
       float illumination=.5+.5*sin(t*2.*PI/228.+facetShade*6.283+v_uv.x*.64);
-      float refractAmount=(.0027+.0022*facetShade)*(.83+illumination*.23);
+      /* V41: raised crystal corners catch soft, directional light.
+         Look for changes in the EXISTING facet normal map, not synthetic
+         sparkles or decorative geometry. Two small neighbor lookups are
+         cheaper than evaluating the whole animated scene a second time. */
+      vec2 nearX=(texture2D(u_facet,
+        clamp(coords+vec2(.0017,0.),vec2(.003),vec2(.997))).rg-vec2(.5))*2.;
+      vec2 nearY=(texture2D(u_facet,
+        clamp(coords+vec2(0.,.0017),vec2(.003),vec2(.997))).rg-vec2(.5))*2.;
+      float ridgeDelta=max(length(facetN-nearX),length(facetN-nearY));
+      float ridge=smoothstep(.12,.58,ridgeDelta);
+      vec2 surfaceDir=normalize(facetN+vec2(.055,-.035));
+      float incidence=clamp(.5+.5*dot(surfaceDir,normalize(vec2(.75,-.32))),0.,1.);
+      float grazing=pow(1.-incidence,2.);
+      /* Refraction remains subtle at the seams of the raised facets.
+         Preserve ONE complete animated-scene sample for mobile GPUs. */
+      float refractAmount=(.0026+.0021*facetShade+.00065*ridge)
+                          *(.83+.23*illumination);
       vec2 bend=facetN*refractAmount;
-      /* Refraction is applied AFTER separately rotating each real gear and
-         undulating the independent threads. Single composite sample limits
-         mobile GPU cost while preserving actual warped geometry. */
       vec3 base=operatingScene(clamp(coords+bend,vec2(.003),vec2(.997))).rgb;
-      /* A slightly milky, HARD crystalline foreground: broad planar face
-         highlights, not pinprick sparkles or additional hanging objects. */
-      float incidence=clamp(.5+.5*dot(normalize(facetN+vec2(.01)),
-                                      normalize(vec2(.75,-.32))),0.,1.);
-      float sheen=(.020+.031*incidence)*(.75+.25*illumination);
-      base=mix(base,vec3(.65,.78,.90),sheen);
-      base+=mix(vec3(.21,.41,.66),vec3(.60,.51,.38),facetShade)
-            *(.010+.015*incidence)*illumination;
+      /* Wide satin reflection and small, diffused highlights where planes meet.
+         Muted icy-blue lighting avoids hot white/specular pixels. */
+      float softSheen=(.014+.021*incidence)*(.75+.25*illumination);
+      float edgeSheen=ridge*(.007+.020*incidence*incidence)
+                      *(.72+.28*illumination);
+      base=mix(base,vec3(.64,.78,.90),softSheen+edgeSheen);
+      base+=vec3(.025,.038,.052)*ridge*grazing*(.62+.38*illumination);
+      base+=mix(vec3(.18,.35,.55),vec3(.48,.44,.34),facetShade)
+            *(.007+.010*incidence)*illumination;
       float centerShade=1.-smoothstep(.22,1.00,length((v_uv-.5)*vec2(1.3,1.)));
-      base*=mix(.81,.95,centerShade);
-      // Every adjoining facet has its own soft directional shading, including
-      // planes whose painted border is subtle. Zero-mean so V9 remains dark.
+      base*=mix(.77,.93,centerShade);
+      /* Low-contrast face-to-face shading maintains dimensionality in the dark. */
       float planarLight=clamp(dot(facetN,vec2(.77,-.51)),-1.,1.);
-      float planeContrast=1.+.044*planarLight+.010*(facetShade-.5);
+      float planeContrast=1.+.033*planarLight+.008*(facetShade-.5);
       base*=planeContrast;
       /* Four supported slots; currently exactly 2 active on all devices.
          Original staff portraits are composited INSIDE their exact crystal facet. */

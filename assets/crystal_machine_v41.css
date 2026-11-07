@@ -30,9 +30,9 @@
 /* Replace only the former page-wide crystalline veil, keep the rest of the design. */
 .crystal-veil{display:none!important}
 /* Keep the existing hero scene as a subtle fused memory behind the crystal engine. */
-.hero .hero-bg{opacity:.17;mix-blend-mode:screen;filter:saturate(.65) brightness(.82)}
+.hero .hero-bg{opacity:.13;mix-blend-mode:screen;filter:saturate(.58) brightness(.72)}
 .hero .hero-bg::after{
-  background:linear-gradient(180deg,rgba(7,12,20,.65),rgba(6,11,19,.48) 40%,rgba(7,12,20,.76));
+  background:linear-gradient(180deg,rgba(7,12,20,.74),rgba(6,11,19,.58) 40%,rgba(7,12,20,.84));
 }
 .hero::after{
   content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
@@ -44,7 +44,7 @@
   .crystal-machine-wash{background:
     linear-gradient(180deg,rgba(5,10,18,.45),rgba(7,12,21,.24) 35%,rgba(5,10,18,.44)),
     radial-gradient(ellipse at center,rgba(7,12,20,.34),rgba(6,10,18,.47));}
-  .hero .hero-bg{opacity:.11}
+  .hero .hero-bg{opacity:.085}
 }
 @media(prefers-reduced-motion:reduce){
   .crystal-machine-scene canvas{transition:none}
@@ -147,11 +147,11 @@ body{background:transparent}
 /* V16 new-from-scratch separated artwork. Preserve all layout and motion rules.
    Prior base was already very dark; these independent assets are painted dark
    and must not receive the former additional 30-50% brightness reduction. */
-.crystal-machine-fallback{filter:brightness(.89) saturate(.95)}
-.crystal-machine-scene canvas{filter:brightness(.94) saturate(.94)}
+.crystal-machine-fallback{filter:brightness(.78) saturate(.92)}
+.crystal-machine-scene canvas{filter:brightness(.86) saturate(.92)}
 @media(max-width:720px){
-  .crystal-machine-fallback{filter:brightness(.86) saturate(.94)}
-  .crystal-machine-scene canvas{filter:brightness(.90) saturate(.93)}
+  .crystal-machine-fallback{filter:brightness(.75) saturate(.91)}
+  .crystal-machine-scene canvas{filter:brightness(.83) saturate(.91)}
 }
 
 /* V17 — localized visibility balance. Do NOT brighten the entire backdrop.
@@ -224,8 +224,8 @@ html{background-image:linear-gradient(rgba(5,11,22,.37),rgba(5,11,22,.37)),url('
 .crystal-machine-facet-membrane{
   position:absolute;inset:0;z-index:5;pointer-events:none;
   background:url('crystal_facet_membrane_v16.webp') center center / cover no-repeat;
-  mix-blend-mode:screen;opacity:.90;
-  filter:brightness(.97) saturate(.90) contrast(1.03);overflow:hidden;
+  mix-blend-mode:screen;opacity:.84;
+  filter:brightness(.92) saturate(.88) contrast(1.02);overflow:hidden;
 }
 .crystal-machine-facet-membrane::after{
   content:"";position:absolute;inset:-16%;pointer-events:none;
@@ -235,14 +235,14 @@ html{background-image:linear-gradient(rgba(5,11,22,.37),rgba(5,11,22,.37)),url('
   opacity:.65;
   animation:crystalMachineSlowReflection 102s ease-in-out infinite alternate;
 }
-.crystal-machine-facet-membrane::after{opacity:.49}
+.crystal-machine-facet-membrane::after{opacity:.34}
 @keyframes crystalMachineSlowReflection{
   from{transform:translate3d(-7%,-2%,0)}
   to{transform:translate3d(7%,2%,0)}
 }
 @media(max-width:720px){
   .crystal-machine-facet-membrane{
-    opacity:.89;filter:brightness(.97) saturate(.90) contrast(1.03);
+    opacity:.81;filter:brightness(.90) saturate(.87) contrast(1.02);
   }
 }
 @media(prefers-reduced-motion:reduce){
