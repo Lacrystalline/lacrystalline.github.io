@@ -1,4 +1,4 @@
-/* La Crystalline — Crystal Engine V35: genuine separated wheel + thread layers.
+/* La Crystalline — Crystal Engine V36: genuine separated wheel + thread layers.
    Static atmospheric base has no moving gear pixels. Three RGBA wheel sprites rotate
    independently through the full 360 degrees, while one separate woven-filament
    layers gently undulate. The complete animated composite is refracted through the
@@ -15,9 +15,9 @@
   image.decoding = 'async';
   const facetImage = new Image();
   facetImage.decoding = 'async';
-  // V32: the user-approved simplified bronze gears. Three independent RGBA
-  // sprites, native pixels copied without resampling into one 2048px atlas.
-  // Large: eight supports; medium and small: six supports each.
+  // V36: one user-supplied, six-spoke engraved bronze wheel, with its original
+  // transparent contours preserved. Three scales share this exact artwork;
+  // their existing locations, angular directions and periods are unchanged.
   const gearNames=['large','medium','small'];
   const gearImages=gearNames.map(()=>{
     const im=new Image();im.decoding='async';return im;
@@ -451,18 +451,21 @@
       return tx;
     }
     function buildGearAtlas(){
-      // Three real transparent assets, packed with their original pixels.
-      // No resize or repaint: 761/627/453px occupy centered 1024px cells.
+      // The same user-supplied transparent bronze artwork is scaled only as
+      // necessary to match the previously approved 761/627/453px wheel bounds.
+      // No new gear geometry, synthetic rendering or background pixels.
       // WebGL 1 guarantees MAX_TEXTURE_SIZE >= 2048.
       const tile=1024;
       const a=document.createElement('canvas');
       a.width=tile*2;a.height=tile*2;
       const ctx=a.getContext('2d',{alpha:true});
       if(!ctx)throw new Error('No gear atlas canvas');
+      const sizes=[761,627,453];
       gearImages.forEach((im,i)=>{
         const cx=(i%2)*tile+tile/2;
         const cy=Math.floor(i/2)*tile+tile/2;
-        ctx.drawImage(im,cx-im.naturalWidth/2,cy-im.naturalHeight/2);
+        const size=sizes[i];
+        ctx.drawImage(im,cx-size/2,cy-size/2,size,size);
       });
       return a;
     }
@@ -626,7 +629,7 @@
   loadPortraitAtlas().catch(()=>{});
   image.src='assets/crystal_machine_base_v16.webp';
   facetImage.src='assets/crystal_facet_normals_v16.webp';
-  gearImages.forEach((im,i)=>im.src='assets/crystal_gear_thin_'+gearNames[i]+'_dense_v35.webp');
+  gearImages.forEach(im=>im.src='assets/crystal_gear_bronze_six_spoke_v36.webp');
   silkImages.forEach((im,i)=>im.src='assets/crystal_silk_'+silkNames[i]+(i<2?'_v24.svg':'_v26.svg'));
   tryInit();
   window.addEventListener('resize',resize,{passive:true});
