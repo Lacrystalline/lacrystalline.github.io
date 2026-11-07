@@ -14,9 +14,9 @@
   width:100%;height:100%;
   object-fit:contain;object-position:center center;
   display:block;pointer-events:none;
-  /* V3: longer photographic dissolve and unidirectional champagne foil reflection. */
+  /* V4: 5.2-second unidirectional champagne foil reflection; maintain soft full-face gloss. */
   opacity:0;
-  transition:opacity 3.6s cubic-bezier(.44,.03,.22,1);
+  transition:opacity 5.2s cubic-bezier(.44,.03,.22,1);
 }
 .member-card .member-photo-duo.is-alt .member-photo-alternate{opacity:1}
 /* A broad, softly feathered champagne-gold foil face glides left-to-right
@@ -58,13 +58,13 @@
   transform:translate3d(-95%,0,0) skewX(-14deg);
 }
 .member-card .member-photo-duo.is-switching .member-photo-glint{
-  animation:memberPhotoFoilBloom 3.6s ease-in-out both;
+  animation:memberPhotoFoilBloom 5.2s ease-in-out both;
 }
 .member-card .member-photo-duo.is-switching .member-photo-glint::before{
-  animation:memberPhotoFoilSurface 3.6s cubic-bezier(.45,.04,.20,1) both;
+  animation:memberPhotoFoilSurface 5.2s cubic-bezier(.45,.04,.20,1) both;
 }
 .member-card .member-photo-duo.is-switching .member-photo-glint::after{
-  animation:memberPhotoFoilPearl 3.6s cubic-bezier(.44,.07,.23,.96) both;
+  animation:memberPhotoFoilPearl 5.2s cubic-bezier(.44,.07,.23,.96) both;
 }
 @keyframes memberPhotoFoilBloom{
   0%,7%{opacity:0}
