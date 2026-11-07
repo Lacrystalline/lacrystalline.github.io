@@ -215,38 +215,6 @@ body{background:transparent}
 .crystal-machine-fallback{background-image:url('crystal_machine_base_v16.webp')}
 html{background-image:linear-gradient(rgba(5,11,22,.37),rgba(5,11,22,.37)),url('crystal_machine_base_v16.webp')}
 
-
-/* V31 — artwork-based crystal light field from the approved layout image.
-   Gear silhouettes are excised from this translucent overlay so the ONLY
-   visible gear shapes are the three independently rotating GPU sprites.
-   The original gear-free fallback remains visible until the first frame. */
-.crystal-machine-ambient{
-  position:absolute;
-  inset:0;
-  z-index:2;
-  pointer-events:none;
-  width:100%;
-  height:100%;
-  background-image:url('crystal_ambient_v31.webp');
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-  mix-blend-mode:screen;
-  opacity:.83;
-}
+/* V39: atmospheric overlay removed. The original V16 base remains in the
+   fallback and in the WebGL source; the moving wheels and silk remain separate. */
 .crystal-machine-wash{z-index:3}
-@media(max-width:720px){
-  .crystal-machine-ambient{opacity:.71}
-}
-@media(prefers-reduced-motion:reduce){
-  .crystal-machine-ambient{animation:none}
-}
-
-
-/* V35: hide any unprocessed V31 gears; reveal only the gear-free atmospheric
-   light layer after the browser has removed the stationary silhouettes. */
-.crystal-machine-ambient{background-image:none;opacity:0}
-.crystal-machine-ambient.is-gear-free{opacity:.83}
-@media(max-width:720px){
-  .crystal-machine-ambient.is-gear-free{opacity:.71}
-}

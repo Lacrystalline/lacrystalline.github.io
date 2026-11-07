@@ -1,4 +1,4 @@
-/* La Crystalline — Crystal Engine V37: genuine separated wheel + thread layers.
+/* La Crystalline — Crystal Engine V39: genuine separated wheel + thread layers.
    Static atmospheric base has no moving gear pixels. Three RGBA wheel sprites rotate
    independently through the full 360 degrees, while one separate woven-filament
    layers gently undulate. The complete animated composite is refracted through the
@@ -574,58 +574,6 @@
     im.onload=tryInit;
     im.onerror=loadError;
   });
-
-  /* V35: The V31 atmospheric image secretly contains three STATIC gears.
-     Make those regions transparent ONCE before showing the blue light layer,
-     so a gear never appears to stay put after the moving sprites change. */
-  function installGearFreeAmbient(){
-    const layer=host.querySelector('.crystal-machine-ambient');
-    if(!layer)return;
-    const art=new Image();art.decoding='async';
-    art.onload=()=>{
-      try{
-        const w=art.naturalWidth,h=art.naturalHeight;
-        const c=document.createElement('canvas');c.width=w;c.height=h;
-        const ctx=c.getContext('2d',{willReadFrequently:true});
-        if(!ctx)throw new Error('Ambient cleanup canvas unavailable');
-        ctx.drawImage(art,0,0);
-        const frame=ctx.getImageData(0,0,w,h),pixels=frame.data;
-        // Normalized reference-plane locations of the old, unanimated gears
-        const holes=[[235,-120,620,440],[525,692,410,415],[1550,360,530,460]];
-        for(let y=0;y<h;y++){
-          const sy=y*811/h;
-          for(let x=0;x<w;x++){
-            const sx=x*1440/w,i=(y*w+x)*4;
-            let a=1;
-            for(let k=0;k<holes.length;k++){
-              const z=holes[k],u=(sx-z[0])/z[2],v=(sy-z[1])/z[3];
-              const dist=Math.sqrt(u*u+v*v);
-              a=Math.min(a,Math.max(0,Math.min(1,(dist-.90)/.10)));
-            }
-            const r=pixels[i],g=pixels[i+1],b=pixels[i+2];
-            if(r-g>11&&g-b>8&&r>53)a*=.04;
-            pixels[i+3]=Math.round(pixels[i+3]*a);
-          }
-        }
-        ctx.putImageData(frame,0,0);
-        const show=blob=>{
-          if(!blob)return;
-          const url=URL.createObjectURL(blob);
-          layer.style.backgroundImage='url("'+url+'")';
-          layer.classList.add('is-gear-free');
-          window.addEventListener('pagehide',()=>URL.revokeObjectURL(url),{once:true});
-        };
-        if(c.toBlob)c.toBlob(show,'image/png');
-        else {
-          layer.style.backgroundImage='url("'+c.toDataURL('image/png')+'")';
-          layer.classList.add('is-gear-free');
-        }
-      }catch(err){console.warn('[La Crystalline cleaned ambient]',err)}
-    };
-    art.onerror=()=>console.warn('[La Crystalline cleaned ambient] Asset failed');
-    art.src='assets/crystal_ambient_v31.webp';
-  }
-  installGearFreeAmbient();
 
   portraitStart=performance.now();
   loadPortraitAtlas().catch(()=>{});
