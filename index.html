@@ -670,6 +670,10 @@ section{padding:72px 0}
 .member-card.active{border-color:rgba(127,211,214,.64);box-shadow:0 0 0 1px rgba(127,211,214,.08),0 18px 38px rgba(0,0,0,.24)}
 .member-card .portrait{aspect-ratio:3/4;border:0;border-bottom:1px solid rgba(127,211,214,.12);border-radius:0;padding:0;margin:0;max-width:none}
 .member-card img{width:100%;height:100%;object-fit:cover;object-position:center center;display:block}
+/* Noji: preserve both ears and the open book from the original tall portrait.
+   Keep the member card at 3:4; never crop or stretch this photo. */
+.member-card[data-member="10"] .portrait{background:#0b1926}
+.member-card[data-member="10"] .portrait > img:first-child{object-fit:contain;object-position:center center}
 .member-card .northwind-portrait{position:relative;overflow:hidden}
 .member-card .northwind-portrait .member-signature{
   position:absolute;right:-3%;bottom:3.5%;z-index:3;
