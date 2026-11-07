@@ -1374,6 +1374,14 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
             <div class="member-card-rp">接待・陪聊・攝影</div>
           </div>
         </button>
+        <button class="member-card" type="button" data-member="11" aria-pressed="false">
+          <div class="portrait"><img src="assets/ludeman_profile.webp?v=1" onerror="this.onerror=null;this.src='assets/emblem.png'" alt="水晶庭成員 魯德曼" loading="lazy" decoding="async"></div>
+          <div class="member-card-copy">
+            <div class="member-card-name">魯德曼</div>
+            <div class="member-card-role">夥伴 / Staff</div>
+            <div class="member-card-rp">閒聊</div>
+          </div>
+        </button>
       </div>
       <button class="member-arrow next" id="memberNext" type="button" aria-label="下一位成員">›</button>
     </div>
@@ -1390,6 +1398,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <button class="member-dot" type="button" data-member="8" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="9" tabindex="-1"></button>
       <button class="member-dot" type="button" data-member="10" tabindex="-1"></button>
+      <button class="member-dot" type="button" data-member="11" tabindex="-1"></button>
     </div>
 
     <div class="member-detail" id="memberDetail" aria-live="polite"></div>
@@ -2000,6 +2009,33 @@ const MEMBER_PROFILES=[
     ],
     quote:"「放心啦，我今天只是想幫你拍張照而已！才不會把你變成草人呢。……咦？你幹嘛退那麼遠？」",
     foot:"來自第一世界的小妖精，披著貓魅族少女的模樣四處旅行。喜歡攝影、畫畫與惡作劇，卻經常反過來被人捉弄。如今在水晶庭尋找著能讓大家真正幸福的魔法。"
+  },
+  {
+    name:"魯德曼", en:"", role:"夥伴 / Staff",
+    meta:[["RP 擔當","閒聊"],["氣質","高冷・理性毒舌・穩重"]],
+    body:[
+      "大部分人第一次見到這位敖龍族女性，都覺得她看起來有點高冷，令人難以親近。",
+      "阿魯確實平常只會擺出一副生人勿近的表情，但這其實是她保護另一個自己的方式。",
+      "從小的時候，她就擁有兩個不同的人格。",
+      "原本的魯魯，天真活潑、好奇心旺盛，是位貓魅女性；",
+      "另一個人格阿魯則是被她當作幻想朋友的敖龍女性，理性毒舌，強大且穩重。",
+      "平常阿魯並不會主動接管身體，都是任由魯魯去探索這個世界。",
+      "直到幾個月前，魯魯在圖拉爾冒險的時候，跟原先的隊伍走散，在森林裡迷路，結果踏進了一頭被當地人稱為「圖拉爾威爪」的魔獸領地。",
+      "在這之前，森林裡的幾場戰鬥早就消耗了不少魯魯的體力。",
+      "圖拉爾威爪更是沒給她反應的時間，一掌橫掃過來，直接就把她拍飛出去了。",
+      "危急時刻，阿魯奪過身體的掌控權，決定把這什麼圖拉爾威爪的東西給滅了。",
+      "戰鬥途中，她的身上冒出藍色火焰，直至戰鬥結束才熄滅。",
+      {type:"quote",text:"「咦？怎麼變成敖龍族了？」"},
+      "魯魯與阿魯看著自己的變化，摸不著頭緒，也不知道該怎麼辦。",
+      {type:"quote",text:"「那接下來就由妳來探索這個世界吧。偶爾也要出來走走嘛。」"},
+      "為了找到變回去的辦法，阿魯四處遊歷，聽到了很有趣的傳聞。",
+      {type:"quote",text:"「欸，妳知道嗎？在利姆薩·羅敏薩有家酒館，聽說店主能夠編織命運呢。」"},
+      "就這樣，阿魯來到了水晶庭，找到了店主。面對她的詢問，北風只是淡淡一笑，沒有承認傳聞，卻也沒有否認。",
+      {type:"quote",text:"「不過，這裡有來自不同地方的客人，這些交織的緣分說不定會帶給妳需要的答案。」"},
+      "最後，她留了下來，穿梭在客人之間，一邊閒聊一邊打聽，找尋變回去的辦法。"
+    ],
+    quote:"",
+    foot:""
   }
 ];
 let activeMemberIndex=-1;
