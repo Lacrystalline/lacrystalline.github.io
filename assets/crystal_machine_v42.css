@@ -147,10 +147,10 @@ body{background:transparent}
 /* V16 new-from-scratch separated artwork. Preserve all layout and motion rules.
    Prior base was already very dark; these independent assets are painted dark
    and must not receive the former additional 30-50% brightness reduction. */
-.crystal-machine-fallback{filter:brightness(.78) saturate(.92)}
+.crystal-machine-fallback{filter:brightness(.62) saturate(.92)}
 .crystal-machine-scene canvas{filter:brightness(.86) saturate(.92)}
 @media(max-width:720px){
-  .crystal-machine-fallback{filter:brightness(.75) saturate(.91)}
+  .crystal-machine-fallback{filter:brightness(.60) saturate(.91)}
   .crystal-machine-scene canvas{filter:brightness(.83) saturate(.91)}
 }
 
@@ -219,7 +219,8 @@ html{background-image:linear-gradient(rgba(5,11,22,.37),rgba(5,11,22,.37)),url('
    fallback and in the WebGL source; the moving wheels and silk remain separate. */
 .crystal-machine-wash{z-index:3}
 
-/* V42: Original V16 crystalline curtain with visible, soft moving highlights.
+/* V44: Crystal curtain softbox light raised by 50% against a 20% darker base.
+   V42: Original V16 crystalline curtain with visible, soft moving highlights.
    The V31 atmospheric image remains removed; this is ONLY the facet sheet. */
 .crystal-machine-facet-membrane{
   position:absolute;inset:0;z-index:5;pointer-events:none;
@@ -233,12 +234,12 @@ html{background-image:linear-gradient(rgba(5,11,22,.37),rgba(5,11,22,.37)),url('
      Broad transitions keep it reflective without a hard white streak. */
   background:
     linear-gradient(112deg,
-      transparent 24%,rgba(172,219,253,.030) 33%,
-      rgba(178,221,250,.095) 43%,
-      rgba(226,238,250,.125) 50%,
-      rgba(165,205,238,.067) 57%,transparent 70%),
+      transparent 24%,rgba(172,219,253,.045) 33%,
+      rgba(178,221,250,.143) 43%,
+      rgba(226,238,250,.188) 50%,
+      rgba(165,205,238,.101) 57%,transparent 70%),
     radial-gradient(ellipse 29% 38% at 48% 46%,
-      rgba(161,210,244,.085),transparent 78%);
+      rgba(161,210,244,.128),transparent 78%);
   mix-blend-mode:screen;
   opacity:1;
   will-change:transform;
