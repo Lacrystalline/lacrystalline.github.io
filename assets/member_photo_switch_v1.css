@@ -14,13 +14,13 @@
   width:100%;height:100%;
   object-fit:contain;object-position:center center;
   display:block;pointer-events:none;
-  /* V2: photographic dissolve, instead of a hard diagonal dividing line. */
+  /* V3: longer photographic dissolve and unidirectional champagne foil reflection. */
   opacity:0;
-  transition:opacity 2.1s cubic-bezier(.44,.03,.22,1);
+  transition:opacity 3.6s cubic-bezier(.44,.03,.22,1);
 }
 .member-card .member-photo-duo.is-alt .member-photo-alternate{opacity:1}
-/* A foil-card surface reflection: two BROAD translucent white planes
-   travel across the complete photo, not a thin scanning beam. */
+/* A broad, softly feathered champagne-gold foil face glides left-to-right
+   for EVERY transition (including the switch back to the first photo). */
 .member-card .member-photo-duo .member-photo-glint{
   position:absolute;inset:0;z-index:2;
   overflow:hidden;pointer-events:none;opacity:0;
@@ -35,12 +35,12 @@
   left:-54%;top:-20%;width:146%;height:144%;
   background:linear-gradient(112deg,
     transparent 0%,
-    rgba(224,238,250,.025) 11%,
-    rgba(242,247,255,.12) 25%,
-    rgba(254,254,255,.31) 38%,
-    rgba(255,255,255,.58) 50%,
-    rgba(250,252,255,.40) 61%,
-    rgba(229,240,251,.13) 80%,
+    rgba(218,193,141,.024) 11%,
+    rgba(237,213,164,.10) 25%,
+    rgba(250,229,186,.28) 38%,
+    rgba(255,239,202,.54) 50%,
+    rgba(254,234,191,.37) 61%,
+    rgba(235,203,145,.13) 80%,
     transparent 96%);
   filter:blur(11px);
   transform:translate3d(-90%,0,0) skewX(-14deg);
@@ -49,27 +49,22 @@
   left:-53%;top:-18%;width:146%;height:140%;
   background:
     radial-gradient(ellipse 68% 76% at 51% 49%,
-      rgba(255,255,255,.22),rgba(245,250,255,.10) 47%,transparent 84%),
+      rgba(255,241,209,.20),rgba(245,218,173,.10) 47%,transparent 84%),
     linear-gradient(108deg,
-      transparent 19%,rgba(245,250,255,.035) 35%,
-      rgba(255,255,255,.16) 52%,
-      rgba(225,242,251,.055) 70%,transparent 88%);
+      transparent 19%,rgba(240,211,163,.032) 35%,
+      rgba(255,238,202,.16) 52%,
+      rgba(235,205,152,.055) 70%,transparent 88%);
   filter:blur(18px);
   transform:translate3d(-95%,0,0) skewX(-14deg);
 }
 .member-card .member-photo-duo.is-switching .member-photo-glint{
-  animation:memberPhotoFoilBloom 2.1s ease-in-out both;
+  animation:memberPhotoFoilBloom 3.6s ease-in-out both;
 }
 .member-card .member-photo-duo.is-switching .member-photo-glint::before{
-  animation:memberPhotoFoilSurface 2.1s cubic-bezier(.45,.04,.20,1) both;
+  animation:memberPhotoFoilSurface 3.6s cubic-bezier(.45,.04,.20,1) both;
 }
 .member-card .member-photo-duo.is-switching .member-photo-glint::after{
-  animation:memberPhotoFoilPearl 2.1s cubic-bezier(.44,.07,.23,.96) both;
-}
-.member-card .member-photo-duo.is-switching.is-reversing .member-photo-glint,
-.member-card .member-photo-duo.is-switching.is-reversing .member-photo-glint::before,
-.member-card .member-photo-duo.is-switching.is-reversing .member-photo-glint::after{
-  animation-direction:reverse;
+  animation:memberPhotoFoilPearl 3.6s cubic-bezier(.44,.07,.23,.96) both;
 }
 @keyframes memberPhotoFoilBloom{
   0%,7%{opacity:0}
