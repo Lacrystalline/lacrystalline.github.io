@@ -1,0 +1,78 @@
+/* La Crystalline / member photo two-frame crystal sweep.
+   Applied only to portraits with a genuine second photo; original assets untouched. */
+.member-card .member-photo-duo{
+  position:relative;
+  isolation:isolate;
+  cursor:pointer;
+}
+.member-card .member-photo-duo > img:first-child{
+  position:relative;
+  z-index:0;
+}
+.member-card .member-photo-duo .member-photo-alternate{
+  position:absolute;inset:0;z-index:1;
+  width:100%;height:100%;
+  object-fit:contain;object-position:center center;
+  display:block;pointer-events:none;
+  /* A 35-degree diagonal reveal, no scaling or cropping of either image. */
+  clip-path:polygon(0 0,-12% 0,-112% 100%,0 100%);
+  transition:clip-path .82s cubic-bezier(.50,.04,.26,.97);
+}
+.member-card .member-photo-duo.is-alt .member-photo-alternate{
+  clip-path:polygon(0 0,210% 0,110% 100%,0 100%);
+}
+.member-card .member-photo-duo .member-photo-glint{
+  position:absolute;z-index:2;
+  left:-9%;top:-10%;width:78px;height:120%;
+  pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,
+    transparent 0%,rgba(151,203,223,.025) 25%,
+    rgba(194,218,231,.13) 40%,
+    rgba(238,213,168,.42) 48%,
+    rgba(255,244,218,.78) 50%,
+    rgba(209,227,232,.27) 54%,
+    rgba(199,163,110,.08) 67%,transparent 100%);
+  mix-blend-mode:screen;
+  transform:translate3d(-240%,0,0) skewX(-35deg);
+}
+.member-card .member-photo-duo.is-switching .member-photo-glint{
+  animation:memberPhotoGleam .82s cubic-bezier(.50,.04,.26,.97) both;
+}
+.member-card .member-photo-duo.is-switching.is-reversing .member-photo-glint{
+  animation-direction:reverse;
+}
+@keyframes memberPhotoGleam{
+  0%{transform:translate3d(-240%,0,0) skewX(-35deg);opacity:0}
+  14%{opacity:.75}
+  70%{opacity:.8}
+  100%{transform:translate3d(570%,0,0) skewX(-35deg);opacity:0}
+}
+.member-card .member-photo-duo .member-photo-dots{
+  position:absolute;z-index:5;left:14px;bottom:14px;
+  display:flex;align-items:center;gap:6px;
+  padding:7px 9px;border-radius:99px;
+  background:rgba(8,15,25,.40);
+  border:1px solid rgba(234,214,176,.18);
+  opacity:0;pointer-events:none;
+  transition:opacity .22s ease;
+}
+.member-card .member-photo-duo.is-ready .member-photo-dots{opacity:.94}
+.member-card .member-photo-duo .member-photo-dots i{
+  display:block;width:5px;height:5px;border-radius:50%;
+  border:1px solid rgba(237,215,173,.58);
+  background:transparent;
+  transition:background .22s ease,box-shadow .22s ease;
+}
+.member-card .member-photo-duo:not(.is-alt) .member-photo-dots i:first-child,
+.member-card .member-photo-duo.is-alt .member-photo-dots i:last-child{
+  background:#ecd7ad;box-shadow:0 0 5px rgba(236,215,173,.48);
+}
+.member-card .northwind-portrait.member-photo-duo .member-signature{
+  z-index:4;pointer-events:none;
+}
+@media(prefers-reduced-motion:reduce){
+  .member-card .member-photo-duo .member-photo-alternate{transition:none}
+  .member-card .member-photo-duo .member-photo-glint{display:none}
+  .member-card .member-photo-duo .member-photo-dots,
+  .member-card .member-photo-duo .member-photo-dots i{transition:none}
+}
