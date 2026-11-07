@@ -288,7 +288,7 @@ html{
 .crystal-machine-facet-membrane::after{opacity:.35}
 /* Keep the venue's real photo a distant memory, not a bright background patch. */
 /* V49: raise only the original hero-bar photograph visibility by 30%. */
-.hero .hero-bg{opacity:.325;filter:saturate(.69) brightness(.83)}
+.hero .hero-bg{opacity:.455;filter:saturate(.69) brightness(.83)}
 .hero .hero-bg::after{
   background:linear-gradient(180deg,
     rgba(4,11,33,.66),rgba(6,17,45,.46) 42%,rgba(3,10,32,.73));
@@ -311,5 +311,5 @@ html{
   .crystal-machine-facet-membrane{
     opacity:.66;filter:brightness(.86) saturate(.79) contrast(1.07);
   }
-  .hero .hero-bg{opacity:.273;filter:saturate(.66) brightness(.82)}
+  .hero .hero-bg{opacity:.3822;filter:saturate(.66) brightness(.82)}
 }
