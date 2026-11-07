@@ -6,12 +6,13 @@
    Portrait projection, accessibility and typography are kept unchanged. */
 (() => {
   'use strict';
-  /* V47 single-direction optical sweep parameters. */
-  const PERIOD=9.0;
-  const PASS=6.0;
+  /* V48: slower, softer single sweep (keep all facet geometry and samplers). */
+  const PERIOD=12.5;
+  const PASS=8.5;
   const PARALLAX=0.22;
-  const BAND_FRONT=0.035;
-  const BAND_TAIL=0.11;
+  const BAND_FRONT=0.040;
+  const BAND_TAIL=0.135;
+  const SWEEP_GAIN=0.80; /* Applies to every V47 moving-light contribution. */
   const TIP_LEAD=0.018;
   const CORE=0.007;
   const HALO=0.0224;
@@ -43,10 +44,12 @@
   let gl, program, texture, facetTexture, gearTexture, silkTextures = [], frameHandle = 0, lastFrame = 0, start = 0, visible = !document.hidden;
   let uniforms = {};
   let running = false;
-  // Adapt once, like the cattail test: sample real rAF cadence for ~3.2 s.
-  // Do not alter the gear/silk geometry, shader timeline, or foreground artwork.
+  // Adaptive FPS: sample rAF cadence for 3.2s at startup AND every 15s.
+  // This is a cadence heuristic (not a GPU timer); it can recover upward or
+  // downshift after sustained slowdown. Never change gear/silk geometry.
+  const FPS_RESAMPLE_MS=15000;
   let frameQuality='full', frameSamples=[], sampleStart=0, sampleLast=0;
-  let sampleFinished=false, qualityNeedsResize=false;
+  let sampleFinished=false, nextSampleAt=0, qualityNeedsResize=false;
   // Non-generative subject extraction: original public member portraits are
   // drawn into a transient transparent atlas through hand-traced silhouette
   // masks. No original photograph is altered or uploaded.
@@ -250,6 +253,7 @@
     const float PARALLAX = ${PARALLAX.toFixed(6)};
     const float BAND_FRONT = ${BAND_FRONT.toFixed(6)};
     const float BAND_TAIL = ${BAND_TAIL.toFixed(6)};
+    const float SWEEP_GAIN = ${SWEEP_GAIN.toFixed(6)};
     const float TIP_LEAD = ${TIP_LEAD.toFixed(6)};
     const float CORE = ${CORE.toFixed(6)};
     const float HALO = ${HALO.toFixed(6)};
@@ -468,7 +472,7 @@
          adjacent seams. Darken only after passage, by at most ten percent. */
       float behind=s<0. ? 1.-exp(s/.275) : 0.;
       base*=1.-.10*behind*(1.-scan)*passMask;
-      float faceI=scan*facing*(.45+.75*exp(-d/.045));
+      float faceI=scan*facing*(.45+.75*exp(-d/.045))*SWEEP_GAIN;
       base+=vec3(.62,.80,.95)*faceI*.70;
       /* Light-spectrum front and tail via math only; no extra reads. */
       float frontColor=exp(-pow((s-.6*BAND_FRONT)/(.45*BAND_FRONT),2.))*faceI;
@@ -484,7 +488,7 @@
       /* Tip intensity is always driven by the same passing band.
          Phase changes strength and the STATIC color ring, never timing. */
       float sv=axis(vertexUV,L)-c+mirror-TIP_LEAD;
-      float tipI=band(sv)*passMask*facing*(.7+.3*apexPhase);
+      float tipI=band(sv)*passMask*facing*(.7+.3*apexPhase)*SWEEP_GAIN;
       float core=exp(-pow(d/CORE,2.));
       float halo=exp(-pow(d/HALO,1.2));
       float rays=(exp(-abs(offA.x)/.0016)+exp(-abs(offA.y)/.0016))
@@ -625,7 +629,12 @@
     return true;
   }
   function sampleFrameCadence(now) {
-    if(sampleFinished||!visible||reduced.matches)return;
+    if(!visible||reduced.matches)return;
+    if(sampleFinished){
+      if(now<nextSampleAt)return;
+      sampleFinished=false;
+      sampleStart=0;sampleLast=0;frameSamples=[];
+    }
     if(!sampleStart){sampleStart=now;sampleLast=now;return;}
     const elapsed=now-sampleLast;
     sampleLast=now;
@@ -643,6 +652,7 @@
     if(next!==frameQuality){frameQuality=next;qualityNeedsResize=true;}
     host.dataset.frameQuality=frameQuality;
     sampleFinished=true;
+    nextSampleAt=now+FPS_RESAMPLE_MS;
     frameSamples=[];
   }
   function resize() {
@@ -730,8 +740,9 @@
   window.addEventListener('resize',resize,{passive:true});
   document.addEventListener('visibilitychange',()=>{
     visible=!document.hidden;
-    if(!visible&&!sampleFinished){
+    if(!visible){
       sampleStart=0;sampleLast=0;frameSamples=[];
+      sampleFinished=true;nextSampleAt=0; // re-evaluate on return
     }
     if(visible&&!reduced.matches)startRendering();else stopRendering();
   });
