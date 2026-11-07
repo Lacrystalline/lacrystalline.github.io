@@ -219,32 +219,40 @@ html{background-image:linear-gradient(rgba(5,11,22,.37),rgba(5,11,22,.37)),url('
    fallback and in the WebGL source; the moving wheels and silk remain separate. */
 .crystal-machine-wash{z-index:3}
 
-/* V40: Restore the original V16 crystalline curtain removed in V38.
+/* V42: Original V16 crystalline curtain with visible, soft moving highlights.
    The V31 atmospheric image remains removed; this is ONLY the facet sheet. */
 .crystal-machine-facet-membrane{
   position:absolute;inset:0;z-index:5;pointer-events:none;
   background:url('crystal_facet_membrane_v16.webp') center center / cover no-repeat;
-  mix-blend-mode:screen;opacity:.84;
-  filter:brightness(.92) saturate(.88) contrast(1.02);overflow:hidden;
+  mix-blend-mode:screen;opacity:.75;
+  filter:brightness(.90) saturate(.88) contrast(1.02);overflow:hidden;
 }
 .crystal-machine-facet-membrane::after{
-  content:"";position:absolute;inset:-16%;pointer-events:none;
-  background:linear-gradient(112deg,
-     transparent 27%,rgba(183,225,255,.014) 42%,
-     rgba(205,238,255,.038) 50%,rgba(239,226,188,.014) 58%,transparent 72%);
-  opacity:.65;
-  animation:crystalMachineSlowReflection 102s ease-in-out infinite alternate;
+  content:"";position:absolute;inset:-25%;pointer-events:none;
+  /* A wide, frosted softbox passing over the actual facet curtain.
+     Broad transitions keep it reflective without a hard white streak. */
+  background:
+    linear-gradient(112deg,
+      transparent 24%,rgba(172,219,253,.030) 33%,
+      rgba(178,221,250,.095) 43%,
+      rgba(226,238,250,.125) 50%,
+      rgba(165,205,238,.067) 57%,transparent 70%),
+    radial-gradient(ellipse 29% 38% at 48% 46%,
+      rgba(161,210,244,.085),transparent 78%);
+  mix-blend-mode:screen;
+  opacity:1;
+  will-change:transform;
+  animation:crystalMachineSlowReflection 34s ease-in-out infinite alternate;
 }
-.crystal-machine-facet-membrane::after{opacity:.34}
 @keyframes crystalMachineSlowReflection{
-  from{transform:translate3d(-7%,-2%,0)}
-  to{transform:translate3d(7%,2%,0)}
+  from{transform:translate3d(-22%,-3%,0)}
+  to{transform:translate3d(22%,3%,0)}
 }
 @media(max-width:720px){
   .crystal-machine-facet-membrane{
-    opacity:.81;filter:brightness(.90) saturate(.87) contrast(1.02);
+    opacity:.73;filter:brightness(.89) saturate(.87) contrast(1.02);
   }
 }
 @media(prefers-reduced-motion:reduce){
-  .crystal-machine-facet-membrane::after{animation:none}
+  .crystal-machine-facet-membrane::after{animation:none;will-change:auto;transform:none}
 }
