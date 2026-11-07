@@ -265,7 +265,7 @@
 
     vec4 operatingScene(vec2 uv){
       float t=u_seconds*(1.-u_reduced);
-      vec3 painting=texture2D(u_art,uv).rgb*.80; /* V44: darken base painting only; gears and silk unchanged */
+      vec3 painting=texture2D(u_art,uv).rgb*vec3(.67,.74,.86); /* V45: lapis-toned base; wheels and champagne silk untouched */
       /* Composition approved earlier:
          upper-left cropped eight-spoke gear, right-edge six-spoke gear,
          lower-left just a corner of the smaller six-spoke wheel.
@@ -412,12 +412,12 @@
       /* The highlight tracks both the raised plane AND its seam. Diffuse
          strength is capped; even the brightest facet stays milky, not white. */
       float specularEnergy=(.035+.125*broadSpecular*sweep
-                            +.065*ridgeLight*(.42+.58*sweep))*slowBreath*1.5;
-      base=mix(base,vec3(.56,.75,.88),min(specularEnergy,.285));
+                            +.065*ridgeLight*(.42+.58*sweep))*slowBreath*1.22;
+      base=mix(base,vec3(.56,.75,.88),min(specularEnergy,.23));
       base+=vec3(.025,.044,.062)*ridge*(.34+.66*incidence)
-            *(.56+.44*illumination)*1.5;
+            *(.56+.44*illumination)*1.20;
       base+=mix(vec3(.18,.35,.55),vec3(.48,.44,.34),facetShade)
-            *(.008+.011*incidence)*illumination*1.5;
+            *(.008+.011*incidence)*illumination*1.20;
       float centerShade=1.-smoothstep(.22,1.00,length((v_uv-.5)*vec2(1.3,1.)));
       base*=mix(.77,.93,centerShade);
       /* Low-contrast face-to-face shading maintains dimensionality in the dark. */
