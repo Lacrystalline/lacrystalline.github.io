@@ -912,6 +912,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
   <link rel="stylesheet" href="assets/radio.css">
   <link rel="stylesheet" href="assets/crystal_machine_v42.css?v=20261107-curtain50">
   <link rel="stylesheet" href="assets/crystal_typography_v12.css">
+  <link rel="stylesheet" href="assets/member_photo_switch_v1.css?v=20261107-1">
   <script defer src="assets/crystal_machine_v42.js?v=20261107-curtain50"></script>
 </head>
 <body data-build="VIPVISUAL-20260930-v4_6">
@@ -1299,7 +1300,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
       <button class="member-arrow prev" id="memberPrev" type="button" aria-label="上一位成員">‹</button>
       <div class="member-carousel" id="memberCarousel">
         <button class="member-card" type="button" data-member="0" aria-pressed="false">
-          <div class="portrait northwind-portrait"><img src="assets/master.webp" alt="店長 北風" loading="lazy" decoding="async"><img class="member-signature" src="assets/northern_wind_signature_member_m10.png" alt="" aria-hidden="true"></div>
+          <div class="portrait northwind-portrait member-photo-duo" data-alt-src="assets/master_profile_02.webp"><img src="assets/master.webp" alt="店長 北風" loading="lazy" decoding="async"><img class="member-signature" src="assets/northern_wind_signature_member_m10.png" alt="" aria-hidden="true"></div>
           <div class="member-card-copy">
             <div class="member-card-name">北風<span class="member-card-en">Northern Wind</span></div>
             <div class="member-card-role">店長 / Keeper</div>
@@ -2095,6 +2096,7 @@ setInterval(refreshVisitCard,10000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshVisitCard();});
 </script>
   <script defer src="assets/member_portrait_smoothing_v1.js?v=2"></script>
+  <script defer src="assets/member_photo_switch_v1.js?v=20261107-1"></script>
   <script src="assets/radio.js"></script>
 </body>
 </html>
