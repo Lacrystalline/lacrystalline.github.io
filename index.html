@@ -660,22 +660,28 @@ section{padding:72px 0}
 }
 .member-carousel::-webkit-scrollbar{display:none}
 .member-card{
-  flex:0 0 clamp(220px,26vw,270px);scroll-snap-align:center;
+  flex:0 0 clamp(235px,28vw,295px);scroll-snap-align:center;
   border:1px solid rgba(127,211,214,.16);border-radius:4px;
-  background:rgba(14,22,34,.48);padding:0 0 14px;color:inherit;
+  background:transparent;padding:0;color:inherit;
   text-align:left;cursor:pointer;transition:.24s ease;overflow:hidden;
-  box-shadow:0 12px 30px rgba(0,0,0,.14)
+  box-shadow:0 12px 30px rgba(0,0,0,.14);
+  display:flex;flex-direction:column
 }
 .member-card:hover{border-color:rgba(127,211,214,.38);transform:translateY(-2px)}
 .member-card.active{border-color:rgba(127,211,214,.64);box-shadow:0 0 0 1px rgba(127,211,214,.08),0 18px 38px rgba(0,0,0,.24)}
-.member-card .portrait{aspect-ratio:3/4;border:0;border-bottom:1px solid rgba(127,211,214,.12);border-radius:0;padding:0;margin:0;max-width:none}
-.member-card img{width:100%;height:100%;object-fit:cover;object-position:center center;display:block}
-/* Noji: preserve both ears and the open book from the original tall portrait.
-   Keep the member card at 3:4; never crop or stretch this photo. */
-.member-card[data-member="2"] .portrait{background:#0b1926}
-.member-card[data-member="2"] .portrait > img:first-child{object-fit:contain;object-position:center center}
-.member-card[data-member="10"] .portrait{background:#0b1926}
-.member-card[data-member="10"] .portrait > img:first-child{object-fit:contain;object-position:center center}
+/* All member photos: a taller unified transparent window; no opaque filler bars.
+   The original photo, facial details and source aspect ratios are unchanged. */
+.member-card .portrait{
+  width:100%;aspect-ratio:7/10;min-height:0;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;background:transparent;
+  border:0;border-bottom:1px solid rgba(127,211,214,.12);
+  border-radius:0;padding:0;margin:0;max-width:none;
+}
+.member-card .portrait > img:first-child{
+  width:100%;height:100%;object-fit:contain;
+  object-position:center center;display:block;
+}
 .member-card .northwind-portrait{position:relative;overflow:hidden}
 .member-card .northwind-portrait .member-signature{
   position:absolute;right:-3%;bottom:3.5%;z-index:3;
@@ -685,7 +691,7 @@ section{padding:72px 0}
   transform:rotate(-10deg);
   transform-origin:center center;
 }
-.member-card-copy{padding:13px 15px 0}
+.member-card-copy{padding:13px 15px 14px;background:rgba(14,22,34,.56);flex:1}
 .member-card-name{font-family:var(--serif);font-size:1.45rem;color:var(--mist);letter-spacing:.05em}
 .member-card-en{display:block;color:var(--crys-dim);font-family:var(--serif);font-style:italic;font-size:.9rem;margin-top:.05em}
 .member-card-role{color:var(--crys);font-size:.72rem;letter-spacing:.13em;margin-top:.55em}
@@ -757,7 +763,7 @@ footer .cr{color:#4a5560;font-size:.72rem;margin-top:1em;letter-spacing:.05em}
   section{padding:56px 0}
   .worlds{grid-template-columns:1fr}
   .member-carousel{gap:12px;padding:6px 38px 12px 14px;scroll-padding-inline:14px}
-  .member-card{flex-basis:min(72vw,245px)}
+  .member-card{flex-basis:min(78vw,268px)}
   .member-arrow{width:32px;height:32px;font-size:1.25rem;top:40%}
   .member-arrow.prev{left:2px}.member-arrow.next{right:2px}
   .member-detail{padding:0 2px}
