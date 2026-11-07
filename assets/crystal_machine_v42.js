@@ -315,8 +315,8 @@
       vec4 silkHF=texture2D(u_threads2,uvHF);
       vec4 silkVB=texture2D(u_threads3,uvVB);
       vec4 silkVF=texture2D(u_threads4,uvVF);
-      /* Preserve the V20/V21 strong blue-gold line visibility, but only
-         on actual filament pixels, with no wide bloom or white bands. */
+      /* V43: muted champagne-gold filaments. Geometry, alpha, silk motion,
+         sheen rhythm, and blue crystalline background remain unchanged. */
       float pulseH=.96+.26*sin(uv.x*12.9-t*.018+uv.y*3.);
       float pulseV=.97+.24*sin(uv.y*10.3+t*.016-uv.x*2.7);
       float alphaHB=clamp(pow(silkHB.a,.63)*pulseH*1.12,0.,.68);
@@ -325,10 +325,16 @@
       float alphaVF=clamp(pow(silkVF.a,.60)*pulseV*1.16,0.,.78);
       float satinH=pow(.5+.5*sin(uv.x*25.+uv.y*8.-t*.22),7.);
       float satinV=pow(.5+.5*sin(uv.y*26.-uv.x*7.+t*.18),7.);
-      vec3 colorHB=clamp(max(silkHB.rgb,vec3(.57,.68,.77))+vec3(.09,.12,.13)*satinH,0.,1.);
-      vec3 colorHF=clamp(max(silkHF.rgb,vec3(.65,.78,.85))+vec3(.12,.14,.15)*satinH,0.,1.);
-      vec3 colorVB=clamp(max(silkVB.rgb,vec3(.60,.70,.73))+vec3(.10,.12,.12)*satinV,0.,1.);
-      vec3 colorVF=clamp(max(silkVF.rgb,vec3(.68,.77,.81))+vec3(.12,.13,.13)*satinV,0.,1.);
+      /* Preserve subtle tonal variation of each original silk texture while
+         replacing its former blue/teal cast with a soft pale-gold palette. */
+      float toneHB=clamp(dot(silkHB.rgb,vec3(.24,.68,.08)),0.,1.);
+      float toneHF=clamp(dot(silkHF.rgb,vec3(.24,.68,.08)),0.,1.);
+      float toneVB=clamp(dot(silkVB.rgb,vec3(.24,.68,.08)),0.,1.);
+      float toneVF=clamp(dot(silkVF.rgb,vec3(.24,.68,.08)),0.,1.);
+      vec3 colorHB=clamp(mix(vec3(.70,.59,.42),vec3(.90,.79,.60),toneHB)+vec3(.07,.06,.04)*satinH,0.,1.);
+      vec3 colorHF=clamp(mix(vec3(.77,.67,.50),vec3(.96,.87,.70),toneHF)+vec3(.06,.05,.03)*satinH,0.,1.);
+      vec3 colorVB=clamp(mix(vec3(.71,.60,.43),vec3(.91,.80,.62),toneVB)+vec3(.07,.06,.04)*satinV,0.,1.);
+      vec3 colorVF=clamp(mix(vec3(.78,.68,.52),vec3(.97,.88,.71),toneVF)+vec3(.06,.05,.03)*satinV,0.,1.);
       painting=mix(painting,colorHB,alphaHB);
       painting=mix(painting,colorVB,alphaVB);
       painting=mix(painting,colorHF,alphaHF);
