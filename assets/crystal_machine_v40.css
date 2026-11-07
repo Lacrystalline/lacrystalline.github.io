@@ -218,3 +218,33 @@ html{background-image:linear-gradient(rgba(5,11,22,.37),rgba(5,11,22,.37)),url('
 /* V39: atmospheric overlay removed. The original V16 base remains in the
    fallback and in the WebGL source; the moving wheels and silk remain separate. */
 .crystal-machine-wash{z-index:3}
+
+/* V40: Restore the original V16 crystalline curtain removed in V38.
+   The V31 atmospheric image remains removed; this is ONLY the facet sheet. */
+.crystal-machine-facet-membrane{
+  position:absolute;inset:0;z-index:5;pointer-events:none;
+  background:url('crystal_facet_membrane_v16.webp') center center / cover no-repeat;
+  mix-blend-mode:screen;opacity:.90;
+  filter:brightness(.97) saturate(.90) contrast(1.03);overflow:hidden;
+}
+.crystal-machine-facet-membrane::after{
+  content:"";position:absolute;inset:-16%;pointer-events:none;
+  background:linear-gradient(112deg,
+     transparent 27%,rgba(183,225,255,.014) 42%,
+     rgba(205,238,255,.038) 50%,rgba(239,226,188,.014) 58%,transparent 72%);
+  opacity:.65;
+  animation:crystalMachineSlowReflection 102s ease-in-out infinite alternate;
+}
+.crystal-machine-facet-membrane::after{opacity:.49}
+@keyframes crystalMachineSlowReflection{
+  from{transform:translate3d(-7%,-2%,0)}
+  to{transform:translate3d(7%,2%,0)}
+}
+@media(max-width:720px){
+  .crystal-machine-facet-membrane{
+    opacity:.89;filter:brightness(.97) saturate(.90) contrast(1.03);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .crystal-machine-facet-membrane::after{animation:none}
+}
