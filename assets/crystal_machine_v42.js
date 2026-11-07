@@ -31,6 +31,10 @@
   let gl, program, texture, facetTexture, gearTexture, silkTextures = [], frameHandle = 0, lastFrame = 0, start = 0, visible = !document.hidden;
   let uniforms = {};
   let running = false;
+  // Adapt once, like the cattail test: sample real rAF cadence for ~3.2 s.
+  // Do not alter the gear/silk geometry, shader timeline, or foreground artwork.
+  let frameQuality='full', frameSamples=[], sampleStart=0, sampleLast=0;
+  let sampleFinished=false, qualityNeedsResize=false;
   // Non-generative subject extraction: original public member portraits are
   // drawn into a transient transparent atlas through hand-traced silhouette
   // masks. No original photograph is altered or uploaded.
@@ -530,6 +534,27 @@
     gl.activeTexture(gl.TEXTURE0);
     return true;
   }
+  function sampleFrameCadence(now) {
+    if(sampleFinished||!visible||reduced.matches)return;
+    if(!sampleStart){sampleStart=now;sampleLast=now;return;}
+    const elapsed=now-sampleLast;
+    sampleLast=now;
+    // Ignore one-off tab switches and suspension; hidden tabs reset sampling.
+    if(elapsed>=4&&elapsed<=200)frameSamples.push(elapsed);
+    if(now-sampleStart<3200)return;
+    const count=frameSamples.length;
+    const ordered=frameSamples.slice().sort((a,b)=>a-b);
+    const median=count?ordered[Math.floor(count/2)]:Infinity;
+    const slow=count?frameSamples.filter(n=>n>35).length/count:1;
+    const verySlow=count?frameSamples.filter(n=>n>70).length/count:1;
+    let next='full';
+    if(count<35||median>35||slow>.30||verySlow>.11)next='lite';
+    else if(median>23||slow>.10||verySlow>.03)next='balanced';
+    if(next!==frameQuality){frameQuality=next;qualityNeedsResize=true;}
+    host.dataset.frameQuality=frameQuality;
+    sampleFinished=true;
+    frameSamples=[];
+  }
   function resize() {
     if(!gl) return;
     // Match the actual CSS-fixed background dimensions, NOT Safari innerHeight.
@@ -537,7 +562,8 @@
     const rect=host.getBoundingClientRect();
     const cssWidth=Math.max(1,Math.round(rect.width));
     const cssHeight=Math.max(1,Math.round(rect.height));
-    const ratio=Math.min(window.devicePixelRatio||1,cssWidth<720?1:1.35);
+    const detailFactor=frameQuality==='lite'?.82:frameQuality==='balanced'?.93:1;
+    const ratio=Math.min(window.devicePixelRatio||1,cssWidth<720?1:1.35)*detailFactor;
     const factor=Math.min(1,1440/Math.max(1,cssWidth*ratio));
     const width=Math.max(1,Math.round(cssWidth*ratio*factor));
     const height=Math.max(1,Math.round(cssHeight*ratio*factor));
@@ -552,10 +578,14 @@
   function render(now) {
     if(!running)return;
     frameHandle=0;
-    const fps=innerWidth<720?15:24;
+    sampleFrameCadence(now);
+    const mobile=isSmall();
+    const fps=frameQuality==='lite'?(mobile?10:12):
+      frameQuality==='balanced'?(mobile?12:18):(mobile?15:24);
     if(now-lastFrame<1000/fps){frameHandle=requestAnimationFrame(render);return;}
     lastFrame=now;
     gl.useProgram(program);
+    if(qualityNeedsResize){qualityNeedsResize=false;resize();}
     gl.uniform1f(uniforms.seconds,(now-start)/1000);
     gl.uniform1f(uniforms.reduced,reduced.matches?1:0);
     syncProjection(now);
@@ -609,6 +639,9 @@
   window.addEventListener('resize',resize,{passive:true});
   document.addEventListener('visibilitychange',()=>{
     visible=!document.hidden;
+    if(!visible&&!sampleFinished){
+      sampleStart=0;sampleLast=0;frameSamples=[];
+    }
     if(visible&&!reduced.matches)startRendering();else stopRendering();
   });
   const changeMotion=()=>{
