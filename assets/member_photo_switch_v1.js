@@ -9,7 +9,7 @@
   if(!photos.length)return;
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
   const WAIT=8000;
-  const SWITCH_MS=2100;
+  const SWITCH_MS=3600;
   let timer=0,scrollTimer=0,memberOnScreen=true;
   let hovering=null;
   const isActive=portrait=>portrait.closest('.member-card')?.classList.contains('active');
@@ -38,16 +38,15 @@
   function switchPhoto(portrait){
     if(!portrait.classList.contains('is-ready')||portrait.classList.contains('is-switching'))return;
     stopTimer();
-    const reverse=portrait.classList.contains('is-alt');
-    portrait.classList.toggle('is-alt',!reverse);
+    portrait.classList.toggle('is-alt');
     if(!reduced.matches){
-      portrait.classList.remove('is-switching','is-reversing');
-      // Restart the broad foil-surface reflection without rebuilding images.
+      portrait.classList.remove('is-switching');
+      // Both directions of PHOTO change restart the SAME left-to-right gold sweep.
+      // No reverse playback, no mirrored return stroke.
       void portrait.offsetWidth;
-      if(reverse)portrait.classList.add('is-reversing');
       portrait.classList.add('is-switching');
       window.setTimeout(()=>{
-        portrait.classList.remove('is-switching','is-reversing');
+        portrait.classList.remove('is-switching');
         schedule();
       },SWITCH_MS+50);
     }else{
