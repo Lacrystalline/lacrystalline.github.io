@@ -257,3 +257,59 @@ html{background-image:linear-gradient(rgba(5,11,22,.37),rgba(5,11,22,.37)),url('
 @media(prefers-reduced-motion:reduce){
   .crystal-machine-facet-membrane::after{animation:none;will-change:auto;transform:none}
 }
+/* V45 — Lapis nocturne.
+   Dark cobalt/lapis ambience stays BEHIND the existing facet membrane.
+   Do not tint member images, typography, golden filament artwork or controls. */
+html{
+  background-color:#06102d;
+  background-image:
+    linear-gradient(rgba(3,10,34,.61),rgba(3,10,34,.61)),
+    url('crystal_machine_base_v16.webp');
+}
+.crystal-machine-scene{background:#061331}
+.crystal-machine-fallback{filter:brightness(.53) saturate(.88)}
+.crystal-machine-scene canvas{filter:brightness(.74) saturate(.97)}
+/* Navy depth behind the optical membrane, not a flat black overlay on top. */
+.crystal-machine-wash{
+  background:
+    radial-gradient(ellipse 65% 67% at 47% 42%,
+      rgba(10,32,82,.11),rgba(3,11,38,.23) 83%),
+    linear-gradient(180deg,
+      rgba(2,10,35,.25),rgba(5,17,47,.15) 41%,rgba(2,9,31,.31));
+}
+.crystal-machine-scene::after{
+  background:linear-gradient(180deg,
+    rgba(2,10,35,.20),rgba(4,16,44,.15) 44%,rgba(2,9,31,.28));
+}
+/* This is the only bright visible surface: a quiet, cool facet sheen. */
+.crystal-machine-facet-membrane{
+  opacity:.69;
+  filter:brightness(.88) saturate(.80) contrast(1.07);
+}
+.crystal-machine-facet-membrane::after{opacity:.77}
+/* Keep the venue's real photo a distant memory, not a bright background patch. */
+.hero .hero-bg{opacity:.25;filter:saturate(.69) brightness(.83)}
+.hero .hero-bg::after{
+  background:linear-gradient(180deg,
+    rgba(4,11,33,.66),rgba(6,17,45,.46) 42%,rgba(3,10,32,.73));
+}
+.hero::after{
+  background:radial-gradient(ellipse at 50% 49%,
+    rgba(6,16,44,.32),rgba(3,10,30,.09) 65%,rgba(2,8,26,.26));
+}
+@media(max-width:720px){
+  .crystal-machine-fallback{filter:brightness(.51) saturate(.86)}
+  .crystal-machine-scene canvas{filter:brightness(.70) saturate(.95)}
+  .crystal-machine-wash{
+    background:linear-gradient(180deg,
+      rgba(2,10,35,.29),rgba(5,17,47,.17) 43%,rgba(2,8,30,.34));
+  }
+  .crystal-machine-scene::after{
+    background:linear-gradient(180deg,
+      rgba(2,9,34,.24),rgba(4,15,42,.19) 45%,rgba(2,8,30,.32));
+  }
+  .crystal-machine-facet-membrane{
+    opacity:.66;filter:brightness(.86) saturate(.79) contrast(1.07);
+  }
+  .hero .hero-bg{opacity:.21;filter:saturate(.66) brightness(.82)}
+}
