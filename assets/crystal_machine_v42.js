@@ -6,6 +6,13 @@
    Portrait projection, accessibility and typography are kept unchanged. */
 (() => {
   'use strict';
+  /* V46 optical parameters, held here (rather than scattered in the shader). */
+  const APEX_SIGMA=0.035;
+  const CORE_SIGMA=0.006;
+  const GLINT_GAIN=0.90;
+  const SPIKE_LEN=0.025;
+  const DISPERSION=0.05;
+  const apexDebug=new URLSearchParams(location.search).get('apex')==='1';
   const canvas = document.getElementById('crystalMachineCanvas');
   const host = canvas && canvas.closest('.crystal-machine-scene');
   if (!canvas || !host) return;
@@ -15,6 +22,8 @@
   image.decoding = 'async';
   const facetImage = new Image();
   facetImage.decoding = 'async';
+  const apexImage = new Image();
+  apexImage.decoding = 'async';
   // V36: one user-supplied, six-spoke engraved bronze wheel, with its original
   // transparent contours preserved. Three scales share this exact artwork;
   // their existing locations, angular directions and periods are unchanged.
@@ -232,6 +241,12 @@
     uniform vec2 u_view;
     uniform float u_seconds;
     uniform float u_reduced;
+    uniform float u_apexDebug;
+    const float APEX_SIGMA = ${APEX_SIGMA.toFixed(6)};
+    const float CORE_SIGMA = ${CORE_SIGMA.toFixed(6)};
+    const float GLINT_GAIN = ${GLINT_GAIN.toFixed(6)};
+    const float SPIKE_LEN = ${SPIKE_LEN.toFixed(6)};
+    const float DISPERSION = ${DISPERSION.toFixed(6)};
     const float PI = 3.141592653589793;
     const float ASPECT = 1.7755856967; /* 1440 / 811 */
     mat2 rotation(float a){float s=sin(a), c=cos(a);return mat2(c,-s,s,c);}
@@ -241,6 +256,11 @@
         ? vec2(p.x, .5+(p.y-.5)*ASPECT/ratio)
         : vec2(.5+(p.x-.5)*ratio/ASPECT,p.y);
     }
+    /* V46: two side-by-side 720x406 maps in ONE sampler texture unit.
+       Left half: original normal map. Right half: baked apex displacement.
+       Mobile retains all eight preexisting sampler units and portrait slots. */
+    vec2 normalUV(vec2 p){return vec2(p.x*.5,p.y);}
+    vec2 apexUV(vec2 p){return vec2(.5+p.x*.5,p.y);}
     float noise2(vec2 p){return fract(sin(dot(p,vec2(123.71,311.17)))*43758.54);}
     /* V30: all wheels sample the SAME lossless 1254px metal artwork.
        Only scale/position/angle changes, never the original silhouette. */
@@ -373,18 +393,22 @@
       /* The optical normals correspond EXACTLY to the visible shared-edge
          crystal membrane. All gears and weaving threads refract beneath it. */
       vec2 coords=coverUV(v_uv);
-      vec3 ftex=texture2D(u_facet,coords).rgb;
+      vec3 ftex=texture2D(u_facet,normalUV(coords)).rgb;
+      vec3 apexTex=texture2D(u_facet,apexUV(coords)).rgb; /* exactly ONE extra lookup */
+      vec2 apexOffset=(apexTex.rg-vec2(.5))*.24;
+      float apexD=length(apexOffset);
+      float apexFalloff=exp(-pow(apexD/APEX_SIGMA,1.6));
+      float apexPhase=apexTex.b;
       vec2 facetN=(ftex.rg-vec2(.5))*2.;
       float facetShade=ftex.b;
       float illumination=.5+.5*sin(t*2.*PI/228.+facetShade*6.283+v_uv.x*.64);
-      /* V42: raised crystal corners catch soft, directional light.
-         Look for changes in the EXISTING facet normal map, not synthetic
-         sparkles or decorative geometry. Two small neighbor lookups are
-         cheaper than evaluating the whole animated scene a second time. */
-      vec2 nearX=(texture2D(u_facet,
-        clamp(coords+vec2(.0017,0.),vec2(.003),vec2(.997))).rg-vec2(.5))*2.;
-      vec2 nearY=(texture2D(u_facet,
-        clamp(coords+vec2(0.,.0017),vec2(.003),vec2(.997))).rg-vec2(.5))*2.;
+      /* V46: sparkles are permitted ONLY when anchored on real facet apices;
+         no randomly placed points. Preserve both neighbor-normal reads and
+         the single original operatingScene sample on mobile. */
+      vec2 nearX=(texture2D(u_facet,normalUV(
+        clamp(coords+vec2(.0017,0.),vec2(.003),vec2(.997)))).rg-vec2(.5))*2.;
+      vec2 nearY=(texture2D(u_facet,normalUV(
+        clamp(coords+vec2(0.,.0017),vec2(.003),vec2(.997)))).rg-vec2(.5))*2.;
       float ridgeDelta=max(length(facetN-nearX),length(facetN-nearY));
       float ridge=smoothstep(.12,.58,ridgeDelta);
       vec2 surfaceDir=normalize(facetN+vec2(.055,-.035));
@@ -403,12 +427,12 @@
          plane instead of drawing independent spots on the page. */
       vec2 softboxDir=normalize(vec2(.72+.18*sin(t*.091),-.42+.16*cos(t*.075)));
       float facing=max(0.,dot(surfaceDir,softboxDir));
-      float broadSpecular=pow(facing,3.2);
+      float broadSpecular=pow(facing,3.2)*mix(.45,1.35,apexFalloff);
       float sweepCenter=.50+.35*sin(t*.125);
       float sweepAxis=coords.x+.22*(coords.y-.5);
       float sweep=exp(-pow((sweepAxis-sweepCenter)/.27,2.0));
       float slowBreath=.88+.12*sin(t*.16+facetShade*5.7);
-      float ridgeLight=ridge*pow(facing,1.6);
+      float ridgeLight=ridge*pow(facing,1.6)*mix(.25,1.0,apexFalloff);
       /* The highlight tracks both the raised plane AND its seam. Diffuse
          strength is capped; even the brightest facet stays milky, not white. */
       float specularEnergy=(.035+.125*broadSpecular*sweep
@@ -430,6 +454,33 @@
       base=projectGhost(base,coords,ftex,u_portraitSlot[1],u_portraitFace[1],u_portraitPick.y);
       base=projectGhost(base,coords,ftex,u_portraitSlot[2],u_portraitFace[2],u_portraitPick.z);
       base=projectGhost(base,coords,ftex,u_portraitSlot[3],u_portraitFace[3],u_portraitPick.w);
+      /* V46 apex response: the facet core alone may approach white.
+         The legacy broad softbox retains its existing .23 energy cap. */
+      float twinkle=u_reduced>.5 ? .5 :
+        smoothstep(.6,1.,.5+.5*sin(t*.8+apexPhase*6.2831853));
+      float lightPass=.25+.75*facing*sweep;
+      float core=exp(-pow(apexD/CORE_SIGMA,2.));
+      float glint=core*lightPass*twinkle;
+      /* Four long cardinal rays + four shorter 45-degree secondary rays.
+         Keep rays subpixel-thin and fade at or before SPIKE_LEN. */
+      float ax=abs(apexOffset.x),ay=abs(apexOffset.y);
+      float primary=exp(-pow(min(ax,ay)/.00085,2.));
+      float secondary=exp(-pow(abs(ax-ay)/.00090,2.));
+      float rayFade=pow(max(0.,1.-apexD/SPIKE_LEN),2.);
+      float rayGlow=lightPass*twinkle*rayFade*(.34*primary+.16*secondary);
+      base+=vec3(1.,.985,.94)*GLINT_GAIN*(glint+rayGlow);
+      /* Chromatic ring is an angular color function, not RGB refraction
+         through multiple scene samples. The core stays nearly neutral. */
+      float ring=smoothstep(CORE_SIGMA,CORE_SIGMA*1.35,apexD)*
+        (1.-smoothstep(CORE_SIGMA*2.65,CORE_SIGMA*3.,apexD));
+      float hue=atan(apexOffset.y,apexOffset.x)/6.2831853+
+        apexPhase+t*.03*(1.-u_reduced);
+      vec3 spectrum=.5+.5*cos(6.2831853*(hue+vec3(0.,.333333,.666667)));
+      base+=spectrum*(DISPERSION*ring*lightPass*twinkle);
+      if(u_apexDebug>.5){
+        float point=1.-smoothstep(.0022,.0040,apexD);
+        base=mix(base,vec3(1.,.015,.035),point);
+      }
       gl_FragColor=vec4(clamp(base,0.,1.),1.);
     }`;
 
@@ -470,7 +521,21 @@
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,facetImage);
+    /* V46 runtime atlas: add the apex image alongside, never modifying
+       either source file. This keeps total WebGL1 fragment samplers at 8. */
+    if(facetImage.naturalWidth!==apexImage.naturalWidth||
+       facetImage.naturalHeight!==apexImage.naturalHeight)
+      throw new Error('Apex map size differs from facet normal map');
+    const facetAtlas=document.createElement('canvas');
+    facetAtlas.width=facetImage.naturalWidth*2;
+    facetAtlas.height=facetImage.naturalHeight;
+    const facetCtx=facetAtlas.getContext('2d',{alpha:false});
+    if(!facetCtx)throw new Error('Cannot build normal/apex GPU atlas');
+    facetCtx.drawImage(facetImage,0,0);
+    facetCtx.drawImage(apexImage,facetImage.naturalWidth,0);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,facetAtlas);
+    uniforms.apexDebug=gl.getUniformLocation(program,'u_apexDebug');
+    gl.uniform1f(uniforms.apexDebug,apexDebug?1:0);
     uniforms.view=gl.getUniformLocation(program,'u_view');
     uniforms.seconds=gl.getUniformLocation(program,'u_seconds');
     uniforms.reduced=gl.getUniformLocation(program,'u_reduced');
@@ -617,7 +682,7 @@
   }
   let initialized=false;
   function tryInit(){
-    if(initialized||![image,facetImage,...gearImages,...silkImages].every(im=>im.complete&&im.naturalWidth>0))return;
+    if(initialized||![image,facetImage,apexImage,...gearImages,...silkImages].every(im=>im.complete&&im.naturalWidth>0))return;
     initialized=true;
     try {
       if (!setup())return;  // static painted fallback on browsers without WebGL
@@ -632,7 +697,7 @@
     }
   }
   const loadError=()=>host.classList.remove('is-ready');
-  [image,facetImage,...gearImages,...silkImages].forEach(im=>{
+  [image,facetImage,apexImage,...gearImages,...silkImages].forEach(im=>{
     im.onload=tryInit;
     im.onerror=loadError;
   });
@@ -641,6 +706,7 @@
   loadPortraitAtlas().catch(()=>{});
   image.src='assets/crystal_machine_base_v16.webp';
   facetImage.src='assets/crystal_facet_normals_v16.webp';
+  apexImage.src='assets/crystal_facet_apex_v1.webp';
   gearImages.forEach(im=>im.src='assets/crystal_gear_bronze_six_spoke_v36.webp');
   silkImages.forEach((im,i)=>im.src='assets/crystal_silk_'+silkNames[i]+(i<2?'_v24.svg':'_v26.svg'));
   tryInit();
