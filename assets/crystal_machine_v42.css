@@ -286,12 +286,18 @@ html{
   filter:brightness(.88) saturate(.80) contrast(1.07);
 }
 .crystal-machine-facet-membrane::after{opacity:.35}
-/* Keep the venue's real photo a distant memory, not a bright background patch. */
-/* V49: raise only the original hero-bar photograph visibility by 30%. */
-.hero .hero-bg{opacity:.455;filter:saturate(.69) brightness(.83)}
+/* V51: restore translucency while revealing details in the ORIGINAL hero photo.
+   Lower opacity leaves the lapis crystal background visible; lift exposure and
+   reduce the blue occlusion so the venue remains legible through the veil.
+   No global backdrop, membrane, facet-shader or portrait change. */
+.hero .hero-bg{
+  opacity:.30;
+  mix-blend-mode:screen;
+  filter:brightness(1.50) contrast(1.15) saturate(.98);
+}
 .hero .hero-bg::after{
   background:linear-gradient(180deg,
-    rgba(4,11,33,.66),rgba(6,17,45,.46) 42%,rgba(3,10,32,.73));
+    rgba(4,11,33,.37),rgba(6,17,45,.19) 42%,rgba(3,10,32,.48));
 }
 .hero::after{
   background:radial-gradient(ellipse at 50% 49%,
@@ -311,5 +317,5 @@ html{
   .crystal-machine-facet-membrane{
     opacity:.66;filter:brightness(.86) saturate(.79) contrast(1.07);
   }
-  .hero .hero-bg{opacity:.3822;filter:saturate(.66) brightness(.82)}
+  .hero .hero-bg{opacity:.26;filter:brightness(1.48) contrast(1.14) saturate(.96)}
 }
