@@ -241,9 +241,8 @@ html{background-image:linear-gradient(rgba(5,11,22,.37),rgba(5,11,22,.37)),url('
     radial-gradient(ellipse 29% 38% at 48% 46%,
       rgba(161,210,244,.128),transparent 78%);
   mix-blend-mode:screen;
-  opacity:1;
-  will-change:transform;
-  animation:crystalMachineSlowReflection 34s ease-in-out infinite alternate;
+  opacity:.35;
+  transform:none; /* V47 static membrane surface sheen */
 }
 @keyframes crystalMachineSlowReflection{
   from{transform:translate3d(-22%,-3%,0)}
@@ -286,7 +285,7 @@ html{
   opacity:.69;
   filter:brightness(.88) saturate(.80) contrast(1.07);
 }
-.crystal-machine-facet-membrane::after{opacity:.77}
+.crystal-machine-facet-membrane::after{opacity:.35}
 /* Keep the venue's real photo a distant memory, not a bright background patch. */
 .hero .hero-bg{opacity:.25;filter:saturate(.69) brightness(.83)}
 .hero .hero-bg::after{

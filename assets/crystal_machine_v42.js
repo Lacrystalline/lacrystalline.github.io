@@ -6,12 +6,15 @@
    Portrait projection, accessibility and typography are kept unchanged. */
 (() => {
   'use strict';
-  /* V46 optical parameters, held here (rather than scattered in the shader). */
-  const APEX_SIGMA=0.035;
-  const CORE_SIGMA=0.006;
-  const GLINT_GAIN=0.90;
-  const SPIKE_LEN=0.025;
-  const DISPERSION=0.05;
+  /* V47 single-direction optical sweep parameters. */
+  const PERIOD=9.0;
+  const PASS=6.0;
+  const PARALLAX=0.22;
+  const BAND_FRONT=0.035;
+  const BAND_TAIL=0.11;
+  const TIP_LEAD=0.018;
+  const CORE=0.007;
+  const HALO=0.0224;
   const apexDebug=new URLSearchParams(location.search).get('apex')==='1';
   const canvas = document.getElementById('crystalMachineCanvas');
   const host = canvas && canvas.closest('.crystal-machine-scene');
@@ -242,11 +245,15 @@
     uniform float u_seconds;
     uniform float u_reduced;
     uniform float u_apexDebug;
-    const float APEX_SIGMA = ${APEX_SIGMA.toFixed(6)};
-    const float CORE_SIGMA = ${CORE_SIGMA.toFixed(6)};
-    const float GLINT_GAIN = ${GLINT_GAIN.toFixed(6)};
-    const float SPIKE_LEN = ${SPIKE_LEN.toFixed(6)};
-    const float DISPERSION = ${DISPERSION.toFixed(6)};
+    const float PERIOD = ${PERIOD.toFixed(6)};
+    const float PASS = ${PASS.toFixed(6)};
+    const float PARALLAX = ${PARALLAX.toFixed(6)};
+    const float BAND_FRONT = ${BAND_FRONT.toFixed(6)};
+    const float BAND_TAIL = ${BAND_TAIL.toFixed(6)};
+    const float TIP_LEAD = ${TIP_LEAD.toFixed(6)};
+    const float CORE = ${CORE.toFixed(6)};
+    const float HALO = ${HALO.toFixed(6)};
+    const float ASP = 720.0 / 406.0;
     const float PI = 3.141592653589793;
     const float ASPECT = 1.7755856967; /* 1440 / 811 */
     mat2 rotation(float a){float s=sin(a), c=cos(a);return mat2(c,-s,s,c);}
@@ -261,6 +268,12 @@
        Mobile retains all eight preexisting sampler units and portrait slots. */
     vec2 normalUV(vec2 p){return vec2(p.x*.5,p.y);}
     vec2 apexUV(vec2 p){return vec2(.5+p.x*.5,p.y);}
+    float axis(vec2 p,vec2 L){
+      return (p.x*ASP*L.x+p.y*L.y)/(ASP*abs(L.x)+abs(L.y));
+    }
+    float band(float s){
+      return s>0. ? exp(-pow(s/BAND_FRONT,2.)) : exp(s/BAND_TAIL);
+    }
     float noise2(vec2 p){return fract(sin(dot(p,vec2(123.71,311.17)))*43758.54);}
     /* V30: all wheels sample the SAME lossless 1254px metal artwork.
        Only scale/position/angle changes, never the original silhouette. */
@@ -394,17 +407,29 @@
          crystal membrane. All gears and weaving threads refract beneath it. */
       vec2 coords=coverUV(v_uv);
       vec3 ftex=texture2D(u_facet,normalUV(coords)).rgb;
-      vec3 apexTex=texture2D(u_facet,apexUV(coords)).rgb; /* exactly ONE extra lookup */
+      vec3 apexTex=texture2D(u_facet,apexUV(coords)).rgb;
+      /* Account for the NEAREST texel center and actual 720x406 aspect. */
+      vec2 tc=(floor(coords*vec2(720.,406.))+.5)/vec2(720.,406.);
       vec2 apexOffset=(apexTex.rg-vec2(.5))*.24;
-      float apexD=length(apexOffset);
-      float apexFalloff=exp(-pow(apexD/APEX_SIGMA,1.6));
+      vec2 vertexUV=tc-apexOffset;
+      vec2 offA=(coords-vertexUV)*vec2(ASP,1.);
+      float d=length(offA);
+      float apexFalloff=exp(-pow(d/.035,1.6));
       float apexPhase=apexTex.b;
       vec2 facetN=(ftex.rg-vec2(.5))*2.;
       float facetShade=ftex.b;
-      float illumination=.5+.5*sin(t*2.*PI/228.+facetShade*6.283+v_uv.x*.64);
-      /* V46: sparkles are permitted ONLY when anchored on real facet apices;
-         no randomly placed points. Preserve both neighbor-normal reads and
-         the single original operatingScene sample on mobile. */
+      vec2 L=normalize(vec2(.80,-.60));
+      float cycle=mod(t,PERIOD);
+      float c=u_reduced>.5 ? .5 : -.35+1.7*(cycle/PASS);
+      float passMask=u_reduced>.5 ? 1. : 1.-smoothstep(PASS-.12,PASS,cycle);
+      float mirror=PARALLAX*dot(facetN,L);
+      float s=axis(coords,L)-c+mirror;
+      float scan=band(s)*passMask;
+      float facing=clamp(.55+.45*dot(facetN,L),0.,1.);
+      /* Static refractive base; the band is the only moving light. */
+      float illumination=.55+.25*facetShade;
+      /* V47: anchored facet apices only, no randomized timing or positions.
+         Preserve the two neighbor normals and one operating scene sample. */
       vec2 nearX=(texture2D(u_facet,normalUV(
         clamp(coords+vec2(.0017,0.),vec2(.003),vec2(.997)))).rg-vec2(.5))*2.;
       vec2 nearY=(texture2D(u_facet,normalUV(
@@ -420,23 +445,14 @@
                           *(.83+.23*illumination);
       vec2 bend=facetN*refractAmount;
       vec3 base=operatingScene(clamp(coords+bend,vec2(.003),vec2(.997))).rgb;
-      /* V44: 50% brighter crystal curtain reflection on a darker painting.
-         Retain the existing sweep geometry, normals, motion and satin hues.
-         V42: visibly moving, broad-area softbox light with a muted
-         microfacet response. The light shifts slowly over each normal-map
-         plane instead of drawing independent spots on the page. */
-      vec2 softboxDir=normalize(vec2(.72+.18*sin(t*.091),-.42+.16*cos(t*.075)));
-      float facing=max(0.,dot(surfaceDir,softboxDir));
-      float broadSpecular=pow(facing,3.2)*mix(.45,1.35,apexFalloff);
-      float sweepCenter=.50+.35*sin(t*.125);
-      float sweepAxis=coords.x+.22*(coords.y-.5);
-      float sweep=exp(-pow((sweepAxis-sweepCenter)/.27,2.0));
-      float slowBreath=.88+.12*sin(t*.16+facetShade*5.7);
-      float ridgeLight=ridge*pow(facing,1.6)*mix(.25,1.0,apexFalloff);
-      /* The highlight tracks both the raised plane AND its seam. Diffuse
-         strength is capped; even the brightest facet stays milky, not white. */
-      float specularEnergy=(.035+.125*broadSpecular*sweep
-                            +.065*ridgeLight*(.42+.58*sweep))*slowBreath*1.22;
+      /* V47: muted broad reflection remains as a STATIC optical base.
+         Its old separate motion is gone, preserving one directional sweep. */
+      vec2 softboxDir=L;
+      float baseFacing=max(0.,dot(surfaceDir,softboxDir));
+      float broadSpecular=pow(baseFacing,3.2)*mix(.45,1.35,apexFalloff);
+      float ridgeLight=ridge*pow(baseFacing,1.6)*mix(.25,1.0,apexFalloff);
+      float specularEnergy=(.035+.125*broadSpecular*.20
+                            +.065*ridgeLight*(.42+.58*.20))*.90*1.22;
       base=mix(base,vec3(.56,.75,.88),min(specularEnergy,.23));
       base+=vec3(.025,.044,.062)*ridge*(.34+.66*incidence)
             *(.56+.44*illumination)*1.20;
@@ -448,37 +464,38 @@
       float planarLight=clamp(dot(facetN,vec2(.77,-.51)),-1.,1.);
       float planeContrast=1.+.033*planarLight+.008*(facetShade-.5);
       base*=planeContrast;
+      /* Facet-normal parallax shifts the band per face, splitting it at
+         adjacent seams. Darken only after passage, by at most ten percent. */
+      float behind=s<0. ? 1.-exp(s/.275) : 0.;
+      base*=1.-.10*behind*(1.-scan)*passMask;
+      float faceI=scan*facing*(.45+.75*exp(-d/.045));
+      base+=vec3(.62,.80,.95)*faceI*.70;
+      /* Light-spectrum front and tail via math only; no extra reads. */
+      float frontColor=exp(-pow((s-.6*BAND_FRONT)/(.45*BAND_FRONT),2.))*faceI;
+      float tailColor=exp(-pow((s+.9*BAND_FRONT)/(.60*BAND_FRONT),2.))*faceI;
+      base+=vec3(.35,.55,1.)*frontColor*.10;
+      base+=vec3(1.,.78,.45)*tailColor*.06;
       /* Four supported slots; currently exactly 2 active on all devices.
          Original staff portraits are composited INSIDE their exact crystal facet. */
       base=projectGhost(base,coords,ftex,u_portraitSlot[0],u_portraitFace[0],u_portraitPick.x);
       base=projectGhost(base,coords,ftex,u_portraitSlot[1],u_portraitFace[1],u_portraitPick.y);
       base=projectGhost(base,coords,ftex,u_portraitSlot[2],u_portraitFace[2],u_portraitPick.z);
       base=projectGhost(base,coords,ftex,u_portraitSlot[3],u_portraitFace[3],u_portraitPick.w);
-      /* V46 apex response: the facet core alone may approach white.
-         The legacy broad softbox retains its existing .23 energy cap. */
-      float twinkle=u_reduced>.5 ? .5 :
-        smoothstep(.6,1.,.5+.5*sin(t*.8+apexPhase*6.2831853));
-      float lightPass=.25+.75*facing*sweep;
-      float core=exp(-pow(apexD/CORE_SIGMA,2.));
-      float glint=core*lightPass*twinkle;
-      /* Four long cardinal rays + four shorter 45-degree secondary rays.
-         Keep rays subpixel-thin and fade at or before SPIKE_LEN. */
-      float ax=abs(apexOffset.x),ay=abs(apexOffset.y);
-      float primary=exp(-pow(min(ax,ay)/.00085,2.));
-      float secondary=exp(-pow(abs(ax-ay)/.00090,2.));
-      float rayFade=pow(max(0.,1.-apexD/SPIKE_LEN),2.);
-      float rayGlow=lightPass*twinkle*rayFade*(.34*primary+.16*secondary);
-      base+=vec3(1.,.985,.94)*GLINT_GAIN*(glint+rayGlow);
-      /* Chromatic ring is an angular color function, not RGB refraction
-         through multiple scene samples. The core stays nearly neutral. */
-      float ring=smoothstep(CORE_SIGMA,CORE_SIGMA*1.35,apexD)*
-        (1.-smoothstep(CORE_SIGMA*2.65,CORE_SIGMA*3.,apexD));
-      float hue=atan(apexOffset.y,apexOffset.x)/6.2831853+
-        apexPhase+t*.03*(1.-u_reduced);
+      /* Tip intensity is always driven by the same passing band.
+         Phase changes strength and the STATIC color ring, never timing. */
+      float sv=axis(vertexUV,L)-c+mirror-TIP_LEAD;
+      float tipI=band(sv)*passMask*facing*(.7+.3*apexPhase);
+      float core=exp(-pow(d/CORE,2.));
+      float halo=exp(-pow(d/HALO,1.2));
+      float rays=(exp(-abs(offA.x)/.0016)+exp(-abs(offA.y)/.0016))
+        *pow(max(0.,1.-d/.03),2.);
+      base+=vec3(1.,.98,.94)*tipI*(core+.35*halo+.30*rays);
+      float ring=exp(-pow((d-.0154)/.0056,2.));
+      float hue=atan(offA.y,offA.x)/6.2831853+apexPhase;
       vec3 spectrum=.5+.5*cos(6.2831853*(hue+vec3(0.,.333333,.666667)));
-      base+=spectrum*(DISPERSION*ring*lightPass*twinkle);
+      base+=spectrum*(.18*tipI*ring);
       if(u_apexDebug>.5){
-        float point=1.-smoothstep(.0022,.0040,apexD);
+        float point=1.-smoothstep(.0022,.0040,d);
         base=mix(base,vec3(1.,.015,.035),point);
       }
       gl_FragColor=vec4(clamp(base,0.,1.),1.);
