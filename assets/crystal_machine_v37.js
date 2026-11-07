@@ -1,4 +1,4 @@
-/* La Crystalline — Crystal Engine V36: genuine separated wheel + thread layers.
+/* La Crystalline — Crystal Engine V37: genuine separated wheel + thread layers.
    Static atmospheric base has no moving gear pixels. Three RGBA wheel sprites rotate
    independently through the full 360 degrees, while one separate woven-filament
    layers gently undulate. The complete animated composite is refracted through the
@@ -270,11 +270,13 @@
       painting=mix(painting,ul.rgb,ul.a*.92);
       vec4 right=wheelSprite(uv,vec2(1520.,441.),475.,vec2(1.,0.),627./1024.,-t*2.*PI/1080.-PI/12.);
       painting=mix(painting,right.rgb,right.a*.88);
-      /* Keep the lower rotating gear visibly cropped at bottom-left on wide
-         screens, and toward the safe area on narrow screens. */
+      /* V37 lower-left wheel: keep the upper arc visibly above the viewport edge
+         on desktop AND portrait. Reuse the proven first atlas tile because all
+         three wheels use the same supplied metal artwork; the old third-tile
+         lookup plus overly low Y center could leave this region invisible. */
       float portraitN=clamp((ASPECT-u_view.x/u_view.y)/1.25,0.,1.);
-      vec2 lowerCenter=mix(vec2(470.,-175.),vec2(710.,-175.),portraitN);
-      vec4 low=wheelSprite(uv,lowerCenter,330.,vec2(0.,1.),453./1024.,t*2.*PI/1260.+PI/9.);
+      vec2 lowerCenter=mix(vec2(445.,-90.),vec2(710.,-90.),portraitN);
+      vec4 low=wheelSprite(uv,lowerCenter,330.,vec2(0.,0.),761./1024.,t*2.*PI/1260.+PI/9.);
       painting=mix(painting,low.rgb,low.a*.81);
 
       /* V25: four COMPLETE independently generated silk artworks.
