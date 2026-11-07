@@ -9,7 +9,7 @@
   if(!photos.length)return;
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
   const WAIT=8000;
-  const SWITCH_MS=3600;
+  const SWITCH_MS=5200;
   let timer=0,scrollTimer=0,memberOnScreen=true;
   let hovering=null;
   const isActive=portrait=>portrait.closest('.member-card')?.classList.contains('active');
