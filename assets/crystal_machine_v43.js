@@ -731,7 +731,7 @@
 
   portraitStart=performance.now();
   loadPortraitAtlas().catch(()=>{});
-  image.src='assets/crystal_machine_base_v16.webp';
+  image.src='assets/crystal_lapis_lazuli_base_v43.webp';
   facetImage.src='assets/crystal_facet_normals_v16.webp';
   apexImage.src='assets/crystal_facet_apex_v1.webp';
   gearImages.forEach(im=>im.src='assets/crystal_gear_bronze_six_spoke_v36.webp');
