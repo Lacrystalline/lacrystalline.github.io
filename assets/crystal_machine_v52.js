@@ -302,7 +302,7 @@
 
     vec4 operatingScene(vec2 uv){
       float t=u_seconds*(1.-u_reduced);
-      vec3 painting=texture2D(u_art,uv).rgb*vec3(.67,.74,.86); /* V45: lapis-toned base; wheels and champagne silk untouched */
+      vec3 painting=texture2D(u_art,uv).rgb*vec3(.88,.94,1.00); /* V52: reveal genuine lapis pyrite; gear, gold threads and optical shader unchanged */
       /* Composition approved earlier:
          upper-left cropped eight-spoke gear, right-edge six-spoke gear,
          lower-left just a corner of the smaller six-spoke wheel.
