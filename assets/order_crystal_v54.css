@@ -1,0 +1,45 @@
+/* La Crystalline — V54 order-page optical and readability tuning.
+   Loaded AFTER shared V53 homepage styling; order-page scoped only.
+   All background layers remain noninteractive behind the form. */
+body.order-crystal-v54 .crystal-machine-facet-membrane{
+  opacity:.74;
+  filter:brightness(.97) saturate(.82) contrast(1.15);
+}
+body.order-crystal-v54 .crystal-machine-facet-membrane::after{
+  opacity:.32;
+}
+body.order-crystal-v54 main.wrap{
+  /* Soft local reading plane; no solid boxed-off rectangle. */
+  background:linear-gradient(90deg,
+    rgba(4,12,30,.06) 0%,
+    rgba(4,12,30,.36) 13%,
+    rgba(4,12,30,.52) 50%,
+    rgba(4,12,30,.36) 87%,
+    rgba(4,12,30,.06) 100%);
+}
+body.order-crystal-v54 .member:not(.sel),
+body.order-crystal-v54 .opt:not(.sel):not(.service-disabled),
+body.order-crystal-v54 .companion-card{
+  background-color:rgba(10,22,42,.48);
+  box-shadow:inset 0 1px rgba(216,232,246,.025);
+}
+body.order-crystal-v54 .field input,
+body.order-crystal-v54 .field select,
+body.order-crystal-v54 .field textarea{
+  background:rgba(8,18,36,.85);
+}
+@media(max-width:720px){
+  body.order-crystal-v54 .crystal-machine-facet-membrane{
+    opacity:.72;
+    filter:brightness(.96) saturate(.81) contrast(1.14);
+  }
+  body.order-crystal-v54 main.wrap{
+    background:linear-gradient(90deg,
+      rgba(4,12,30,.30),
+      rgba(4,12,30,.56) 50%,
+      rgba(4,12,30,.30));
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body.order-crystal-v54 .crystal-machine-facet-membrane::after{animation:none}
+}
