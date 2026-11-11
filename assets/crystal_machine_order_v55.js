@@ -1,4 +1,4 @@
-/* La Crystalline — Crystal Engine V42: genuine separated wheel + thread layers.
+/* La Crystalline — Order Crystal Engine V55: one decoded gear + half-height atlas.
    Static atmospheric base has no moving gear pixels. Three RGBA wheel sprites rotate
    independently through the full 360 degrees, while one separate woven-filament
    layers gently undulate. The complete animated composite is refracted through the
@@ -31,10 +31,11 @@
   // V36: one user-supplied, six-spoke engraved bronze wheel, with its original
   // transparent contours preserved. Three scales share this exact artwork;
   // their existing locations, angular directions and periods are unchanged.
-  const gearNames=['large','medium','small'];
-  const gearImages=gearNames.map(()=>{
-    const im=new Image();im.decoding='async';return im;
-  });
+  /* All three screen gears share one transparent WebP. Only two upper-row
+     atlas cells are sampled; the small lower-left gear uses cell 0. */
+  const gearImage=new Image();
+  gearImage.decoding='async';
+  const gearImages=[gearImage];
   // Four independent transparent silk artworks: two horizontal, two vertical.
   // No cropped intersections, pixel masks or line removal at runtime.
   const silkNames=['horizontal_back','horizontal_front','vertical_back','vertical_front'];
@@ -105,9 +106,9 @@
     float noise2(vec2 p){return fract(sin(dot(p,vec2(123.71,311.17)))*43758.54);}
     /* V30: all wheels sample the SAME lossless 1254px metal artwork.
        Only scale/position/angle changes, never the original silhouette. */
-    /* V32: native, separately cropped aged-bronze gears in a 2x2 GPU atlas.
-       1024px tile and the actual dimensions ensure NO sprite resampling;
-       only display-scale transforms change their size in the scene. */
+    /* V55: upper-row 2x1 GPU atlas, same 1024px tile and original art pixels.
+       Lower-left gear already samples cell 0, so the former lower row
+       contained only unused data. The dimensions and gear motion are unchanged. */
     vec4 wheelSprite(vec2 uv,vec2 centerPx,float halfSize,
                      vec2 atlasCell,float imageRatio,float angle){
       vec2 world=uv*vec2(1440.,811.)-centerPx;
@@ -116,7 +117,9 @@
                   step(.0,local.y)*step(local.y,1.);
       if(valid<.5)return vec4(0.);
       vec2 cellLocal=vec2(.5)+(clamp(local,vec2(0.),vec2(1.))-vec2(.5))*imageRatio;
-      vec2 tileUv=(vec2(atlasCell.x,1.-atlasCell.y)+cellLocal)*.5;
+      /* Same pixels as the upper row of the former 2x2 atlas.
+         UNPACK_FLIP_Y_WEBGL stays true; only Y normalization changes. */
+      vec2 tileUv=vec2((atlasCell.x+cellLocal.x)*.5,cellLocal.y);
       vec4 metal=texture2D(u_gears,tileUv);
       // Retain aged bronze and real engraving; no fake plastic specular gloss.
       metal.rgb*=vec3(.90,.88,.85);
@@ -371,21 +374,19 @@
       return tx;
     }
     function buildGearAtlas(){
-      // The same user-supplied transparent bronze artwork is scaled only as
-      // necessary to match the previously approved 761/627/453px wheel bounds.
-      // No new gear geometry, synthetic rendering or background pixels.
-      // WebGL 1 guarantees MAX_TEXTURE_SIZE >= 2048.
+      // Exact same 761px and 627px upper-row sprites as V54.
+      // The 453px third atlas cell is unused by the shader: the third
+      // visible gear samples the first (761px) sprite at a smaller scale.
+      // Halve GPU upload/canvas memory (2048x2048 -> 2048x1024).
       const tile=1024;
       const a=document.createElement('canvas');
-      a.width=tile*2;a.height=tile*2;
+      a.width=tile*2;a.height=tile;
       const ctx=a.getContext('2d',{alpha:true});
       if(!ctx)throw new Error('No gear atlas canvas');
-      const sizes=[761,627,453];
-      gearImages.forEach((im,i)=>{
-        const cx=(i%2)*tile+tile/2;
-        const cy=Math.floor(i/2)*tile+tile/2;
-        const size=sizes[i];
-        ctx.drawImage(im,cx-size/2,cy-size/2,size,size);
+      [761,627].forEach((size,i)=>{
+        const cx=i*tile+tile/2;
+        const cy=tile/2;
+        ctx.drawImage(gearImage,cx-size/2,cy-size/2,size,size);
       });
       return a;
     }
@@ -505,7 +506,7 @@
   image.src='assets/crystal_lapis_lazuli_base_v43.webp';
   facetImage.src='assets/crystal_facet_normals_v16.webp';
   apexImage.src='assets/crystal_facet_apex_v1.webp';
-  gearImages.forEach(im=>im.src='assets/crystal_gear_bronze_six_spoke_v36.webp');
+  gearImage.src='assets/crystal_gear_bronze_six_spoke_v36.webp';
   silkImages.forEach((im,i)=>im.src='assets/crystal_silk_'+silkNames[i]+(i<2?'_v24.svg':'_v26.svg'));
   tryInit();
   window.addEventListener('resize',resize,{passive:true});
