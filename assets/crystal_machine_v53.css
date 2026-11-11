@@ -280,10 +280,12 @@ html{
   background:linear-gradient(180deg,
     rgba(2,10,35,.13),rgba(4,16,44,.09) 44%,rgba(2,9,31,.19));
 }
-/* This is the only bright visible surface: a quiet, cool facet sheen. */
+/* V53: rebalance the visible crystalline curtain against the V52 lapis.
+   Restore a little translucent body and clean facet boundaries without
+   changing the lapis base, shader, silk, gears or moving optical sweep. */
 .crystal-machine-facet-membrane{
-  opacity:.69;
-  filter:brightness(.88) saturate(.80) contrast(1.07);
+  opacity:.76;
+  filter:brightness(.96) saturate(.84) contrast(1.12);
 }
 .crystal-machine-facet-membrane::after{opacity:.35}
 /* V51: restore translucency while revealing details in the ORIGINAL hero photo.
@@ -315,7 +317,7 @@ html{
       rgba(2,9,34,.17),rgba(4,15,42,.13) 45%,rgba(2,8,30,.25));
   }
   .crystal-machine-facet-membrane{
-    opacity:.66;filter:brightness(.86) saturate(.79) contrast(1.07);
+    opacity:.73;filter:brightness(.94) saturate(.83) contrast(1.11);
   }
   .hero .hero-bg{opacity:.26;filter:brightness(1.48) contrast(1.14) saturate(.96)}
 }
