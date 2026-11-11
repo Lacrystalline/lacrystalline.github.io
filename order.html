@@ -27,7 +27,6 @@
 html{scroll-behavior:smooth}
 body{background:var(--ink);color:var(--mist);font-family:var(--tc);font-weight:300;line-height:1.9;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0;z-index:-3;background:radial-gradient(1100px 760px at 80% -6%,rgba(50,90,130,.30),transparent 60%),radial-gradient(950px 700px at 10% 14%,rgba(35,65,110,.26),transparent 58%),linear-gradient(180deg,#070b12,#0a1120 45%,#080d16)}
-.crystal-veil{position:fixed;inset:0;z-index:-2;pointer-events:none;background-image:url('assets/crystal.svg');background-size:cover;opacity:.42;mix-blend-mode:screen}
 img{display:block;max-width:100%}
 .wrap{max-width:760px;margin:0 auto;padding:0 22px}
 
@@ -387,9 +386,17 @@ footer .warn{color:var(--crys-dim);margin-top:.6em}
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Italianno&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/visit_voucher.css?v=20261019-mobile-top-right">
   <link rel="stylesheet" href="assets/radio.css?v=20261019-radio-bottom">
+<!-- Same V53 lapis/crystalline visual layers as homepage; no order logic changes. -->
+<link rel="stylesheet" href="assets/crystal_machine_v53.css?v=20261111-crystal53">
+<script defer src="assets/crystal_machine_v52.js?v=20261109-lapis52"></script>
 </head>
 <body data-build="VIPVISUAL-20260930-v4_6">
-<div class="crystal-veil" aria-hidden="true"></div>
+<div class="crystal-machine-scene" aria-hidden="true">
+  <div class="crystal-machine-fallback"></div>
+  <canvas id="crystalMachineCanvas"></canvas>
+  <div class="crystal-machine-wash"></div>
+  <div class="crystal-machine-facet-membrane"></div>
+</div>
 
 <nav class="nav">
   <a class="nav-logo" href="index.html"><img src="assets/emblem_nav.png" alt="水晶庭"><span class="lt">La Crystalline<small>水晶庭</small></span></a>
