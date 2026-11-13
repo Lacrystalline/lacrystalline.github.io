@@ -33,6 +33,18 @@ img{display:block;max-width:100%}
 .head .ey{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1rem;letter-spacing:.12em}
 .head h1{font-size:clamp(2rem,7vw,2.8rem);font-weight:400;letter-spacing:.14em;margin-top:.2em}
 .head .en{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1.2rem;letter-spacing:.08em}
+.menu-section{padding:10px 0 14px}
+.menu-section+.menu-section{margin-top:20px}
+.section-head{text-align:center;padding:12px 0 18px}
+.section-kicker{font-family:var(--serif);font-style:italic;font-size:.92rem;letter-spacing:.15em;color:var(--crys-dim)}
+.section-head h2{font-weight:400;font-size:1.3rem;letter-spacing:.14em;margin-top:4px}
+.section-head h2 span{display:block;font-family:var(--serif);font-style:italic;font-size:1rem;letter-spacing:.07em;color:var(--crys);margin-top:1px}
+.section-head p{color:var(--mute);font-size:.77rem;letter-spacing:.06em;margin-top:6px}
+.limited-section .section-kicker,.limited-section .section-head h2 span{color:var(--gold)}
+.limited-section .section-head{border-top:1px solid rgba(216,184,122,.2);padding-top:26px}
+.limited-section .grid{border-top-color:rgba(216,184,122,.28)}
+.limited-section .card{border-color:rgba(216,184,122,.22)}
+.limited-section .card:hover{border-color:rgba(216,184,122,.48)}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:28px 0;border-top:1px solid var(--line)}
 .card{display:grid;grid-template-columns:145px minmax(0,1fr);gap:16px;align-items:center;padding:14px;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:4px;background:linear-gradient(145deg,rgba(17,26,43,.34),rgba(9,20,31,.24));transition:.2s ease}
 .card:hover{border-color:rgba(127,211,214,.38);transform:translateY(-1px)}
@@ -70,14 +82,16 @@ footer{text-align:center;padding:30px 24px 42px;border-top:1px solid var(--line)
 </header>
 
 <main class="wrap">
-  <section class="grid">
+  <section class="menu-section" aria-labelledby="permanent-title">
+    <header class="section-head">
+      <div class="section-kicker">Hidden Selection</div>
+      <h2 id="permanent-title">隱藏精選 <span>Permanent Selection</span></h2>
+      <p>留給偶然相遇的風味。</p>
+    </header>
+    <div class="grid">
     <a class="card" href="peridot-whisper.html">
       <div class="pic"><img src="../assets/drink_peridot_whisper.png" alt="翠芽呢喃"></div>
       <div><div class="cn">翠芽呢喃</div><div class="en">Peridot Whisper</div><div class="desc">綠茶、青果與白花，清雅而悠長。</div></div>
-    </a>
-    <a class="card" href="sunlit-canopy.html">
-      <div class="pic"><img src="../assets/drink_sunlit_canopy.webp" alt="綠蔭拾光"></div>
-      <div><div class="cn">綠蔭拾光</div><div class="en">Sunlit Canopy</div><div class="desc">檜木與嫩茶的柔和木韻，映著青葡萄與午後綠光。</div></div>
     </a>
     <a class="card" href="ruby-moon-mischief.html">
       <div class="pic"><img src="../assets/drink_ruby_moon_mischief.png" alt="紅月蝶戲"></div>
@@ -103,18 +117,33 @@ footer{text-align:center;padding:30px 24px 42px;border-top:1px solid var(--line)
       <div class="pic"><img src="../assets/drink_sapphire_nocturne.webp" alt="藍月魅影"></div>
       <div><div class="cn">藍月魅影</div><div class="en">Sapphire Nocturne</div><div class="desc">青藍夜色、白葡萄與冷調草本。</div></div>
     </a>
-    <a class="card" href="smoky-quartz-edge.html">
-      <div class="pic"><img src="../assets/drink_misty_quartz_edge.webp" alt="霧晶銀鋒"></div>
-      <div><div class="cn">霧晶銀鋒</div><div class="en">Smoky Quartz Edge</div><div class="desc">威士忌、雪莉、淡可可與俐落橙皮尾韻。</div></div>
-    </a>
-    <a class="card" href="moonstone-serenade.html">
-      <div class="pic"><img src="../assets/drink_moonstone_serenade.webp" alt="守月長曲"></div>
-      <div><div class="cn">守月長曲</div><div class="en">Moonstone Serenade</div><div class="desc">守護天節限定。白蔓越莓、紫羅蘭與淡紫月色，奏出一曲溫柔夜歌。</div></div>
-    </a>
     <a class="card" href="amber-river.html">
       <div class="pic"><img src="../assets/drink_amber_river.png" alt="琥珀川"></div>
       <div><div class="cn">琥珀川</div><div class="en">Amber River</div><div class="desc">清梨與淡雅茴香交融，冰晶深處藏著一縷青龍。</div></div>
     </a>
+    </div>
+  </section>
+
+  <section class="menu-section limited-section" aria-labelledby="limited-title">
+    <header class="section-head">
+      <div class="section-kicker">Limited Selection</div>
+      <h2 id="limited-title">期間限定 <span>Limited Edition</span></h2>
+      <p>只在這段時光裡，與你相遇。</p>
+    </header>
+    <div class="grid">
+    <a class="card" href="moonstone-serenade.html">
+      <div class="pic"><img src="../assets/drink_moonstone_serenade.webp" alt="守月長曲"></div>
+      <div><div class="cn">守月長曲</div><div class="en">Moonstone Serenade</div><div class="desc">守護天節限定。白蔓越莓、紫羅蘭與淡紫月色，奏出一曲溫柔夜歌。</div></div>
+    </a>
+    <a class="card" href="smoky-quartz-edge.html">
+      <div class="pic"><img src="../assets/drink_misty_quartz_edge.webp" alt="霧晶銀鋒"></div>
+      <div><div class="cn">霧晶銀鋒</div><div class="en">Smoky Quartz Edge</div><div class="desc">威士忌、雪莉、淡可可與俐落橙皮尾韻。</div></div>
+    </a>
+    <a class="card" href="sunlit-canopy.html">
+      <div class="pic"><img src="../assets/drink_sunlit_canopy.webp" alt="綠蔭拾光"></div>
+      <div><div class="cn">綠蔭拾光</div><div class="en">Sunlit Canopy</div><div class="desc">檜木與嫩茶的柔和木韻，映著青葡萄與午後綠光。</div></div>
+    </a>
+    </div>
   </section>
 </main>
 
