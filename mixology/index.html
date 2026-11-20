@@ -155,7 +155,7 @@ function selectGlass(type){if(state.busy||state.demo)return;const ml=total();if(
 async function add(id,ml,fromDemo=false){if(state.busy||(!fromDemo&&state.demo))return false;const cap=glasses[state.glass].capacity;if(total()+ml>cap){notify(`這只杯子最多可裝 ${cap} ml，請減少倒入量。`);return false}const currentRev=state.revision;const previous=total();if(state.mix>.001)freezePreviousBlend();state.portions.push({id,ml});state.busy=true;state.pour={start:performance.now(),duration:850,from:state.visualML,to:previous+ml,color:rgb(byId[id].color)};
  state.stirMotion=0;updateUI();syncRoom('pour_begin');await sleep(870);if(currentRev!==state.revision)return false;state.visualML=total();state.pour=null;state.busy=false;updateUI();syncRoom('pour_end');return true}
 async function loadPreset(p){if(state.busy||state.demo)return;reset(true);state.glass=p.glass;state.demo=true;updateUI();syncRoom('glass');const revision=state.revision;for(const [id,ml] of p.recipe){if(revision!==state.revision)return;await add(id,ml,true);await sleep(110)}if(revision===state.revision){state.demo=false;updateUI();notify(`${p.name} 已完成。試試攪拌，觀察酒液的變化。`)}}
-function freezePreviousBlend(){const averaged=liquidAverage();const weight=total();let density=0;state.portions.forEach(p=>density+=p.ml*(p.lockedDensity??byId[p.id].density));density=weight?density/weight:1;const gen=++state.mixGeneration;state.portions.forEach(p=>{p.lockedColor=blend(p.lockedColor||rgb(byId[p.id].color),averaged,state.mix);if(state.mix>.94){p.lockedDensity=density;p.mixGroup=gen}else{p.mixGroup=null}});state.mixedOnce=state.mixedOnce||state.mix>.65;state.mix=0}
+function freezePreviousBlend(){const averaged=liquidAverage();const weight=total();let density=0;state.portions.forEach(p=>density+=p.ml*(p.lockedDensity??byId[p.id].density));density=weight?density/weight:1;const gen=Math.max(state.mixGeneration,...state.portions.map(p=>Number(p.mixGroup)||0))+1;state.mixGeneration=gen;state.portions.forEach(p=>{p.lockedColor=blend(p.lockedColor||rgb(byId[p.id].color),averaged,state.mix);if(state.mix>.94){p.lockedDensity=density;p.mixGroup=gen}else{p.mixGroup=null}});state.mixedOnce=state.mixedOnce||state.mix>.65;state.mix=0}
 function startProcess(kind){if(state.busy||state.demo||!total())return;state.processing={kind,start:performance.now(),duration:kind==='shaken'?1250:1600,from:state.mix};state.busy=true;state.mixKind=kind;state.mixedOnce=true;updateUI();syncRoom('mix_begin')}
 function changeDecoration(type){if(state.decor.has(type))state.decor.delete(type);else state.decor.add(type);updateUI();syncRoom('decor')}
 function fitCanvas(){const dpr=Math.min(window.devicePixelRatio||1,window.innerWidth<=720?1.5:2);const w=560*dpr,h=620*dpr;if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}ctx.setTransform(dpr,0,0,dpr,0,0)}
@@ -170,8 +170,42 @@ function drawBackground(t){const glow=ctx.createRadialGradient(280,355,10,280,35
  const refl=ctx.createLinearGradient(170,534,400,534);refl.addColorStop(0,'rgba(224,187,134,0)');refl.addColorStop(.5,'rgba(224,187,134,.11)');refl.addColorStop(1,'rgba(224,187,134,0)');ctx.fillStyle=refl;ctx.fillRect(115,532,330,1)}
 function drawStem(){if(state.glass!=='coupe')return;const stem=ctx.createLinearGradient(272,0,288,0);stem.addColorStop(0,'rgba(148,193,206,.08)');stem.addColorStop(.3,'rgba(228,244,242,.48)');stem.addColorStop(.65,'rgba(70,127,148,.19)');stem.addColorStop(1,'rgba(217,223,226,.55)');ctx.fillStyle=stem;ctx.beginPath();ctx.moveTo(274,389);ctx.lineTo(271,499);ctx.lineTo(289,499);ctx.lineTo(286,389);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(197,228,235,.30)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(275,395);ctx.lineTo(273,495);ctx.moveTo(285,395);ctx.lineTo(288,495);ctx.stroke();let base=ctx.createLinearGradient(180,0,380,0);base.addColorStop(0,'rgba(144,183,204,.02)');base.addColorStop(.25,'rgba(197,219,218,.18)');base.addColorStop(.5,'rgba(236,232,210,.28)');base.addColorStop(.8,'rgba(197,219,218,.19)');base.addColorStop(1,'rgba(144,183,204,.02)');ctx.fillStyle=base;ctx.beginPath();ctx.ellipse(280,510,107,11,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(188,223,232,.3)';ctx.stroke()}
 function drawGlassBack(){drawStem();ctx.save();silhouette(true);const bg=ctx.createLinearGradient(132,0,428,0);bg.addColorStop(0,'rgba(189,215,222,.09)');bg.addColorStop(.23,'rgba(210,238,246,.018)');bg.addColorStop(.55,'rgba(186,234,255,.025)');bg.addColorStop(.84,'rgba(217,234,225,.02)');bg.addColorStop(1,'rgba(191,231,245,.11)');ctx.fillStyle=bg;ctx.fill();ctx.restore()}
-function getLayers(){const portions=state.portions.map(p=>({...p,layerColor:p.lockedColor||rgb(byId[p.id].color),density:p.lockedDensity??byId[p.id].density})).sort((a,b)=>b.density-a.density);const result=[];for(const p of portions){const last=result[result.length-1];if(p.mixGroup&&last&&last.mixGroup===p.mixGroup){last.ml+=p.ml}else result.push(p)}return result}
-function liquidAverage(){let ml=total();if(!ml)return [150,190,210];let sums=[0,0,0];state.portions.forEach(p=>{const c=p.lockedColor||rgb(byId[p.id].color);for(let k=0;k<3;k++)sums[k]+=c[k]*p.ml});return sums.map(v=>Math.round(v/ml))}
+function visiblePortions(){
+ const last=state.portions.length-1;
+ return state.portions.map((p,index)=>{
+  const liveMl=state.pour&&index===last?clamp(state.visualML-state.pour.from,0,p.ml):p.ml;
+  return {...p,ml:liveMl,layerColor:p.lockedColor||rgb(byId[p.id].color),density:p.lockedDensity??byId[p.id].density};
+ }).filter(p=>p.ml>0.00001);
+}
+function liquidAverage(){
+ const items=visiblePortions(),volume=items.reduce((s,p)=>s+p.ml,0);
+ if(!volume)return [150,190,210];
+ const sum=[0,0,0];
+ for(const p of items)for(let i=0;i<3;i++)sum[i]+=p.layerColor[i]*p.ml;
+ return sum.map(x=>Math.round(x/volume));
+}
+function getLayers(){
+ const items=visiblePortions();
+ if(!items.length)return [];
+ const sum=items.reduce((s,p)=>s+p.ml,0);
+ // Completed stirring is ONE liquid body, not identically colored stripes.
+ if(state.mix>=.995){
+  return [{ml:sum,layerColor:liquidAverage(),density:items.reduce((s,p)=>s+p.density*p.ml,0)/sum,mixGroup:'all'}];
+ }
+ // Preserve an already-stirred body as one layer if more alcohol is poured.
+ const groups=new Map(),layers=[];
+ for(const p of items){
+  if(p.mixGroup!==null&&p.mixGroup!==undefined&&p.mixGroup!==0){
+   const key=String(p.mixGroup),g=groups.get(key);
+   if(g){
+    const nextMl=g.ml+p.ml;
+    g.layerColor=g.layerColor.map((v,i)=>Math.round((v*g.ml+p.layerColor[i]*p.ml)/nextMl));
+    g.density=(g.density*g.ml+p.density*p.ml)/nextMl;g.ml=nextMl;
+   }else{const merged={...p};groups.set(key,merged);layers.push(merged)}
+  }else layers.push({...p});
+ }
+ return layers.sort((a,b)=>b.density-a.density);
+}
 function wave(y,x,t,level=1){const motion=state.stirMotion,amp=(1+3.6*motion)*level;return y+amp*Math.sin(x*.028-t*.0017)+(amp*.36)*Math.sin(x*.068+t*.0029)}
 function drawLiquid(t){const displayed=clamp(state.visualML,0,total());if(displayed<=.1)return;const g=glasses[state.glass],layers=getLayers(),avg=liquidAverage();ctx.save();silhouette();ctx.clip();let mlAccum=0;for(const p of layers){const volume=Math.min(p.ml,Math.max(0,displayed-mlAccum));if(volume<=0)break;const yBottom=vToY(mlAccum),yTop=vToY(mlAccum+volume);let color=blend(p.layerColor,avg,state.mix);const mixV=.3+state.stirMotion*.12;const gg=ctx.createLinearGradient(120,yTop,445,yTop);gg.addColorStop(0,rgba(tint(color,-.37),.94));gg.addColorStop(.18,rgba(tint(color,-.06),.95));gg.addColorStop(.46,rgba(tint(color,.19),.96));gg.addColorStop(.75,rgba(tint(color,-.045),.96));gg.addColorStop(1,rgba(tint(color,-.46),.92));
  ctx.beginPath();ctx.moveTo(80,wave(yTop,80,t));for(let x=80;x<=480;x+=8)ctx.lineTo(x,wave(yTop,x,t));ctx.lineTo(480,yBottom+11);ctx.lineTo(80,yBottom+11);ctx.closePath();ctx.fillStyle=gg;ctx.fill();
