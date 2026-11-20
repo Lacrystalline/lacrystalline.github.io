@@ -75,61 +75,111 @@ function ground(ctx,id){
  line.addColorStop(0,'rgba(208,168,115,0)');line.addColorStop(.48,'rgba(231,195,143,.22)');line.addColorStop(1,'rgba(208,168,115,0)');
  ctx.strokeStyle=line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(136,baseY);ctx.lineTo(426,baseY);ctx.stroke();
 }
+// One surface contour + a subtle translucent top plane. No twin ellipse strokes.
+const waterMotion={wasPouring:false,lastPourEnd:-99999};
 function liquid(ctx,opts){
- const {state,t,glasses,getLayers,liquidAverage,total}=opts;
- const id=state.glass,g=specs[id];if(!g)return;
- const ml=clamp(state.visualML,0,total());if(ml<=.08)return;
- const cap=glasses[id].capacity, layers=getLayers(), avg=liquidAverage(),mix=clamp(state.mix,0,1),stir=state.stirMotion||0;
- const time=t*.001,impact=state.pour?Math.max(0,Math.sin(Math.PI*clamp((t-state.pour.start)/state.pour.duration,0,1))):0;
- const waveAmp=.6+2.7*stir+2.8*impact;
- const wave=x=>waveAmp*(.55*Math.sin(x*.038+time*5.1)+.28*Math.sin(x*.088-time*3.6));
- ctx.save();mask(ctx,id,4);ctx.clip();
+ const {state,t,glasses,getLayers,liquidAverage,total}=opts,id=state.glass,g=specs[id];
+ if(!g)return;
+ const ml=clamp(state.visualML,0,total());if(ml<=.08){waterMotion.wasPouring=!!state.pour;return}
+ const cap=glasses[id].capacity,layers=getLayers(),avg=liquidAverage();
+ const mix=clamp(state.mix,0,1),stir=Math.max(0,state.stirMotion||0),pour=state.pour;
+ if(pour)waterMotion.wasPouring=true;
+ else if(waterMotion.wasPouring){waterMotion.wasPouring=false;waterMotion.lastPourEnd=t}
+ const pourProgress=pour?clamp((t-pour.start)/Math.max(1,pour.duration),0,1):0;
+ const contact=pour?Math.pow(Math.sin(Math.PI*pourProgress),.65):0;
+ const after=(!pour&&waterMotion.lastPourEnd>0)?Math.exp(-Math.max(0,t-waterMotion.lastPourEnd)/520):0;
+ const impact=Math.max(contact,after*.65);
+ const amp=.16+Math.min(1,stir)*2.5+impact*5.3;
+ const surfaceY=liquidY(id,ml,cap),sr=Math.max(2,radScreen(id,surfaceY)-5);
+ const surfaceDepth=Math.max(2,sr*g.ellipse*.76);
+ const wobble=(x,depth=1)=>{
+  const q=clamp((x-CX)/Math.max(1,sr),-1,1);
+  const envelope=Math.pow(Math.max(0,1-q*q),1.6);
+  const cascade=Math.sin((x-CX)*.062-t*.024)*.60+Math.sin((x-CX)*.115+t*.031)*.28;
+  const sink=impact*Math.exp(-Math.pow((x-CX)/29,2))*1.6;
+  return envelope*depth*(amp*cascade+sink);
+ };
+ ctx.save();mask(ctx,id,5);ctx.clip();
  let used=0,topColor=avg;
- for(const p of layers){const take=Math.min(p.ml,Math.max(0,ml-used));if(take<=.01)break;
-  const yTop=liquidY(id,used+take,cap),yBottom=liquidY(id,used,cap);
-  let shade=blend(p.layerColor,avg,mix);topColor=shade;
-  let left= CX-radScreen(id,yTop),right=CX+radScreen(id,yTop);
-  const gr=ctx.createLinearGradient(left,yTop,right,yTop);
-  gr.addColorStop(0,color(bright(shade,-.42),.94));gr.addColorStop(.19,color(bright(shade,.06),.91));gr.addColorStop(.39,color(bright(shade,.25),.94));
-  gr.addColorStop(.67,color(bright(shade,.09),.93));gr.addColorStop(.89,color(bright(shade,-.12),.93));gr.addColorStop(1,color(bright(shade,-.39),.95));
-  ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(0,yTop+wave(0));
-  for(let x=0;x<=560;x+=7)ctx.lineTo(x,yTop+wave(x)*(used+take>=ml?1:.28));
-  ctx.lineTo(560,yBottom+8);ctx.lineTo(0,yBottom+8);ctx.closePath();ctx.fill();
-  const grad=ctx.createLinearGradient(0,yTop,0,yBottom);
-  grad.addColorStop(0,'rgba(255,252,229,.17)');grad.addColorStop(.3,'rgba(255,255,244,0)');grad.addColorStop(1,'rgba(13,18,32,.16)');
-  ctx.fillStyle=grad;ctx.fillRect(0,yTop,560,Math.max(2,yBottom-yTop)+6);
-  if(used>0&&mix<.88){
-    ctx.beginPath();const width=radScreen(id,yBottom)-5;
-    ctx.ellipse(CX,yBottom,Math.max(2,width),Math.max(1,width*g.ellipse),0,0,Math.PI);
-    ctx.strokeStyle=`rgba(246,242,217,${.36*(1-mix)})`;ctx.lineWidth=1.25;ctx.stroke();
+ for(const p of layers){
+  const take=Math.min(p.ml,Math.max(0,ml-used));if(take<=.001)break;
+  const top=liquidY(id,used+take,cap),bottom=liquidY(id,used,cap);
+  const isSurface=(used+take>=ml-.01);
+  const r=Math.max(2,radScreen(id,top)-4);
+  const ry=Math.max(1,r*g.ellipse*(isSurface?.76:.30));
+  const shade=blend(p.layerColor,avg,mix);
+  topColor=shade;
+  const gr=ctx.createLinearGradient(CX-r,top,CX+r,top);
+  gr.addColorStop(0,color(bright(shade,-.39),.86));
+  gr.addColorStop(.14,color(bright(shade,-.04),.91));
+  gr.addColorStop(.38,color(bright(shade,.19),.94));
+  gr.addColorStop(.64,color(bright(shade,.06),.93));
+  gr.addColorStop(.84,color(bright(shade,-.04),.90));
+  gr.addColorStop(1,color(bright(shade,-.34),.87));
+  // Paint the liquid body all the way to the FRONT edge of one meniscus.
+  // The back edge is rendered only as a light/shaded plane, not another line.
+  ctx.beginPath();ctx.moveTo(CX-r,top);
+  for(let x=CX-r+4;x<CX+r;x+=4){
+   const q=clamp((x-CX)/r,-1,1);
+   ctx.lineTo(x,top+ry*Math.sqrt(Math.max(0,1-q*q))+(isSurface?wobble(x):0));
   }
-  used+=p.ml;
+  ctx.lineTo(CX+r,top);ctx.lineTo(CX+r,bottom+8);
+  ctx.lineTo(CX-r,bottom+8);ctx.closePath();
+  ctx.fillStyle=gr;ctx.fill();
+  // Continuous vertical absorption, not independent rectangle banding.
+  const depth=ctx.createLinearGradient(0,top,0,bottom);
+  depth.addColorStop(0,'rgba(255,252,239,.045)');
+  depth.addColorStop(.8,'rgba(28,34,51,0)');
+  depth.addColorStop(1,'rgba(7,15,28,.10)');
+  ctx.fillStyle=depth;ctx.fillRect(CX-r-4,top,r*2+8,Math.max(2,bottom-top)+9);
+  used+=take;
  }
- // Visible fluid surface ellipse; mask makes it disappear naturally at the glass wall.
- const surface=liquidY(id,ml,cap),sr=radScreen(id,surface)-3,ry=Math.max(2,sr*g.ellipse);
- const front=ctx.createRadialGradient(CX-18,surface-ry*.65,2,CX,surface,Math.max(12,sr));
- front.addColorStop(0,color(bright(topColor,.46),.50));front.addColorStop(.6,color(bright(topColor,.24),.24));front.addColorStop(1,color(bright(topColor,-.18),.36));
- ctx.fillStyle=front;ellipse(ctx,CX,surface+wave(CX)*.15,sr,ry);ctx.fill();
- ctx.strokeStyle='rgba(250,249,227,.58)';ctx.lineWidth=1.3;
- ctx.beginPath();ctx.ellipse(CX,surface,sr,ry,0,0,Math.PI);ctx.stroke();
- ctx.strokeStyle='rgba(244,247,245,.23)';ctx.lineWidth=.85;
- ctx.beginPath();ctx.ellipse(CX,surface,sr,ry,0,Math.PI,TAU);ctx.stroke();
- if(stir>.07||impact>.1){const strength=clamp(stir*.8+impact*.8,0,1);
-  for(let k=0;k<3;k++){ctx.beginPath();ctx.ellipse(CX+8,surface,16+k*14,3+k*2,0,0,Math.PI);
-  ctx.strokeStyle=`rgba(255,253,234,${Math.max(0,.36-k*.085)*strength})`;ctx.lineWidth=1.1;ctx.stroke()}
+ // Single transparent liquid surface, entirely inside the interior glass mask.
+ // No front/back semicircle outlines; the body shares this exact meniscus.
+ const plane=ctx.createRadialGradient(CX-18,surfaceY-surfaceDepth*.6,1,CX,surfaceY,sr);
+ plane.addColorStop(0,color(bright(topColor,.43),.24));
+ plane.addColorStop(.52,color(bright(topColor,.20),.11));
+ plane.addColorStop(1,color(bright(topColor,-.13),.07));
+ ctx.fillStyle=plane;
+ ellipse(ctx,CX,surfaceY+wobble(CX)*.22,sr,surfaceDepth);
+ ctx.fill();
+ // Localized submerged currents at the impact point, fading after a pour.
+ if(impact>.035){
+  const focal=ctx.createRadialGradient(CX+3,surfaceY+8,2,CX+3,surfaceY+22,Math.max(30,sr*.44));
+  const injected=pour&&Array.isArray(pour.color)?pour.color:topColor;
+  focal.addColorStop(0,color(bright(injected,.26),.22*impact));
+  focal.addColorStop(.55,color(injected,.08*impact));
+  focal.addColorStop(1,color(injected,0));
+  ctx.fillStyle=focal;ellipse(ctx,CX+3,surfaceY+21,Math.min(sr*.57,63),22+impact*22);
+  ctx.fill();
+  // Very short, irregular highlights near the pouring impact, not surface rings.
+  for(let k=0;k<3;k++){
+   const x=CX+(k-1)*14+Math.sin(t*.011+k)*3;
+   const y=surfaceY+7+Math.sin(t*.018+k)*impact*5;
+   ctx.fillStyle='rgba(255,251,234,'+(impact*(.11+.035*k))+')';
+   ellipse(ctx,x,y,2.1,1.1);ctx.fill();
+  }
  }
- // Small, bounded bubbles only for carbonated ingredients.
- if(state.portions.some(p=>['soda','tonic'].includes(p.id))){
+ if(stir>.09){
+  const current=ctx.createLinearGradient(CX-45,surfaceY+10,CX+55,surfaceY+56);
+  current.addColorStop(0,'rgba(245,249,250,0)');
+  current.addColorStop(.45,'rgba(245,249,250,'+(.068*stir)+')');
+  current.addColorStop(1,'rgba(245,249,250,0)');
+  ctx.fillStyle=current;ctx.fillRect(CX-55,surfaceY+6,110,60);
+ }
+ // Only sparkling mixers emit a small number of bounded bubbles.
+ if(state.portions.some(p=>p.id==='soda'||p.id==='tonic')){
   const down=liquidY(id,0,cap);
-  for(let j=0;j<20;j++){
-    let f=(j*23+t*.016)%(down-surface+10),y=down-f;
-    if(y<surface+9||y>down-6)continue;
-    const r=radScreen(id,y)*.75,x=CX+Math.sin(j*13.4)*r;
-    ctx.strokeStyle=`rgba(247,255,251,${.15+(j%4)*.035})`;ctx.lineWidth=.8;
-    ellipse(ctx,x,y,1.1+j%3*.35,1.7);ctx.stroke();
+  for(let k=0;k<17;k++){
+   const h=down-surfaceY;if(h<12)break;
+   const y=down-((k*23+t*.014)%(h+6));
+   if(y<surfaceY+9||y>down-6)continue;
+   const r=radScreen(id,y)*.75,x=CX+Math.sin(k*13.4)*r;
+   ctx.strokeStyle='rgba(247,255,251,'+(.10+(k%4)*.035)+')';
+   ctx.lineWidth=.8;ellipse(ctx,x,y,1+k%3*.3,1.5);ctx.stroke();
   }
  }
- if(state.decor.has('ice'))drawIce(ctx,id,surface,t);
+ if(state.decor.has('ice'))drawIce(ctx,id,surfaceY,t);
  ctx.restore();
 }
 function drawIce(ctx,id,surface,t){
