@@ -22,6 +22,17 @@ Object.keys(specs).forEach(id=>{
  im.onerror=()=>{loaded[id]='error';console.warn('Cannot load cocktail glass asset',id)};
  im.src=specs[id].src;specs[id].img=im;
 });
+// V8 glass layers: back glass -> liquid -> ice -> transparent wall optics -> glass base.
+// These are the actual separated WebPs prepared and verified in the V8 approval preview.
+for(const id of ['highball','rocks']){
+ for(const [prop,suffix] of [['edges','edges'],['baseFront','base_front']]){
+  const img=new Image();img.decoding='async';
+  img.onerror=()=>console.warn('V8 glass overlay unavailable',id,suffix);
+  img.src='./ice-v8-preview/assets/'+id+'_glass_'+suffix+'.webp';
+  specs[id][prop]=img;
+ }
+}
+
 function half(id,y){const g=specs[id];if(!g)return 0;const f=clamp((y-g.top)/(g.bottom-g.top),0,1);
  if(id==='coupe'){
    // A rounded coupe bowl; cross-section tapers sharply near the stem.
@@ -232,10 +243,24 @@ function pour(ctx,id,state,t,cap){const p=state.pour;if(!p)return;
 function draw(options){const {ctx,state,t,glasses}=options,id=state.glass,g=specs[id];if(!g)return false;
  if(!loaded[id])return false;
  if(loaded[id]!=='ready')return false;
- ctx.save();ground(ctx,id);liquid(ctx,options);if(window.LCIceV7)window.LCIceV7.draw(ctx,state,t);else if(state.decor.has('ice')&&state.visualML<=.08&&id!=='coupe')drawIce(ctx,id,gy(g.bottom)-98,t);
- // The original transparent glass artwork provides the optics, edges and facets.
- // This image is overlaid on the liquid. The geometry mask is never stroked.
- ctx.drawImage(g.img,IMG.x,IMG.y,IMG.w,IMG.h);
+ ctx.save();ground(ctx,id);
+ const v8=window.LCIceV8;
+ const split=!!(v8&&id!=='coupe'&&g.edges?.complete&&g.edges.naturalWidth&&g.baseFront?.complete&&g.baseFront.naturalWidth);
+ if(split){
+  // Glass art at BACK, so the ice is never hidden by an opaque faceted glass base.
+  ctx.drawImage(g.img,IMG.x,IMG.y,IMG.w,IMG.h);
+  liquid(ctx,options);
+  v8.draw(ctx,state,t);
+  // These physically separated source-image passes preserve original rim and base reflection.
+  ctx.drawImage(g.edges,IMG.x,IMG.y,IMG.w,IMG.h);
+  ctx.drawImage(g.baseFront,IMG.x,IMG.y,IMG.w,IMG.h);
+ }else{
+  // Fallback for unavailable layers and the stemmed coupe (normally no ice).
+  liquid(ctx,options);
+  if(window.LCIceV7)window.LCIceV7.draw(ctx,state,t);
+  else if(state.decor.has('ice')&&state.visualML<=.08&&id!=='coupe')drawIce(ctx,id,gy(g.bottom)-98,t);
+  ctx.drawImage(g.img,IMG.x,IMG.y,IMG.w,IMG.h);
+ }
  garnish(ctx,id,state,t);pour(ctx,id,state,t,glasses[id].capacity-(window.LCIceV7?window.LCIceV7.displacement(state.iceKind,id):(state.decor.has('ice')?(id==='rocks'?50:60):0)));
  ctx.restore();return true;
 }
