@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>La Crystalline | V8 Ice Art Preview</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;background:#091524;color:#e6e7e2}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(ellipse at 48% 0%,#1d2e40 0%,#0b172a 47%,#071320 100%);min-height:100vh}
+main{max-width:1200px;margin:0 auto;padding:22px 20px 38px}.eyebrow{font:12px Georgia,serif;letter-spacing:.35em;color:#e4c18a;text-align:center}
+h1{font-weight:400;font-size:clamp(24px,4vw,34px);text-align:center;margin:12px 0 5px;letter-spacing:.12em}.sub{text-align:center;color:#a2b7c4;font-size:13px;line-height:1.6;margin:0 auto 21px;max-width:650px}
+.layout{display:grid;grid-template-columns:minmax(340px, 1fr) minmax(300px,410px);align-items:start;gap:20px}.stage{border:1px solid #766244;border-radius:20px;background:radial-gradient(ellipse at 50% 47%,#23394b 0%,#0b1b2d 58%,#091422 100%);overflow:hidden;position:relative}
+.stage header{position:absolute;top:13px;left:20px;z-index:3;display:flex;gap:8px;align-items:center;color:#dbbd88;font:11px Georgia,serif;letter-spacing:.17em}.stage footer{padding:12px 17px;border-top:1px solid #52606b;color:#b5c3cd;font-size:12px;line-height:1.7}
+#scene{display:block;width:100%;max-width:560px;margin:0 auto;aspect-ratio:560/615}.panel{border-radius:18px;border:1px solid #536575;background:#0c1d30;padding:20px 18px}.panel h2{font-size:16px;font-weight:500;letter-spacing:.12em;margin:0 0 16px}.panel h3{font-size:13px;color:#dfc599;font-weight:500;margin:18px 0 7px}.options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+button{min-height:45px;padding:10px 8px;cursor:pointer;color:#dbe1dc;border:1px solid #455d71;background:#132b40;border-radius:10px;letter-spacing:.03em;font:12px system-ui}button.selected{border-color:#e4c08c;background:#3c3832;color:#ffebc7}button[hidden]{display:none}
+.meter{width:100%;accent-color:#dbc28a;margin:12px 0}.value{color:#f3d19c;font-family:Georgia,serif}.meta{color:#adbeca;font-size:12px;line-height:1.7;margin-top:12px}.pill{background:#1a3246;color:#dfc28f;border:1px solid #746349;border-radius:12px;padding:4px 8px;font:11px Georgia,serif}
+.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}.controls label{font-size:12px;color:#b0c5ce}.controls input{accent-color:#dfc28f}
+@media(max-width:780px){main{padding:16px 12px}.layout{grid-template-columns:1fr}.stage{order:1}.panel{order:2}#scene{max-height:70vh;object-fit:contain}}
+</style></head><body><main>
+<div class="eyebrow">LA CRYSTALLINE · ART TEST 08</div><h1>冰塊 × 酒杯・分層驗證</h1>
+<p class="sub">這是獨立美術驗收頁，不是正式調酒系統。冰塊採用生成的原始風格素材，碰撞與水位則由 Canvas 演算。</p>
+<div class="layout"><section class="stage"><header><span class="pill">V8 STAGING</span> ICE / GLASS / REFRACTION</header><canvas id="scene" width="560" height="615"></canvas><footer><strong>可確認：</strong>冰柱高度、冰球尺寸、杯底前後遮擋、逐顆碰撞，以及酒液包覆冰塊的視覺。</footer></section>
+<section class="panel"><h2>選擇杯型與冰塊</h2><h3>01 / GLASSWARE</h3><div class="options" id="glassChoices"></div>
+<h3>02 / ICE FORM</h3><div class="options" id="iceChoices"></div>
+<h3>03 / FILL LEVEL　<span class="value" id="volumeText">0 ml</span></h3><input class="meter" type="range" id="volume" min="0" max="200" step="5" value="0" aria-label="酒液容量">
+<div class="buttons"><button id="replay">重新落冰 · REPLAY</button><button id="pour">注入 90 ml 酒液</button></div>
+<div class="controls"><label><input type="checkbox" id="frontLayer" checked> 顯示玻璃前層</label><label><input type="checkbox" id="physics" checked> 開啟碰撞</label></div>
+<div class="meta" id="detail"></div></section></div></main>
+<script>
+(()=>{'use strict';
+const cvs=document.querySelector('#scene'),ctx=cvs.getContext('2d'),$=s=>document.querySelector(s),TAU=Math.PI*2;
+const specs={
+ highball:{name:'高球杯',src:'highball_glass_lossless.webp',capacity:300,top:151,bottom:1158,radTop:235,radBottom:204},
+ rocks:{name:'古典杯',src:'rocks_glass_lossless.webp',capacity:240,top:298,bottom:1094,radTop:405,radBottom:360},
+ coupe:{name:'淺碟杯',src:'coupe_glass_lossless.webp',capacity:180,top:213,bottom:563,radTop:415,radBottom:24}
+};
+const types={highball:[['none','無冰'],['spear','長柱冰'],['cubes','小方冰'],['crushed','碎冰·特調']],rocks:[['none','無冰'],['sphere','球冰'],['large','大方冰'],['cubes','小方冰'],['crushed','碎冰·特調']],coupe:[['none','無冰']]};
+const vsrc={spear:'ice-spear.webp',sphere:'ice-sphere.webp',large:'ice-cube.webp',cubes:'ice-cube.webp',crushed:'ice-crushed.webp'};
+const images={};const glassBase=location.protocol==='file:'?'./assets/':'../assets/';
+for(const [id,g] of Object.entries(specs)){images[id]=new Image;images[id].src=glassBase+g.src}
+for(const [k,src] of Object.entries(vsrc)){if(images[k]&&k==='cubes')continue;images[k]=new Image;images[k].src='./assets/'+src}
+const rect={x:80,y:34,w:400,h:1448*400/1086},S=rect.w/1086,CX=rect.x+rect.w/2;
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x)), lerp=(a,b,t)=>a+(b-a)*t;
+const gy=y=>rect.y+y*S;
+function radius(g,y){let u=clamp((y-g.top)/(g.bottom-g.top),0,1);if(g===specs.coupe)return Math.max(g.radBottom,g.radTop*Math.pow(Math.max(0,1-u**1.68),.58))*S;return lerp(g.radTop,g.radBottom,u**(g===specs.highball?.8:.68))*S}
+function half(id,y){return radius(specs[id],y)}
+let state={glass:'highball',ice:'spear',ml:0,displayMl:0,particles:[],last:0,iceSeed:0,dropStarted:0,stir:0,active:true,pour:null,physical:true};
+const area={highball:260,rocks:210,coupe:180};
+const sizes={spear:{w:64,h:318,r:29},sphere:{w:207,h:207,r:95},large:{w:197,h:197,r:89},cubes:{highball:{w:70,h:71,r:33},rocks:{w:101,h:100,r:46}},crushed:{highball:{w:170,h:112,r:75},rocks:{w:252,h:144,r:119}}};
+const disp={none:0,spear:47,sphere:48,large:52,cubes:52,crushed:67};
+function blimit(){return gy(specs[state.glass].bottom)-6}
+function tlimit(){return gy(specs[state.glass].top)+6}
+function space(p){return Math.max(10,half(state.glass,(p.y-rect.y)/S)-7-p.r)}
+function makeParticles(){const id=state.ice,glass=state.glass;if(id==='none')return [];
+ let size=sizes[id];if(size.highball)size=size[glass];const count=id==='cubes'?(glass==='highball'?4:3):id==='crushed'?10:1;
+ let p=[];for(let i=0;i<count;i++){
+  let k=id==='crushed'?{w:size.w/4,h:size.h/3,r:size.r/6}:size;
+  const variation=id==='spear'?0:(Math.sin(i*2.711+state.iceSeed)*.31);
+  let x=CX+(id==='cubes'?(i%2?1:-1)*Math.min(26,k.r*.7):id==='crushed'?(i%5-2)*k.w*.62:0);
+  p.push({id:i,kind:id,w:k.w,h:k.h,r:k.r,x,y:tlimit()-k.h/2-i*(id==='crushed'?11:27),vx:(i%2?-24:22),vy:0,
+   rot:id==='spear'?.04:variation,vr:(i%2?-.23:.25),delay:i*(id==='cubes'?.13:id==='crushed'?.037:0),on:false});
+ }return p;
+}
+function replay(){state.iceSeed++;state.particles=makeParticles();state.dropStarted=performance.now();state.last=0;state.stir=.6}
+function update(dt,now){const p=state.particles,glass=state.glass,after=(now-state.dropStarted)/1000;
+ for(const b of p){if(after<b.delay)continue;b.on=true;
+  const ySurface=liquidY(state.displayMl);const immersed=state.displayMl>0?clamp((b.y+b.h*.4-ySurface)/(b.h*.85),0,1):0;
+  b.vy+=(890-immersed*970)*dt;b.vy*=Math.pow(immersed?.960:.987,dt*60);b.vx*=Math.pow(.960,dt*60);
+  b.x+=b.vx*dt;b.y+=b.vy*dt;b.rot+=b.vr*dt;b.vr*=Math.pow(.91,dt*60);
+  if(b.kind==='spear')b.rot=clamp(b.rot,-.13,.13);else b.rot=clamp(b.rot,-.54,.54);
+  const bottom=blimit()-b.h/2;if(b.y>bottom){if(b.vy>60)state.stir=Math.min(.7,state.stir+b.vy/1700);b.y=bottom;b.vy=b.vy>40?-b.vy*.23:0;b.vx*=.7}
+  let maxSide=space(b);b.x=clamp(b.x,CX-maxSide,CX+maxSide);
+ }
+ // 2.5D circle proxies for separate small cubes, with sequential impacts.
+ if(p.length>1&&state.physical){for(let it=0;it<3;it++)for(let i=0;i<p.length;i++)for(let j=i+1;j<p.length;j++){
+  const a=p[i],b=p[j];if(!a.on||!b.on)continue;
+  let dx=b.x-a.x,dy=b.y-a.y,dist=Math.max(1,Math.hypot(dx,dy)),overlap=(a.r+b.r)*.92-dist;
+  if(overlap>0){let nx=dx/dist,ny=dy/dist;a.x-=nx*overlap*.5;a.y-=ny*overlap*.5;b.x+=nx*overlap*.5;b.y+=ny*overlap*.5;
+   let rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
+   if(rv<0){let impulse=-rv*.2;a.vx-=nx*impulse;a.vy-=ny*impulse;b.vx+=nx*impulse;b.vy+=ny*impulse;state.stir=Math.min(.8,state.stir+impulse/900)}
+  }
+ }}
+ for(const b of p){const floor=blimit()-b.h/2;if(b.y>floor)b.y=floor;b.x=clamp(b.x,CX-space(b),CX+space(b))}
+ state.stir*=Math.pow(.96,dt*60);
+ if(state.pour){const elapsed=(now-state.pour.started)/1200;const z=clamp(elapsed,0,1);state.displayMl=lerp(state.pour.from,state.pour.to,1-(1-z)**2);state.stir=Math.max(state.stir,Math.sin(Math.PI*z)*.35);if(z>=1)state.pour=null}
+}
+function levelY(ml){const g=specs[state.glass],D=Math.max(60,g.capacity-(disp[state.ice]||0));const fraction=clamp(ml/D,0,1);
+ // Highball roughly linear; rocks gradually narrows at bottom, coupe requires cross-section integration.
+ if(state.glass==='coupe')return gy(g.bottom)-((g.bottom-g.top)*S)*Math.pow(fraction,.43);
+ return gy(g.bottom)-(gy(g.bottom)-gy(g.top))*Math.pow(fraction,state.glass==='rocks'?.92:1.02)}
+const liquidY=levelY;
+function clipInside(){let g=specs[state.glass];ctx.beginPath();for(let n=0;n<=65;n++){
+ let y=g.top+(g.bottom-g.top)*n/65,r=radius(g,y)-7,YY=gy(y);if(!n)ctx.moveTo(CX-r,YY);else ctx.lineTo(CX-r,YY)}
+ for(let n=65;n>=0;n--){let y=g.top+(g.bottom-g.top)*n/65;ctx.lineTo(CX+radius(g,y)-7,gy(y))}ctx.closePath();ctx.clip()}
+function gradientLiquid(now){if(state.displayMl<=0)return;
+ ctx.save();clipInside();const g=specs[state.glass],surface=liquidY(state.displayMl),base=blimit();
+ const fill=ctx.createLinearGradient(CX-110,surface,CX+140,base);fill.addColorStop(0,'rgba(204,159,190,.32)');fill.addColorStop(.45,'rgba(169,119,161,.49)');fill.addColorStop(1,'rgba(123,86,135,.58)');ctx.fillStyle=fill;
+ const swing=state.stir*2.8;ctx.beginPath();ctx.moveTo(CX-220,surface);for(let x=CX-220;x<=CX+220;x+=4){let q=(x-CX)/220;ctx.lineTo(x,surface+Math.sin((x-CX)*.055+now*.014)*swing*(1-q*q))}
+ ctx.lineTo(CX+220,base+30);ctx.lineTo(CX-220,base+30);ctx.closePath();ctx.fill();
+ const top=ctx.createRadialGradient(CX-10,surface-3,2,CX,surface,170);top.addColorStop(0,'rgba(255,225,234,.12)');top.addColorStop(1,'rgba(210,190,221,.02)');ctx.fillStyle=top;ctx.beginPath();ctx.ellipse(CX,surface,half(state.glass,(surface-rect.y)/S)-7,12,0,0,TAU);ctx.fill();
+ ctx.restore();}
+function iceSprite(b){let im=images[b.kind==='cubes'?'large':b.kind==='crushed'?'crushed':b.kind];if(!im?.complete||!im.naturalWidth)return;
+ ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.rot);
+ if(b.kind==='crushed'){ctx.drawImage(im,-b.w/2,-b.h/2,b.w,b.h)}else ctx.drawImage(im,-b.w/2,-b.h/2,b.w,b.h);
+ ctx.restore()}
+function drawIce(){if(!state.particles.length)return;ctx.save();clipInside();for(const b of state.particles){if(!b.on)continue;iceSprite(b)}ctx.restore()}
+function frontGlass(){const g=specs[state.glass],im=images[state.glass];if(!$('#frontLayer').checked||!im.complete||!im.naturalWidth)return;
+ // Foreground is a SEPARATE drawing pass: rim + left/right glass wall + translucent base highlights.
+ // This keeps ice in FRONT of the back glass, while retaining realistic edge refraction.
+ ctx.save();ctx.beginPath();const yTop=gy(g.top),yBottom=gy(g.bottom);
+ // thin sidewall optical strips following the sloped inner glass boundaries.
+ for(const side of [-1,1]){
+  for(let n=0;n<=65;n++){let sy=g.top+(g.bottom-g.top)*n/65,yy=gy(sy),rr=radius(g,sy),left=CX+side*(rr-11);if(n===0)ctx.moveTo(left,yy);else ctx.lineTo(left,yy)}
+  for(let n=65;n>=0;n--){let sy=g.top+(g.bottom-g.top)*n/65,yy=gy(sy),rr=radius(g,sy),right=CX+side*(rr+12);ctx.lineTo(right,yy)}ctx.closePath();
+ }
+ // Rim is frontmost, and glass base only has a translucent front highlight pass.
+ ctx.rect(CX-half(state.glass,g.top)-7,yTop-9,2*half(state.glass,g.top)+14,21);
+ ctx.clip();ctx.globalAlpha=.80;ctx.drawImage(im,rect.x,rect.y,rect.w,rect.h);ctx.restore();
+ ctx.save();ctx.beginPath();ctx.rect(rect.x,yBottom-(state.glass==='rocks'?82:64),rect.w,state.glass==='rocks'?100:80);ctx.clip();ctx.globalAlpha=.24;ctx.drawImage(im,rect.x,rect.y,rect.w,rect.h);ctx.restore();
+}
+function background(){const gr=ctx.createRadialGradient(CX,280,20,CX,300,310);gr.addColorStop(0,'#294054');gr.addColorStop(.65,'#11283c');gr.addColorStop(1,'#091626');ctx.fillStyle=gr;ctx.fillRect(0,0,cvs.width,cvs.height);
+ ctx.strokeStyle='rgba(208,186,146,.09)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,160);ctx.lineTo(560,430);ctx.moveTo(0,360);ctx.lineTo(560,125);ctx.stroke();
+ ctx.fillStyle='rgba(227,199,151,.9)';ctx.font='13px Georgia,serif';ctx.textAlign='center';ctx.fillText('THE ART OF MIXING',CX,38);
+ let g=specs[state.glass];ctx.fillStyle='rgba(0,0,0,.27)';ctx.beginPath();ctx.ellipse(CX,gy(g.bottom)+20,state.glass==='rocks'?155:118,17,0,0,TAU);ctx.fill()}
+function render(t){let dt=state.last?clamp((t-state.last)/1000,0,.033):0;state.last=t;update(dt,t);background();let g=images[state.glass];if(g?.naturalWidth)ctx.drawImage(g,rect.x,rect.y,rect.w,rect.h);
+ gradientLiquid(t);drawIce();
+ // Small underwater color tint applies after ice rendering, prior to glass foreground.
+ if(state.displayMl>0){ctx.save();clipInside();ctx.beginPath();let yy=liquidY(state.displayMl);ctx.rect(rect.x,yy,rect.w,rect.h);ctx.clip();ctx.fillStyle='rgba(167,108,158,.06)';ctx.fillRect(rect.x,yy,rect.w,rect.h);ctx.restore()}
+ frontGlass();requestAnimationFrame(render)}
+function build(){for(const [id,g] of Object.entries(specs)){const b=document.createElement('button');b.textContent=g.name;b.dataset.kind=id;b.onclick=()=>{state.glass=id;state.ice=id==='highball'?'spear':id==='rocks'?'sphere':'none';state.displayMl=state.ml=0;$('#volume').max=g.capacity;$('#volume').value=0;refresh();replay()};$('#glassChoices').appendChild(b)}
+ for(const [kind,name] of [['none','無冰'],['spear','長柱冰'],['sphere','球冰'],['large','大方冰'],['cubes','小方冰'],['crushed','碎冰·特調']]){const b=document.createElement('button');b.textContent=name;b.dataset.kind=kind;b.onclick=()=>{state.ice=kind;refresh();replay()};$('#iceChoices').appendChild(b)}
+ $('#volume').addEventListener('input',e=>{state.ml=state.displayMl=+e.target.value;state.pour=null;refresh()});$('#replay').onclick=replay;
+ $('#pour').onclick=()=>{let d=Math.min(specs[state.glass].capacity-(disp[state.ice]||0),state.displayMl+90);state.ml=d;state.pour={from:state.displayMl,to:d,started:performance.now()};refresh()};
+ $('#physics').onchange=e=>state.physical=e.target.checked;
+ refresh();replay();requestAnimationFrame(render)}
+function refresh(){document.querySelectorAll('#glassChoices button').forEach(x=>x.classList.toggle('selected',x.dataset.kind===state.glass));document.querySelectorAll('#iceChoices button').forEach(x=>{x.hidden=!types[state.glass].some(y=>y[0]===x.dataset.kind);x.classList.toggle('selected',x.dataset.kind===state.ice)});
+ $('#volumeText').textContent=state.ml+' ml';const dimensions={spear:'3.2 × 3.2 × 12.7 cm',sphere:'直徑約 5–6 cm',large:'約 5 × 5 × 5 cm',cubes:'每顆約 2.5–3 cm',crushed:'不規則碎冰，特定酒款',none:'無'};
+ $('#detail').innerHTML='<b>目前規格</b><br>杯型：'+specs[state.glass].name+'<br>冰塊：約 '+dimensions[state.ice]+'<br>分層：杯身背景 → 酒液 → 冰塊 → 杯口／側壁／底部前景<br>冰塊：每顆獨立位置、速度、旋轉，採用固定杯型碰撞邊界。';}
+window.addEventListener('load',build);
+})();
+</script></body></html>
