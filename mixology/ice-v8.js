@@ -76,7 +76,9 @@ function keepInside(p,glass){
  const lo=top(glass)+2,hi=bottom(glass);
  // The ice must fit both walls throughout its ENTIRE vertical silhouette.
  const e=extents(p);
- p.y=clamp(p.y,lo+e.y,hi-e.y);
+ if(p.y+e.y>hi)p.y=hi-e.y;
+ // Ice still descends through the open mouth; do NOT teleport it to the floor.
+ if(p.y-e.y<lo&&p.vy<0)p.y=lo+e.y;
  const radiusAt=y=>boundary(glass,y);
  const width=Math.min(radiusAt(p.y-e.y*.84),radiusAt(p.y),radiusAt(p.y+e.y*.84))-9;
  const xSpace=Math.max(0,width-e.x);
