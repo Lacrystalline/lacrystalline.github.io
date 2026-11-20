@@ -101,7 +101,7 @@ async function strain(){
   await h.sleep(T.pourStart+T.pour+40);if(rev!==s.revision)return;
   s.pour=null;s.visualML=vol;h.updateUI();h.syncRoom('pour_end');
   await h.sleep(Math.max(0,T.end-T.pourStart-T.pour-40));if(rev!==s.revision)return;
-  s.flowStep='served';s.busy=false;h.updateUI();h.syncRoom('strain_done');h.notify('已濾出至成品杯。');
+  s.flowStep='served';s.busy=false;h.updateUI();h.syncRoom('snapshot');h.notify('已濾出至成品杯。');
   return;
  }
  const duration=1450;
