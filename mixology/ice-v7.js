@@ -37,7 +37,7 @@ function make(glass,k,seed){
  const random=rng(seed*1664525+1013904223),p=[],low=bottom(glass);
  const create=(i,w,height,rad,delay=0)=>{
   const isSpear=k==='spear',isBall=k==='sphere',angle=(random()-.5)*(isSpear?.13:.34);
-  p.push({i,k,x:CX+(random()-.5)*(k==='crushed'?77:54),y:top(glass)-height*.60-i*27,
+  p.push({i,k,x:CX+(random()-.5)*(k==='crushed'?77:54),y:top(glass)-height*.60-i*(k==='crushed'?9:27),
     vx:(random()-.5)*58,vy:5,angular:(random()-.5)*.7,angle,w,height,r:rad,delay,
     targetY:low-height*.55,age:0,active:false,wet:false,phase:random()*6.28});
  };
@@ -73,7 +73,7 @@ function step(st,dt,clock){
  for(const p of particles){
   if(clock<p.delay/1000)continue;
   p.active=true;p.age+=dt;
-  const r=p.r;
+  const r=p.r,verticalHalf=k==='spear'?p.height*.50:r;
   const left=CX-boundary(st.glass,p.y)+r,right=CX+boundary(st.glass,p.y)-r;
   const immersion=liquidActive?clamp((p.y+r-surface)/Math.max(1,r*2),0,1):0;
   if(immersion>.03&&!p.wet&&p.vy>40){sys.lastImpulse=Math.max(sys.lastImpulse,clamp(p.vy/560,0,.85));p.wet=true}
@@ -87,12 +87,12 @@ function step(st,dt,clock){
   p.angular*=Math.pow(liquidActive?.955:.989,dt*60);
   const maxAngle=k==='spear'?.11:k==='sphere'?.2:k==='crushed'?.65:.42;
   p.angle=clamp(p.angle,-maxAngle,maxAngle);
-  if(p.y+r>=b){
+  if(p.y+verticalHalf>=b){
    if(p.vy>70)sys.lastImpulse=Math.max(sys.lastImpulse,clamp(p.vy/700,0,.62));
-   p.y=b-r;p.vy=p.vy>28?-p.vy*(k==='crushed'?.17:.23):0;
+   p.y=b-verticalHalf;p.vy=p.vy>28?-p.vy*(k==='crushed'?.17:.23):0;
    p.vx*=.77;p.angular+=p.vx*.001;
   }
-  if(p.y-r<t){p.y=t+r;p.vy=Math.max(0,p.vy)}
+  if(p.y-verticalHalf<t){p.y=t+verticalHalf;p.vy=Math.max(0,p.vy)}
   if(p.x<left){p.x=left;p.vx=Math.abs(p.vx)*.33;p.angular+=.11}
   if(p.x>right){p.x=right;p.vx=-Math.abs(p.vx)*.33;p.angular-=.11}
   // Light restoring torque for standing spear; broad collision proxy for rigid body.
@@ -114,7 +114,7 @@ function step(st,dt,clock){
   }
   // Restore boundaries after pairwise pushes.
   for(const p of particles){const r=p.r,side=boundary(st.glass,p.y);
-   p.x=clamp(p.x,CX-side+r,CX+side-r);p.y=Math.min(b-r,Math.max(t+r,p.y))}
+   p.x=clamp(p.x,CX-side+r,CX+side-r);const vh=k==='spear'?p.height*.50:r;p.y=Math.min(b-vh,Math.max(t+vh,p.y))}
  }
  sys.lastImpulse*=Math.pow(.965,dt*60);
 }
