@@ -35,6 +35,7 @@ const types={highball:[['none','無冰'],['spear','長柱冰'],['cubes','小方�
 const vsrc={spear:'ice-spear.webp',sphere:'ice-sphere.webp',large:'ice-cube.webp',cubes:'ice-cube.webp',crushed:'ice-crushed.webp'};
 const images={};const glassBase=location.protocol==='file:'?'./assets/':'../assets/';
 for(const [id,g] of Object.entries(specs)){images[id]=new Image;images[id].src=glassBase+g.src}
+for(const id of ['highball','rocks']){for(const part of ['edges','base_front']){const im=new Image();im.src='./assets/'+id+'_glass_'+part+'.webp';images[id+'_'+part]=im}}
 for(const [k,src] of Object.entries(vsrc)){if(images[k]&&k==='cubes')continue;images[k]=new Image;images[k].src='./assets/'+src}
 const rect={x:80,y:34,w:400,h:1448*400/1086},S=rect.w/1086,CX=rect.x+rect.w/2;
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x)), lerp=(a,b,t)=>a+(b-a)*t;
@@ -102,6 +103,8 @@ function iceSprite(b){let im=images[b.kind==='cubes'?'large':b.kind==='crushed'?
  ctx.restore()}
 function drawIce(){if(!state.particles.length)return;ctx.save();clipInside();for(const b of state.particles){if(!b.on)continue;iceSprite(b)}ctx.restore()}
 function frontGlass(){const g=specs[state.glass],im=images[state.glass];if(!$('#frontLayer').checked||!im.complete||!im.naturalWidth)return;
+ const edge=images[state.glass+'_edges'],base=images[state.glass+'_base_front'];
+ if(edge?.complete&&edge.naturalWidth&&base?.complete&&base.naturalWidth){ctx.drawImage(edge,rect.x,rect.y,rect.w,rect.h);ctx.drawImage(base,rect.x,rect.y,rect.w,rect.h);return;}
  // Foreground is a SEPARATE drawing pass: rim + left/right glass wall + translucent base highlights.
  // This keeps ice in FRONT of the back glass, while retaining realistic edge refraction.
  ctx.save();ctx.beginPath();const yTop=gy(g.top),yBottom=gy(g.bottom);
