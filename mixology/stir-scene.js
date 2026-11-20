@@ -303,9 +303,9 @@ function drawContents(ctx,base,o){
   c.restore();
  }
  // the long shaft fades into the dark above the stage instead of being cut by the canvas edge
- c.save();c.setTransform(base);c.globalCompositeOperation='destination-out';
+ if(o.spoon){c.save();c.setTransform(base);c.globalCompositeOperation='destination-out';
  const f=c.createLinearGradient(0,0,0,118);f.addColorStop(0,'rgba(0,0,0,1)');f.addColorStop(1,'rgba(0,0,0,0)');
- c.fillStyle=f;c.fillRect(-50,-50,700,168);c.restore();
+ c.fillStyle=f;c.fillRect(-50,-50,700,168);c.restore()}
  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(c.canvas,0,0);ctx.restore();
 }
 
@@ -352,6 +352,8 @@ function shadow(ctx,amount){
 function withFade(ctx,base,alpha,fn){
  const c=layer('scene',ctx.canvas);c.setTransform(base);fn(c);
  // soften the canvas border so an object leaving the stage dissolves instead of being cut
+ // (in screen space: the stage may be zoomed out while straining)
+ c.setTransform(c.canvas.width/560,0,0,c.canvas.height/620,0,0);
  c.globalCompositeOperation='destination-in';
  const gx=c.createLinearGradient(0,0,560,0);gx.addColorStop(0,'rgba(0,0,0,0)');gx.addColorStop(.09,'#000');gx.addColorStop(.91,'#000');gx.addColorStop(1,'rgba(0,0,0,0)');
  c.fillStyle=gx;c.fillRect(-10,-10,580,640);
@@ -444,8 +446,10 @@ function frame(ctx,t,drawServing){
   return true;
  }
  if(ph==='straining'){
-  drawServing(ctx);
-  drawStrain(ctx,base,e,t);
+  // the camera pulls back a little so the whole mixing glass, the stream and the serving glass fit
+  const tg=servingTarget(),z=strainZoom(e,tg),bz=zoomed(base,z);
+  ctx.save();ctx.setTransform(bz);drawServing(ctx);ctx.restore();
+  ctx.save();ctx.setTransform(bz);drawStrain(ctx,bz,e,t,tg);ctx.restore();
   return true;
  }
  return false;
@@ -454,29 +458,97 @@ function frame(ctx,t,drawServing){
 // ---------- strain: mixing glass enters, pours through the strainer, leaves ----------
 function servingTarget(){
  const art=window.LCArtV5,g=s.glass;
- if(!art)return {x:280,y:420,mouth:330};
+ if(!art)return {x:280,y:420,mouth:330,r:60};
  const v=art.view(g),cap=h.glasses[g].capacity-(window.LCIceV7?window.LCIceV7.displacement(s.iceKind,g):0);
  const ys=art.liquidY(g,Math.max(s.visualML,0),cap)*v.s+v.ty,r=art.rim(g);
- return {x:280,y:ys,mouth:(r.back)*v.s+v.ty};
+ return {x:280,y:ys,mouth:(r.back)*v.s+v.ty,r:r.radius*v.s};
+}
+const POUR={rot0:-1.12,rot1:-1.74,sc:.78,gap:30};   // tilt at first drop / at the last drop, glass scale, spout height over the mouth
+function pourAt(tg,rot){
+ const tip=[tg.x+10,tg.mouth-POUR.gap],v=[(G.spout[0]-G.pivot[0])*K*POUR.sc,(G.spout[1]-G.pivot[1])*K*POUR.sc];
+ const c=Math.cos(rot),sn=Math.sin(rot);return {x:tip[0]-(v[0]*c-v[1]*sn),y:tip[1]-(v[0]*sn+v[1]*c),rot,sc:POUR.sc,alpha:1};
+}
+function poseBox(pose){ // canvas-space bounding box of the glass outline (+ strainer handle) under a pose
+ const pts=[[G.cx-G.rim.hw,G.rim.cy-G.rim.ry],[G.cx+G.rim.hw,G.rim.cy-G.rim.ry],[G.cx-G.rim.hw,G.rim.cy+G.rim.ry],[G.cx+G.rim.hw,G.rim.cy+G.rim.ry],
+  [G.cx-G.floor.rx-20,G.baseFront],[G.cx+G.floor.rx+20,G.baseFront],[G.cx+G.rim.hw+40,G.rim.cy+20]];
+ const c=Math.cos(pose.rot),sn=Math.sin(pose.rot),k=K*pose.sc;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+ for(const [px,py] of pts){const u=(px-G.pivot[0])*k,w=(py-G.pivot[1])*k,x=pose.x+u*c-w*sn,y=pose.y+u*sn+w*c;
+  x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
+ return {x0,y0,x1,y1};
+}
+function needZoom(tg){ // largest zoom (<=1) about (280,GROUND) that keeps both pour poses on screen
+ let z=1;
+ for(const r of [POUR.rot0,POUR.rot1]){const b=poseBox(pourAt(tg,r));
+  if(b.y0<44)z=Math.min(z,(GROUND-44)/(GROUND-b.y0));
+  if(b.x1>524)z=Math.min(z,(524-280)/(b.x1-280))}
+ return clamp(z,.62,1);
+}
+function strainZoom(e,tg){
+ const z=needZoom(tg);if(z>=.999)return 1;
+ const q=e<ST.pourStart?inOut(e/ST.enter):e<ST.pourEnd?1:1-inOut((e-ST.pourEnd)/ST.exit);
+ return lerp(1,z,q);
+}
+function zoomed(base,z){
+ if(z>=.999)return base;
+ const m=new DOMMatrix([z,0,0,z,280*(1-z),GROUND*(1-z)]);
+ return base.multiply(m);
 }
 function strainPose(e,tg){
- // pour pose: spout over the serving glass mouth
- const tip=[tg.x+16,tg.mouth-34];
- const rotAt=q=>lerp(-1.30,-1.86,q),sc=.88;
- const at=(rot,scl)=>{const v=[(G.spout[0]-G.pivot[0])*K*scl,(G.spout[1]-G.pivot[1])*K*scl];
-  const c=Math.cos(rot),sn=Math.sin(rot);return {x:tip[0]-(v[0]*c-v[1]*sn),y:tip[1]-(v[0]*sn+v[1]*c),rot,sc:scl,alpha:1}};
- const off={x:680,y:-150,rot:-.42,sc:.74,alpha:1};
- if(e<ST.pourStart){const q=inOut(e/ST.enter),P=at(rotAt(0),sc);
-  return {x:lerp(off.x,P.x,q),y:lerp(off.y,P.y,q),rot:lerp(off.rot,P.rot,q),sc:lerp(off.sc,sc,q),alpha:1}}
- if(e<ST.pourEnd)return at(rotAt(smooth((e-ST.pourStart)/ST.pour)),sc);
- const q=inOut((e-ST.pourEnd)/ST.exit),P=at(rotAt(1),sc);
- return {x:lerp(P.x,off.x,q),y:lerp(P.y,off.y,q),rot:lerp(P.rot,off.rot,q),sc:lerp(sc,off.sc,q),alpha:1-smooth((q-.55)/.45)};
+ const rotAt=q=>lerp(POUR.rot0,POUR.rot1,q);
+ const off={x:690,y:-210,rot:-.42,sc:.7,alpha:1};
+ if(e<ST.pourStart){const q=inOut(e/ST.enter),P=pourAt(tg,rotAt(0));
+  return {x:lerp(off.x,P.x,q),y:lerp(off.y,P.y,q),rot:lerp(off.rot,P.rot,q),sc:lerp(off.sc,POUR.sc,q),alpha:1}}
+ if(e<ST.pourEnd)return pourAt(tg,rotAt(smooth((e-ST.pourStart)/ST.pour)));
+ const q=inOut((e-ST.pourEnd)/ST.exit),P=pourAt(tg,rotAt(1));
+ return {x:lerp(P.x,off.x,q),y:lerp(P.y,off.y,q),rot:lerp(P.rot,off.rot,q),sc:lerp(POUR.sc,off.sc,q),alpha:1-smooth((q-.55)/.45)};
 }
-function drawStrain(ctx,base,e,t){
+function spoutOf(pose){
+ const c=Math.cos(pose.rot),sn=Math.sin(pose.rot),v=[(G.spout[0]-G.pivot[0])*K*pose.sc,(G.spout[1]-G.pivot[1])*K*pose.sc];
+ return [pose.x+v[0]*c-v[1]*sn,pose.y+v[0]*sn+v[1]*c];
+}
+// A falling stream: leaves the lip with a little forward speed, narrows as it accelerates,
+// head falls in at the start and the tail drops away at the end.
+function drawStream(ctx,sp,tg,q,t,col){
+ const sx=sp[0],sy=sp[1]+1,ex=clamp(tg.x+(sx-tg.x)*.35,tg.x-tg.r*.5,tg.x+tg.r*.5),ey=tg.y+1;
+ const fall=Math.max(20,ey-sy),vx=(ex-sx);
+ const P=u=>[sx+vx*(1-Math.pow(1-u,2.2))-6*Math.sin(Math.PI*u)*(1-u),sy+fall*u*u*.55+fall*u*.45];
+ const head=clamp(q/.10,0,1),tail=clamp((q-.92)/.08,0,1);if(head<=tail)return;
+ const force=Math.pow(Math.sin(Math.PI*clamp(q,0,1)),.35);
+ const u0=tail*tail,u1=1-Math.pow(1-head,2),N=36,L=[],R=[];
+ for(let i=0;i<=N;i++){const u=lerp(u0,u1,i/N),p=P(u),pn=P(Math.min(1,u+.01)),pp=P(Math.max(0,u-.01));
+  const dx=pn[0]-pp[0],dy=pn[1]-pp[1],l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
+  const w=(lerp(7.6,4.4,Math.sqrt(u))+.6*Math.sin(t*.02+u*18))*(.45+.55*force);
+  L.push([p[0]+nx*w,p[1]+ny*w]);R.push([p[0]-nx*w,p[1]-ny*w])}
+ const mouthY=tg.mouth+6;
+ const body=c=>{c.beginPath();L.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));for(let i=R.length-1;i>=0;i--)c.lineTo(R[i][0],R[i][1]);c.closePath()};
+ for(const part of ['above','inside']){
+  ctx.save();ctx.beginPath();if(part==='above')ctx.rect(-400,-900,1400,mouthY+900);else ctx.rect(-400,mouthY,1400,1200);ctx.clip();
+  const a=part==='above'?1:.72;
+  const g=ctx.createLinearGradient(sx,sy,ex,ey);g.addColorStop(0,rgba(lift(col,.22),.86*a));g.addColorStop(1,rgba(lift(col,.06),.80*a));
+  body(ctx);ctx.fillStyle=g;ctx.fill();
+  // glassy core highlight and a darker trailing edge give the ribbon volume
+  ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.beginPath();L.forEach((p,i)=>{const m=[lerp(p[0],R[i][0],.32),lerp(p[1],R[i][1],.32)];i?ctx.lineTo(m[0],m[1]):ctx.moveTo(m[0],m[1])});
+  ctx.strokeStyle='rgba(255,253,244,'+(.55*a)+')';ctx.lineWidth=1.3;ctx.stroke();
+  ctx.beginPath();R.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.strokeStyle=rgba(lift(col,-.25),.45*a);ctx.lineWidth=1;ctx.stroke();
+  // light glints running down the stream
+  for(let k=0;k<6;k++){const f=((t*.0024)+k/6)%1,u=lerp(u0,u1,f),p=P(u);
+   ctx.fillStyle='rgba(255,255,250,'+(.42*a*force)+')';ctx.beginPath();ctx.ellipse(p[0]-1,p[1],1.1,3.2,0,0,TAU);ctx.fill()}
+  ctx.restore();
+ }
+ // impact: rings spreading on the drink surface, a small crown while the stream lands
+ if(head>=1&&tail<1){const rx=Math.min(tg.r*.8,40);
+  ctx.save();ctx.lineWidth=1.2;
+  for(let k=0;k<3;k++){const f=((t*.0018)+k/3)%1;ctx.strokeStyle=rgba(lift(col,.35),.42*(1-f)*force);
+   ctx.beginPath();ctx.ellipse(ex,ey,6+rx*f,(6+rx*f)*.26,0,0,TAU);ctx.stroke()}
+  ctx.fillStyle='rgba(255,252,240,'+(.35*force)+')';ctx.beginPath();ctx.ellipse(ex,ey-1,5.5*force+2,2.2,0,0,TAU);ctx.fill();
+  ctx.restore()}
+}
+function drawStrain(ctx,base,e,t,tg){
  const p=s.pour,vol=p&&p.kind==='strain'?p.to:h.total();
  const q=p?clamp((performance.now()-p.start)/p.duration,0,1):(e>=ST.pourEnd?1:0);
  const eased=q*q*(3-2*q),left=vol*(1-eased);
- const tg=servingTarget(),pose=strainPose(e,tg);
+ tg=tg||servingTarget();const pose=strainPose(e,tg);
  const tiltQ=clamp(-pose.rot/1.6,0,1);
  const ice=iceList(0,0,0).map((c,i)=>{ // the strainer holds the ice back against the low wall
   const pr=proj(c.x,c.y,c.z),R=G.rim.rx,Hh=G.floor.cy-G.rim.cy;
@@ -486,20 +558,7 @@ function drawStrain(ctx,base,e,t){
  });
  const o={mlv:left,tilted:true,rot:pose.rot,color:p&&Array.isArray(p.color)?p.color:layersFor(vol).avg,ice,spoon:null,strainer:true};
  withFade(ctx,base,pose.alpha,c=>drawGlassScene(c,base,pose,o));
- // the stream leaves the spout tip and falls into the serving glass
- if(p&&q>0&&q<1){
-  const force=Math.pow(Math.sin(Math.PI*q),.45);
-  const c=Math.cos(pose.rot),sn=Math.sin(pose.rot),v=[(G.spout[0]-G.pivot[0])*K*pose.sc,(G.spout[1]-G.pivot[1])*K*pose.sc];
-  const sx=pose.x+v[0]*c-v[1]*sn,sy=pose.y+v[0]*sn+v[1]*c,ex=tg.x+4,ey=tg.y+2;
-  const col=o.color,g=ctx.createLinearGradient(sx,sy,ex,ey);
-  g.addColorStop(0,rgba(lift(col,.18),.80*force));g.addColorStop(1,rgba(lift(col,.05),.92*force));
-  ctx.save();ctx.lineCap='round';ctx.strokeStyle=g;ctx.lineWidth=2.6+2.6*force;
-  ctx.beginPath();ctx.moveTo(sx,sy);ctx.bezierCurveTo(sx-10,sy+24,ex+4,ey-(ey-sy)*.55,ex,ey);ctx.stroke();
-  ctx.lineWidth=1;ctx.strokeStyle='rgba(250,253,250,'+(.5*force)+')';ctx.stroke();
-  for(let k=0;k<5;k++){const f=((t*.0021)+k/5)%1,x=lerp(sx,ex,f)-Math.sin(f*3)*4,y=lerp(sy,ey,f*f*.6+f*.4);
-   ctx.fillStyle=rgba(lift(col,.3),.32*force);ctx.beginPath();ctx.arc(x,y,1.3,0,TAU);ctx.fill()}
-  ctx.restore();
- }
+ if(p&&q>0)drawStream(ctx,spoutOf(pose),tg,q,t,o.color);
 }
 
 // ---------- host-side actions (never run on a viewer) ----------
@@ -567,5 +626,5 @@ function schedule(){lastPhase=null}
 
 window.LCStirScene={frame,phase,busy,begin,processMs,onReset,strainTiming,startStrain,schedule,
  freezeAt:ms=>{frozen=ms===null?null:Number(s.stirAnim?.startAt||0)+ms},
- timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'9.1'};
+ timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'9.2'};
 })();

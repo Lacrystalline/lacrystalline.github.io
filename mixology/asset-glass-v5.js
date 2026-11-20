@@ -459,5 +459,5 @@ window.LCArtV5={draw,liquidY,hitTest,
  clipInner:(ctx,id,inset=0)=>{interior(ctx,id,inset);ctx.clip()},
  innerRadius:(id,y,inset=0)=>Math.max(1,radScreen(id,y)-inset),
  frontArc,floor:floorInfo,rim:rimInfo,view,toScene,
- ready:()=>Object.values(loaded).every(x=>x==='ready'),specs,assetRect:IMG,version:'8.3'};
+ ready:()=>Object.values(loaded).every(x=>x==='ready'),status:id=>loaded[id]||'loading',specs,assetRect:IMG,version:'8.3'};
 })();

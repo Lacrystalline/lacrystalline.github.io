@@ -12,7 +12,7 @@ const TYPES={
  rocks:[['none','無冰','純飲或預先冰鎮'],['sphere','球冰','推薦 · 單顆大球'],['large','大方冰','單顆切割方冰'],['cubes','小方冰','3 顆，堆疊碰撞'],['crushed','碎冰','特殊配方']],
  coupe:[['none','無冰','建議冰鎮杯身']]
 };
-const DISPLACEMENT={none:0,spear:47,cubes:52,crushed:67,sphere:48,large:52};
+const DISPLACEMENT={none:0,spear:86,cubes:52,crushed:67,sphere:48,large:52};
 const V8_VERSION=3,CX=280,S=400/1086,Y0=35,PI=Math.PI;
 const mix=(a,b,t)=>a+(b-a)*t,clamp=(a,l,h)=>Math.max(l,Math.min(h,a));
 let sys={key:'',particles:[],dtAccum:0,lastAt:0,recoveredAt:0,rested:false,lastImpulse:0};
@@ -48,7 +48,7 @@ for(const [kind,path] of Object.entries(spritePaths)){
  im.src=path;
 }
 const V8_SIZES={
- spear:{w:79,h:350,r:39},sphere:{w:207,h:207,r:95},
+ spear:{w:108,h:366,r:53},sphere:{w:207,h:207,r:95},
  large:{w:197,h:197,r:90},
  cubes:{highball:{w:70,h:71,r:33},rocks:{w:101,h:100,r:46}},
  crushed:{highball:{w:35,h:29,r:17},rocks:{w:46,h:33,r:21}}
@@ -151,7 +151,7 @@ function step(st,dt,clock){
   p.x+=p.vx*dt;p.y+=p.vy*dt;
   p.angle+=p.angular*dt;
   p.angular*=Math.pow(liquidActive?.955:.989,dt*60);
-  const maxAngle=k==='spear'?.11:k==='sphere'?.2:k==='crushed'?.65:.42;
+  const maxAngle=k==='spear'?.07:k==='sphere'?.2:k==='crushed'?.65:.42;
   p.angle=clamp(p.angle,-maxAngle,maxAngle);
   if(p.y+verticalHalf>=floor){
    if(p.vy>70)sys.lastImpulse=Math.max(sys.lastImpulse,clamp(p.vy/700,0,.62));
@@ -160,7 +160,7 @@ function step(st,dt,clock){
   }
   if(p.y-verticalHalf<t&&p.vy<0){p.y=t+verticalHalf;p.vy=0}
   // Light restoring torque for standing spear; broad collision proxy for rigid body.
-  if(k==='spear'){p.angular+=-p.angle*3.6*dt;p.x=clamp(p.x,CX-9,CX+9)}
+  if(k==='spear'){p.angular+=-p.angle*3.6*dt;p.x=clamp(p.x,CX-6,CX+6)}
   keepInside(p,st.glass);
  }
  if(particles.length>1)for(let iter=0;iter<3;iter++){
