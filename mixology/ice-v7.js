@@ -16,6 +16,7 @@ const DISPLACEMENT={none:0,spear:47,cubes:52,crushed:67,sphere:48,large:52};
 const V7_VERSION=1,CX=280,S=400/1086,Y0=35,PI=Math.PI;
 const mix=(a,b,t)=>a+(b-a)*t,clamp=(a,l,h)=>Math.max(l,Math.min(h,a));
 let sys={key:'',particles:[],dtAccum:0,lastAt:0,recoveredAt:0,rested:false,lastImpulse:0};
+const spawnCache=new Map();
 const type=st=>(st.decor?.has('ice')?st.iceKind||'cubes':'none');
 const displacement=(k,glass)=>glass==='coupe'?0:(DISPLACEMENT[k]||0);
 const gy=y=>Y0+y*S,rad=(g,y)=>{let f=clamp((y-g.top)/(g.bottom-g.top),0,1);
@@ -31,18 +32,21 @@ const bottom=glass=>gy(art.specs[glass].bottom)-4;
 const top=glass=>gy(art.specs[glass].top)+8;
 function rng(seed){let x=(seed|0)||1;return ()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return ((x>>>0)%100000)/100000}}
 function make(glass,k,seed){
+ const cacheKey=glass+'|'+k+'|'+seed;
+ if(spawnCache.has(cacheKey))return spawnCache.get(cacheKey).map(p=>({...p}));
  const random=rng(seed*1664525+1013904223),p=[],low=bottom(glass);
  const create=(i,w,height,rad,delay=0)=>{
   const isSpear=k==='spear',isBall=k==='sphere',angle=(random()-.5)*(isSpear?.13:.34);
   p.push({i,k,x:CX+(random()-.5)*(k==='crushed'?77:54),y:top(glass)-height*.60-i*27,
     vx:(random()-.5)*58,vy:5,angular:(random()-.5)*.7,angle,w,height,r:rad,delay,
-    targetY:low-height*.55,age:0,active:false,phase:random()*6.28});
+    targetY:low-height*.55,age:0,active:false,wet:false,phase:random()*6.28});
  };
  if(k==='spear')create(0,36,224,24,0);
  if(k==='sphere')create(0,96,96,44,0);
  if(k==='large')create(0,89,89,46,0);
  if(k==='cubes'){const count=glass==='rocks'?3:4;for(let i=0;i<count;i++)create(i,glass==='rocks'?52:43,glass==='rocks'?49:42,glass==='rocks'?27:22,i*110)}
  if(k==='crushed'){for(let i=0;i<15;i++){const w=18+random()*13;create(i,w,w*.80,w*.40,i*31)}}
+ spawnCache.set(cacheKey,p.map(q=>({...q})));
  return p;
 }
 function reset(st){
@@ -72,6 +76,8 @@ function step(st,dt,clock){
   const r=p.r;
   const left=CX-boundary(st.glass,p.y)+r,right=CX+boundary(st.glass,p.y)-r;
   const immersion=liquidActive?clamp((p.y+r-surface)/Math.max(1,r*2),0,1):0;
+  if(immersion>.03&&!p.wet&&p.vy>40){sys.lastImpulse=Math.max(sys.lastImpulse,clamp(p.vy/560,0,.85));p.wet=true}
+  if(!liquidActive)p.wet=false;
   const buoyance=immersion*610;
   p.vy+=(535-buoyance)*dt;
   p.vx+=liquidActive&&st.stirMotion?.5*Math.sin(p.phase+p.age*4)*dt:0;
@@ -202,9 +208,7 @@ function render(ctx,st,t){
 }
 function impact(st){
  if(type(st)==='none')return 0;
- const delta=Date.now()-(Number(st.iceStartedAt)||0);
- const drop=delta>=0&&delta<2000?Math.sin(Math.PI*clamp(delta/2000,0,1))*.36:0;
- return clamp(Math.max(drop,sys.lastImpulse*.5),0,.55);
+ return clamp(sys.lastImpulse*.8,0,.75);
 }
 function pick(kind){
  if(s.busy||s.demo)return;
