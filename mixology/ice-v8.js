@@ -25,11 +25,30 @@ const spritePaths={
  cubes:'./ice-v8-preview/assets/ice-cube.webp',
  crushed:'./ice-v8-preview/assets/ice-crushed.webp'
 };
-const sprites={};for(const [kind,path] of Object.entries(spritePaths)){
- const im=new Image();im.decoding='async';im.src=path;sprites[kind]=im;
+const sprites={},spriteCrops={};
+for(const [kind,path] of Object.entries(spritePaths)){
+ const im=new Image();im.decoding='async';sprites[kind]=im;
+ im.onload=()=>{
+  // Trim transparent margins (asset sizes are not necessarily the dimensions of the ice itself).
+  // Work on a small image to avoid expensive per-pixel full-resolution mobile reads.
+  try{
+   const c=document.createElement('canvas'),edge=192;
+   c.width=edge;c.height=edge;
+   const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0,edge,edge);
+   const a=g.getImageData(0,0,edge,edge).data;let l=edge,r=-1,t=edge,b=-1;
+   for(let y=0;y<edge;y++)for(let x=0;x<edge;x++){
+    if(a[(y*edge+x)*4+3]<30)continue;
+    l=Math.min(l,x);r=Math.max(r,x);t=Math.min(t,y);b=Math.max(b,y);
+   }
+   if(r>=l&&b>=t){const sx=im.naturalWidth/edge,sy=im.naturalHeight/edge;
+    spriteCrops[kind]={x:l*sx,y:t*sy,w:Math.min(im.naturalWidth,(r-l+1)*sx),h:Math.min(im.naturalHeight,(b-t+1)*sy)};
+   }
+  }catch(e){console.warn('Ice V8 crop fallback',kind,e)}
+ };
+ im.src=path;
 }
 const V8_SIZES={
- spear:{w:64,h:318,r:29},sphere:{w:207,h:207,r:95},
+ spear:{w:79,h:350,r:39},sphere:{w:207,h:207,r:95},
  large:{w:197,h:197,r:90},
  cubes:{highball:{w:70,h:71,r:33},rocks:{w:101,h:100,r:46}},
  crushed:{highball:{w:35,h:29,r:17},rocks:{w:46,h:33,r:21}}
@@ -45,8 +64,30 @@ function boundary(glass,y){
  const g=art.specs[glass];if(!g)return 30;
  return Math.max(7,rad(g,clamp((y-Y0)/S,g.top,g.bottom))-7);
 }
-const bottom=glass=>gy(art.specs[glass].bottom)-4;
-const top=glass=>gy(art.specs[glass].top)+8;
+const bottom=glass=>gy(art.specs[glass].bottom)-7;
+const top=glass=>gy(art.specs[glass].top)+7;
+function extents(p){
+ const cos=Math.abs(Math.cos(p.angle)),sin=Math.abs(Math.sin(p.angle));
+ if(p.k==='sphere')return {x:p.w*.5,y:p.height*.5};
+ // Rotation changes the entire silhouette, not just the proxy-circle centre.
+ return {x:(p.w*cos+p.height*sin)*.5+2,y:(p.height*cos+p.w*sin)*.5+2};
+}
+function keepInside(p,glass){
+ const lo=top(glass)+2,hi=bottom(glass);
+ // The ice must fit both walls throughout its ENTIRE vertical silhouette.
+ const e=extents(p);
+ p.y=clamp(p.y,lo+e.y,hi-e.y);
+ const radiusAt=y=>boundary(glass,y);
+ const width=Math.min(radiusAt(p.y-e.y*.84),radiusAt(p.y),radiusAt(p.y+e.y*.84))-9;
+ const xSpace=Math.max(0,width-e.x);
+ const nx=clamp(p.x,CX-xSpace,CX+xSpace);
+ if(nx!==p.x){p.x=nx;p.vx=-p.vx*.18;p.angular*=.54}
+ // Large rigid shapes cannot rotate so far that their corners cut through the wall.
+ if(e.x>width+1&&p.k!=='sphere'){
+  p.angle*=.67;p.angular*=.40;
+  p.x=clamp(p.x,CX-Math.max(0,width-extents(p).x),CX+Math.max(0,width-extents(p).x));
+ }
+}
 function rng(seed){let x=(seed|0)||1;return ()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return ((x>>>0)%100000)/100000}}
 function make(glass,k,seed){
  const cacheKey=glass+'|'+k+'|'+seed;
@@ -92,7 +133,7 @@ function step(st,dt,clock){
  for(const p of particles){
   if(clock<p.delay/1000)continue;
   p.active=true;p.age+=dt;
-  const r=p.r,verticalHalf=k==='spear'?p.height*.50:r;
+  const r=p.r,verticalHalf=extents(p).y;
   const left=CX-boundary(st.glass,p.y)+r,right=CX+boundary(st.glass,p.y)-r;
   const immersion=liquidActive?clamp((p.y+r-surface)/Math.max(1,r*2),0,1):0;
   if(immersion>.03&&!p.wet&&p.vy>40){sys.lastImpulse=Math.max(sys.lastImpulse,clamp(p.vy/560,0,.85));p.wet=true}
@@ -115,7 +156,8 @@ function step(st,dt,clock){
   if(p.x<left){p.x=left;p.vx=Math.abs(p.vx)*.33;p.angular+=.11}
   if(p.x>right){p.x=right;p.vx=-Math.abs(p.vx)*.33;p.angular-=.11}
   // Light restoring torque for standing spear; broad collision proxy for rigid body.
-  if(k==='spear'){p.angular+=-p.angle*2.4*dt;p.x=clamp(p.x,CX-24,CX+24)}
+  if(k==='spear'){p.angular+=-p.angle*3.6*dt;p.x=clamp(p.x,CX-9,CX+9)}
+  keepInside(p,st.glass);
  }
  if(particles.length>1)for(let iter=0;iter<3;iter++){
   for(let i=0;i<particles.length;i++)for(let j=i+1;j<particles.length;j++){
@@ -132,8 +174,7 @@ function step(st,dt,clock){
    }
   }
   // Restore boundaries after pairwise pushes.
-  for(const p of particles){const r=p.r,side=boundary(st.glass,p.y);
-   p.x=clamp(p.x,CX-side+r,CX+side-r);const vh=k==='spear'?p.height*.50:r;p.y=Math.min(b-vh,Math.max(t+vh,p.y))}
+  for(const p of particles)keepInside(p,st.glass)
  }
  sys.lastImpulse*=Math.pow(.965,dt*60);
 }
@@ -209,7 +250,9 @@ function drawSprite(ctx,p,t){
   const sh=Math.min(im.height-sy,Math.ceil(im.height*.27));
   ctx.drawImage(im,sx,sy,sw,sh,-p.w*.5,-p.height*.5,p.w,p.height);
  }else{
-  ctx.drawImage(im,-p.w*.5,-p.height*.5,p.w,p.height);
+  const trim=spriteCrops[p.k];
+  if(trim)ctx.drawImage(im,trim.x,trim.y,trim.w,trim.h,-p.w*.5,-p.height*.5,p.w,p.height);
+  else ctx.drawImage(im,-p.w*.5,-p.height*.5,p.w,p.height);
  }
  ctx.restore();
 }
@@ -218,17 +261,21 @@ function render(ctx,st,t){
  update(st,t);
  const g=st.glass,config=art.specs[g],c=Math.max(40,h.glasses[g].capacity-displacement(type(st),g));
  const water=st.visualML>0?art.liquidY(g,st.visualML,c):bottom(g)+100;
- // Clip invisibly to the inner glass so ice never passes the painted glass wall.
- ctx.save();ctx.beginPath();
- for(let j=0;j<=60;j++){
-  const sy=config.top+(config.bottom-config.top)*j/60,yy=gy(sy),width=rad(config,sy)-6;
-  if(j===0)ctx.moveTo(CX-width,yy);else ctx.lineTo(CX-width,yy);
+ // Use exactly the SAME calibrated glass interior as the liquid renderer.
+ // One shared clip eliminates the old mismatch between the ice & drink outlines.
+ ctx.save();
+ if(typeof art.clipInner==='function')art.clipInner(ctx,g,10);
+ else{
+  ctx.beginPath();
+  for(let j=0;j<=60;j++){
+   const sy=config.top+(config.bottom-config.top)*j/60,yy=gy(sy),width=rad(config,sy)-12;
+   if(j===0)ctx.moveTo(CX-width,yy);else ctx.lineTo(CX-width,yy);
+  }
+  for(let j=60;j>=0;j--){
+   const sy=config.top+(config.bottom-config.top)*j/60,yy=gy(sy),width=rad(config,sy)-12;
+   ctx.lineTo(CX+width,yy);
+  }ctx.closePath();ctx.clip();
  }
- for(let j=60;j>=0;j--){
-  const sy=config.top+(config.bottom-config.top)*j/60,yy=gy(sy),width=rad(config,sy)-6;
-  ctx.lineTo(CX+width,yy);
- }
- ctx.closePath();ctx.clip();
  for(const p of sys.particles){
   if(!p.active)continue;
   const submerged=st.visualML>0?clamp((p.y+p.r-water)/(p.r*2),0,1):0;
