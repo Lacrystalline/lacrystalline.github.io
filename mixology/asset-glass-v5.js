@@ -81,14 +81,14 @@ function liquid(ctx,opts){
  const {state,t,glasses,getLayers,liquidAverage,total}=opts,id=state.glass,g=specs[id];
  if(!g)return;
  const ml=clamp(state.visualML,0,total());if(ml<=.08){waterMotion.wasPouring=!!state.pour;return}
- const cap=Math.max(60,glasses[id].capacity-(state.decor.has('ice')?(id==='rocks'?50:60):0)),layers=getLayers(),avg=liquidAverage();
+ const cap=Math.max(60,glasses[id].capacity-(window.LCIceV7?window.LCIceV7.displacement(state.iceKind,id):(state.decor.has('ice')?(id==='rocks'?50:60):0))),layers=getLayers(),avg=liquidAverage();
  const mix=clamp(state.mix,0,1),stir=Math.max(0,state.stirMotion||0),pour=state.pour;
  if(pour)waterMotion.wasPouring=true;
  else if(waterMotion.wasPouring){waterMotion.wasPouring=false;waterMotion.lastPourEnd=t}
  const pourProgress=pour?clamp((t-pour.start)/Math.max(1,pour.duration),0,1):0;
  const contact=pour?Math.pow(Math.sin(Math.PI*pourProgress),.65):0;
  const after=(!pour&&waterMotion.lastPourEnd>0)?Math.exp(-Math.max(0,t-waterMotion.lastPourEnd)/520):0;
- const impact=Math.max(contact,after*.65);
+ const impact=Math.max(contact,after*.65,window.LCIceV7?window.LCIceV7.impact(state):0);
  const amp=.16+Math.min(1,stir)*2.5+impact*5.3;
  const surfaceY=liquidY(id,ml,cap),sr=Math.max(2,radScreen(id,surfaceY)-5);
  const surfaceDepth=Math.max(2,sr*g.ellipse*.76);
@@ -179,7 +179,7 @@ function liquid(ctx,opts){
    ctx.lineWidth=.8;ellipse(ctx,x,y,1+k%3*.3,1.5);ctx.stroke();
   }
  }
- if(state.decor.has('ice'))drawIce(ctx,id,surfaceY,t);
+ if(state.decor.has('ice')&&!window.LCIceV7)drawIce(ctx,id,surfaceY,t);
  ctx.restore();
 }
 function drawIce(ctx,id,surface,t){
@@ -232,11 +232,11 @@ function pour(ctx,id,state,t,cap){const p=state.pour;if(!p)return;
 function draw(options){const {ctx,state,t,glasses}=options,id=state.glass,g=specs[id];if(!g)return false;
  if(!loaded[id])return false;
  if(loaded[id]!=='ready')return false;
- ctx.save();ground(ctx,id);liquid(ctx,options);if(state.decor.has('ice')&&state.visualML<=.08&&id!=='coupe')drawIce(ctx,id,gy(g.bottom)-98,t);
+ ctx.save();ground(ctx,id);liquid(ctx,options);if(window.LCIceV7)window.LCIceV7.draw(ctx,state,t);else if(state.decor.has('ice')&&state.visualML<=.08&&id!=='coupe')drawIce(ctx,id,gy(g.bottom)-98,t);
  // The original transparent glass artwork provides the optics, edges and facets.
  // This image is overlaid on the liquid. The geometry mask is never stroked.
  ctx.drawImage(g.img,IMG.x,IMG.y,IMG.w,IMG.h);
- garnish(ctx,id,state,t);pour(ctx,id,state,t,glasses[id].capacity-(state.decor.has('ice')?(id==='rocks'?50:60):0));
+ garnish(ctx,id,state,t);pour(ctx,id,state,t,glasses[id].capacity-(window.LCIceV7?window.LCIceV7.displacement(state.iceKind,id):(state.decor.has('ice')?(id==='rocks'?50:60):0)));
  ctx.restore();return true;
 }
 window.LCArtV5={draw,liquidY,hitTest,ready:()=>Object.values(loaded).every(x=>x==='ready'),specs,assetRect:IMG};
