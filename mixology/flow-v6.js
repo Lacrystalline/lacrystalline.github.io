@@ -39,7 +39,7 @@ function mount(){
 function setMode(mode){
  if(!modes[mode]||s.busy||s.demo)return;
  if(h.total()){h.notify('請先清空酒杯，再切換調製模式。');return}
- s.flow=mode;s.flowStep=mode==='build'?'served':'preparing';s.prepIce=false;s.dilutionMl=0;s.prepPour=null;s.layerIntent=false;s.decor.delete('ice');
+ s.flow=mode;s.flowStep=mode==='build'?'served':'preparing';s.prepIce=false;s.dilutionMl=0;s.prepPour=null;s.layerIntent=false;s.visualML=0;s.decor.delete('ice');
  h.updateUI();h.syncRoom('snapshot');
 }
 function toggleIce(){
@@ -95,9 +95,13 @@ async function strain(){
  h.updateUI();h.syncRoom('pour_end');h.notify('已濾出至成品杯。');
 }
 function tick(t){
- if(!$('v6WorkProgress')||!s.prepPour)return;
- const p=Math.max(0,Math.min(1,(t-s.prepPour.start)/s.prepPour.duration));
- $('v6WorkProgress').style.width=(15+p*85)+'%';
+ if(!$('v6WorkProgress'))return;
+ if(s.prepPour){const p=Math.max(0,Math.min(1,(t-s.prepPour.start)/s.prepPour.duration));$('v6WorkProgress').style.width=(15+p*85)+'%'}
+ else if(s.processing&&prep()){
+  const p=Math.max(0,Math.min(1,(t-s.processing.start)/s.processing.duration));
+  $('v6WorkProgress').style.width=(p*100)+'%';
+  const w=$('v6Work');if(w)w.style.transform=s.flow==='shake'?'translateX('+Math.sin(t*.032)*Math.sin(p*Math.PI)*3+'px)':'none';
+ }else{const w=$('v6Work');if(w)w.style.transform='none'}
 }
 function updateUI(){
  if(!$('v6Help'))return;
