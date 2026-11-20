@@ -36,7 +36,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <body>
 <header class="topbar">
  <div class="brand"><div class="brandmark" aria-hidden="true"><span>✧</span></div><div class="brandname">LA CRYSTALLINE<small>水晶庭 · MIXOLOGY ATELIER</small></div></div>
- <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">VISUAL V3</span></div>
+ <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ART LAYERS V4</span></div>
 </header>
 <div class="shell">
  <div class="intro"><div><div class="eyebrow">An evening, made by your hands</div><h1>調製屬於你的那杯夜色</h1></div><p>選擇原料 · 觀察分層 · 親手攪拌 · 完成特調</p></div>
@@ -81,7 +81,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
    <div class="sectheading"><h2>04 · 調製手法</h2><span>FINISHING</span></div><p class="sidesub">保留分層，或將不同顏色溫柔融合。</p>
    <div class="actions"><button class="act" id="stirBtn"><span class="act-icon">↻</span>輕輕攪拌</button><button class="act accent" id="shakeBtn"><span class="act-icon">◇</span>充分搖勻</button></div>
    <p class="sidesub" style="margin:10px 0 6px">也可以直接在杯中的酒液上拖曳攪拌。</p>
-   <div class="secondary-actions" id="decorations"><button class="tag" data-deco="ice" aria-pressed="false">＋ 冰塊</button><button class="tag" data-deco="citrus" aria-pressed="false">＋ 柑橘片</button><button class="tag" data-deco="cherry" aria-pressed="false">＋ 櫻桃</button></div>
+   <div class="secondary-actions" id="decorations"><button class="tag" data-deco="ice" aria-pressed="false">＋ 冰塊</button><button class="tag" data-deco="citrus" aria-pressed="false">＋ 柑橘片</button><button class="tag" data-deco="cherry" aria-pressed="false">＋ 櫻桃</button><button class="tag" data-deco="flower" aria-pressed="false">＋ 紫羅蘭</button><button class="tag" data-deco="rosemary" aria-pressed="false">＋ 迷迭香</button></div>
    <button class="finish" id="finishBtn">完成這杯特調 ✧</button><button class="reset" id="resetBtn">↺　清空酒杯，重新開始</button>
   </aside>
  </div>
@@ -97,6 +97,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js" defer></script>
 <script src="./realtime.js" defer></script>
 <script src="./visual-v3.js" defer></script>
+<script src="./layered-art-v4.js" defer></script>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
@@ -130,7 +131,7 @@ function notify(message){const t=$('toast');t.textContent=message;t.classList.ad
 window.mixologyBridge={
  state,
  take(){return {glass:state.glass,qty:state.qty,portions:state.portions.map(p=>({...p})),decor:[...state.decor],mix:state.mix,mixKind:state.mixKind,mixedOnce:state.mixedOnce,visualML:state.visualML,pour:state.pour?{from:state.pour.from,to:state.pour.to,color:state.pour.color,duration:state.pour.duration,startAt:Date.now()-(performance.now()-state.pour.start)}:null,processing:state.processing?{from:state.processing.from,kind:state.processing.kind,duration:state.processing.duration,startAt:Date.now()-(performance.now()-state.processing.start)}:null}},
- apply(s){if(!s||!glasses[s.glass]||!Array.isArray(s.portions))return;state.revision++;state.glass=s.glass;state.qty=[15,30,45].includes(s.qty)?s.qty:30;state.portions=s.portions.filter(p=>byId[p.id]&&Number.isFinite(p.ml)&&p.ml>0).map(p=>({...p}));state.decor=new Set((s.decor||[]).filter(x=>['ice','citrus','cherry'].includes(x)));state.mix=Number.isFinite(s.mix)?s.mix:0;state.mixKind=s.mixKind||'layered';state.mixedOnce=!!s.mixedOnce;state.visualML=Number.isFinite(s.visualML)?s.visualML:total();state.pour=null;state.processing=null;state.busy=false;state.demo=false;state.drag=false;state.stirMotion=0;if(s.pour){const elapsed=Math.max(0,Date.now()-s.pour.startAt);if(elapsed<s.pour.duration){state.pour={from:s.pour.from,to:s.pour.to,color:s.pour.color,duration:s.pour.duration,start:performance.now()-elapsed};state.visualML=s.pour.from;state.busy=true}else state.visualML=total()}if(s.processing){const elapsed=Math.max(0,Date.now()-s.processing.startAt);if(elapsed<s.processing.duration){state.processing={kind:s.processing.kind,from:s.processing.from,duration:s.processing.duration,start:performance.now()-elapsed};state.busy=true}else state.mix=1}updateUI()},
+ apply(s){if(!s||!glasses[s.glass]||!Array.isArray(s.portions))return;state.revision++;state.glass=s.glass;state.qty=[15,30,45].includes(s.qty)?s.qty:30;state.portions=s.portions.filter(p=>byId[p.id]&&Number.isFinite(p.ml)&&p.ml>0).map(p=>({...p}));state.decor=new Set((s.decor||[]).filter(x=>['ice','citrus','cherry','flower','rosemary'].includes(x)));state.mix=Number.isFinite(s.mix)?s.mix:0;state.mixKind=s.mixKind||'layered';state.mixedOnce=!!s.mixedOnce;state.visualML=Number.isFinite(s.visualML)?s.visualML:total();state.pour=null;state.processing=null;state.busy=false;state.demo=false;state.drag=false;state.stirMotion=0;if(s.pour){const elapsed=Math.max(0,Date.now()-s.pour.startAt);if(elapsed<s.pour.duration){state.pour={from:s.pour.from,to:s.pour.to,color:s.pour.color,duration:s.pour.duration,start:performance.now()-elapsed};state.visualML=s.pour.from;state.busy=true}else state.visualML=total()}if(s.processing){const elapsed=Math.max(0,Date.now()-s.processing.startAt);if(elapsed<s.processing.duration){state.processing={kind:s.processing.kind,from:s.processing.from,duration:s.processing.duration,start:performance.now()-elapsed};state.busy=true}else state.mix=1}updateUI()},
  emit(event){if(typeof window.mixologyEmit==='function')window.mixologyEmit(event)},
  isViewer(){return document.body.classList.contains('viewer-mode')}
 };
@@ -200,7 +201,7 @@ function frame(t){fitCanvas();const dt=Math.min(45,t-lastTime);lastTime=t;ctx.cl
  if(state.pour){const p=state.pour;const progress=clamp((t-p.start)/p.duration,0,1);const eased=progress*progress*(3-2*progress);state.visualML=p.from+(p.to-p.from)*eased}
  if(state.processing){const p=state.processing,progress=clamp((t-p.start)/p.duration,0,1);state.mix=p.from+(1-p.from)*progress;state.stirMotion=Math.max(state.stirMotion,Math.sin(progress*Math.PI));if(progress>=1){state.mix=1;state.processing=null;state.stirMotion=.35;state.busy=false;updateUI();syncRoom('mix_end')}}
  state.stirMotion*=Math.pow(.977,dt/16);if(state.drag&&total())state.stirMotion=Math.max(state.stirMotion,.8);
- if(window.LCArtV3){window.LCArtV3.draw({ctx,state,t,glasses,byId,getLayers,liquidAverage,vToY,total});}else{drawBackground(t);ctx.save();if(state.processing?.kind==='shaken')ctx.translate(Math.sin(t*.037)*6*Math.sin((t-state.processing.start)/state.processing.duration*Math.PI),0);drawGlassBack();drawLiquid(t);drawGlassFront(t);drawEmptyCue(t);ctx.restore();drawPour(t)}raf=requestAnimationFrame(frame)}
+ if(window.LCArtV4){window.LCArtV4.draw({ctx,state,t,glasses,byId,getLayers,liquidAverage,vToY,total});}else if(window.LCArtV3){window.LCArtV3.draw({ctx,state,t,glasses,byId,getLayers,liquidAverage,vToY,total});}else{drawBackground(t);ctx.save();if(state.processing?.kind==='shaken')ctx.translate(Math.sin(t*.037)*6*Math.sin((t-state.processing.start)/state.processing.duration*Math.PI),0);drawGlassBack();drawLiquid(t);drawGlassFront(t);drawEmptyCue(t);ctx.restore();drawPour(t)}raf=requestAnimationFrame(frame)}
 function getCanvasPoint(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*560,y:(e.clientY-r.top)/r.height*620}}
 function inLiquid(pt){if(!total())return false;let g=glasses[state.glass];return pt.y>=vToY(state.visualML)-18&&pt.y<=g.bottom+2&&Math.abs(pt.x-280)<halfWidth(state.glass,clamp(pt.y,g.top,g.bottom))}
 canvas.addEventListener('pointerdown',e=>{if(window.mixologyBridge.isViewer()||state.busy||state.demo||!inLiquid(getCanvasPoint(e)))return;state.drag=true;state.dragPrevious=getCanvasPoint(e);canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing'});
