@@ -253,6 +253,6 @@ function mount(){
  document.head.appendChild(css);
  updateUI();
 }
-window.LCIceV7={types:TYPES,displacement,pick,clear,onGlassChange,updateUI,draw:render,impact,physics:sys,version:V7_VERSION};
+window.LCIceV7={types:TYPES,displacement,pick,clear,onGlassChange,updateUI,draw:render,impact,get physics(){return sys},version:V7_VERSION};
 mount();
 })();
