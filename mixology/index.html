@@ -36,7 +36,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <body>
 <header class="topbar">
  <div class="brand"><div class="brandmark" aria-hidden="true"><span>✧</span></div><div class="brandname">LA CRYSTALLINE<small>水晶庭 · MIXOLOGY ATELIER</small></div></div>
- <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ART LAYERS V4</span></div>
+ <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ASSET GLASS V5</span></div>
 </header>
 <div class="shell">
  <div class="intro"><div><div class="eyebrow">An evening, made by your hands</div><h1>調製屬於你的那杯夜色</h1></div><p>選擇原料 · 觀察分層 · 親手攪拌 · 完成特調</p></div>
@@ -98,6 +98,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <script src="./realtime.js" defer></script>
 <script src="./visual-v3.js" defer></script>
 <script src="./layered-art-v4.js" defer></script>
+<script src="./asset-glass-v5.js" defer></script>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
@@ -159,7 +160,7 @@ function startProcess(kind){if(state.busy||state.demo||!total())return;state.pro
 function changeDecoration(type){if(state.decor.has(type))state.decor.delete(type);else state.decor.add(type);updateUI();syncRoom('decor')}
 function fitCanvas(){const dpr=Math.min(window.devicePixelRatio||1,window.innerWidth<=720?1.5:2);const w=560*dpr,h=620*dpr;if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}ctx.setTransform(dpr,0,0,dpr,0,0)}
 function halfWidth(glass,y,outer=false){const s=glasses[glass],t=clamp((s.bottom-y)/(s.bottom-s.top),0,1);let w=glass==='coupe'?s.wt*Math.sqrt(Math.max(0,1-(1-t)*(1-t))):s.wb+(s.wt-s.wb)*t;return w+(outer?glass==='coupe'?5:9:0)}
-function vToY(ml){const g=glasses[state.glass],cap=g.capacity;if(ml<=0)return g.bottom;if(ml>=cap)return g.top;let sum=0;const step=2,areas=[];for(let y=g.bottom;y>g.top;y-=step){const actual=Math.min(step,y-g.top);const mid=y-actual/2,a=Math.PI*Math.pow(halfWidth(state.glass,mid),2)*actual;areas.push([y,y-actual,a]);sum+=a}let target=ml/cap*sum,seen=0;for(const [bottom,top,a] of areas){if(seen+a>=target)return bottom-(target-seen)/a*(bottom-top);seen+=a}return g.top}
+function vToY(ml){if(window.LCArtV5)return window.LCArtV5.liquidY(state.glass,ml,glasses[state.glass].capacity);const g=glasses[state.glass],cap=g.capacity;if(ml<=0)return g.bottom;if(ml>=cap)return g.top;let sum=0;const step=2,areas=[];for(let y=g.bottom;y>g.top;y-=step){const actual=Math.min(step,y-g.top);const mid=y-actual/2,a=Math.PI*Math.pow(halfWidth(state.glass,mid),2)*actual;areas.push([y,y-actual,a]);sum+=a}let target=ml/cap*sum,seen=0;for(const [bottom,top,a] of areas){if(seen+a>=target)return bottom-(target-seen)/a*(bottom-top);seen+=a}return g.top}
 function silhouette(outer=false){const g=glasses[state.glass];ctx.beginPath();const from=g.top-(outer?3:0),to=g.bottom+(outer?5:0);ctx.moveTo(280-halfWidth(state.glass,g.top,outer),from);for(let y=g.top;y<=g.bottom;y+=4)ctx.lineTo(280-halfWidth(state.glass,y,outer),y);ctx.lineTo(280-halfWidth(state.glass,g.bottom,outer),to);ctx.lineTo(280+halfWidth(state.glass,g.bottom,outer),to);for(let y=g.bottom;y>=g.top;y-=4)ctx.lineTo(280+halfWidth(state.glass,y,outer),y);ctx.lineTo(280+halfWidth(state.glass,g.top,outer),from);ctx.closePath()}
 function drawBackground(t){const glow=ctx.createRadialGradient(280,355,10,280,355,240);glow.addColorStop(0,'rgba(119,189,208,.085)');glow.addColorStop(1,'rgba(119,189,208,0)');ctx.fillStyle=glow;ctx.fillRect(30,105,500,420);
  // Subtle stage sparkle, made only with Canvas primitives.
@@ -201,9 +202,9 @@ function frame(t){fitCanvas();const dt=Math.min(45,t-lastTime);lastTime=t;ctx.cl
  if(state.pour){const p=state.pour;const progress=clamp((t-p.start)/p.duration,0,1);const eased=progress*progress*(3-2*progress);state.visualML=p.from+(p.to-p.from)*eased}
  if(state.processing){const p=state.processing,progress=clamp((t-p.start)/p.duration,0,1);state.mix=p.from+(1-p.from)*progress;state.stirMotion=Math.max(state.stirMotion,Math.sin(progress*Math.PI));if(progress>=1){state.mix=1;state.processing=null;state.stirMotion=.35;state.busy=false;updateUI();syncRoom('mix_end')}}
  state.stirMotion*=Math.pow(.977,dt/16);if(state.drag&&total())state.stirMotion=Math.max(state.stirMotion,.8);
- if(window.LCArtV4){window.LCArtV4.draw({ctx,state,t,glasses,byId,getLayers,liquidAverage,vToY,total});}else if(window.LCArtV3){window.LCArtV3.draw({ctx,state,t,glasses,byId,getLayers,liquidAverage,vToY,total});}else{drawBackground(t);ctx.save();if(state.processing?.kind==='shaken')ctx.translate(Math.sin(t*.037)*6*Math.sin((t-state.processing.start)/state.processing.duration*Math.PI),0);drawGlassBack();drawLiquid(t);drawGlassFront(t);drawEmptyCue(t);ctx.restore();drawPour(t)}raf=requestAnimationFrame(frame)}
+ if(window.LCArtV5&&window.LCArtV5.draw({ctx,state,t,glasses,byId,getLayers,liquidAverage,vToY,total})){/* real-glass asset rendering */}else if(window.LCArtV4){window.LCArtV4.draw({ctx,state,t,glasses,byId,getLayers,liquidAverage,vToY,total});}else if(window.LCArtV3){window.LCArtV3.draw({ctx,state,t,glasses,byId,getLayers,liquidAverage,vToY,total});}else{drawBackground(t);ctx.save();if(state.processing?.kind==='shaken')ctx.translate(Math.sin(t*.037)*6*Math.sin((t-state.processing.start)/state.processing.duration*Math.PI),0);drawGlassBack();drawLiquid(t);drawGlassFront(t);drawEmptyCue(t);ctx.restore();drawPour(t)}raf=requestAnimationFrame(frame)}
 function getCanvasPoint(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*560,y:(e.clientY-r.top)/r.height*620}}
-function inLiquid(pt){if(!total())return false;let g=glasses[state.glass];return pt.y>=vToY(state.visualML)-18&&pt.y<=g.bottom+2&&Math.abs(pt.x-280)<halfWidth(state.glass,clamp(pt.y,g.top,g.bottom))}
+function inLiquid(pt){if(window.LCArtV5)return window.LCArtV5.hitTest(state.glass,pt.x,pt.y,state.visualML,glasses[state.glass].capacity);if(!total())return false;let g=glasses[state.glass];return pt.y>=vToY(state.visualML)-18&&pt.y<=g.bottom+2&&Math.abs(pt.x-280)<halfWidth(state.glass,clamp(pt.y,g.top,g.bottom))}
 canvas.addEventListener('pointerdown',e=>{if(window.mixologyBridge.isViewer()||state.busy||state.demo||!inLiquid(getCanvasPoint(e)))return;state.drag=true;state.dragPrevious=getCanvasPoint(e);canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing'});
 canvas.addEventListener('pointermove',e=>{const pt=getCanvasPoint(e);if(!state.drag){canvas.style.cursor=inLiquid(pt)?'grab':'default';return}if(state.busy)return;const prev=state.dragPrevious;const distance=Math.hypot(pt.x-prev.x,pt.y-prev.y);if(distance>2&&distance<110){state.mix=clamp(state.mix+distance/850,0,1);state.mixKind='stirred';state.stirMotion=1;updateUI();syncRoom('stir')}state.dragPrevious=pt});
 function stopDrag(){if(state.drag)syncRoom('stir_end');state.drag=false;state.dragPrevious=null;canvas.style.cursor='default'}canvas.addEventListener('pointerup',stopDrag);canvas.addEventListener('pointercancel',stopDrag);
