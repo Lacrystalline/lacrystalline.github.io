@@ -131,7 +131,7 @@ function updateUI(){
   $('stageHint').textContent='成品杯尚未裝入酒液；原料正在調製器具中。';
  }
 }
-window.flowV6={mount,updateUI,selectMode,toggleIce,shouldHandleAdd,addPrep,allowProcess,onProcessDone,strain,tick,
+window.flowV6={mount,updateUI,selectMode:setMode,toggleIce,shouldHandleAdd,addPrep,allowProcess,onProcessDone,strain,tick,
  renderState:()=>prep()&&s.flowStep!=='transferring'&&s.flowStep!=='served'?{...s,visualML:0,pour:null,decor:s.flowStep==='ready'?s.decor:new Set()}:s,
  effectiveCapacity:()=>cap()-(s.decor.has('ice')?iceVol():0),
  canFinish:()=>!prep()||s.flowStep==='served',
