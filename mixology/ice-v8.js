@@ -339,7 +339,7 @@ function impact(st){
  return clamp(sys.lastImpulse*.8,0,.75);
 }
 function pick(kind){
- if(s.busy||s.demo)return;
+ if(s.busy||s.demo||(window.LCStirScene&&window.LCStirScene.busy()))return;
  if(!TYPES[s.glass].some(a=>a[0]===kind))return;
  if(s.flow!=='build'&&!['ready','served'].includes(s.flowStep)){h.notify('調製用冰請在調酒杯／雪克杯中加入；成品冰須在濾出前準備。');return}
  const old=displacement(type(s),s.glass),newD=displacement(kind,s.glass);
@@ -360,7 +360,7 @@ function updateUI(){
   const k=b.dataset.iceKind,option=config.find(a=>a[0]===k);
   b.hidden=!option;
   if(option){b.classList.toggle('active',type(s)===k);b.setAttribute('aria-pressed',String(type(s)===k))}
-  b.disabled=!!s.busy||!!s.demo||(s.flow!=='build'&&!['ready','served'].includes(s.flowStep));
+  b.disabled=!!s.busy||!!s.demo||(window.LCStirScene&&window.LCStirScene.busy())||(s.flow!=='build'&&!['ready','served'].includes(s.flowStep));
  }
  const hint=$('v7IceHint');
  if(hint)hint.textContent=s.glass==='coupe'?'淺碟杯建議預先冰鎮，成品不放冰塊。':s.flow!=='build'&&s.flowStep==='preparing'?'這裡選的是成品冰。請先在調製器具加冰完成攪拌／搖盪。':s.flow!=='build'&&s.flowStep==='transferring'?'正在濾入成品杯，不可更換冰型。':'冰塊有體積與碰撞效果。碎冰只建議用於特定調酒。';

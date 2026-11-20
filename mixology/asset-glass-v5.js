@@ -366,6 +366,8 @@ function garnish(ctx,id,state,t){
  }
 }
 function pour(ctx,id,state,t,cap){const p=state.pour;if(!p)return;
+ // V9 STIR: the stream comes from the mixing glass spout, drawn by stir-scene.js
+ if(p.kind==='strain'&&state.flow==='stir'&&window.LCStirScene)return;
  const z=clamp((t-p.start)/p.duration,0,1),force=Math.sin(Math.PI*z);if(force<=.008)return;
  const pc=Array.isArray(p.color)?p.color:[188,211,217],surface=liquidY(id,state.visualML,cap);
  const g=specs[id],rimTop=gy(g.rim.cy)-g.rim.ry*SCALE;

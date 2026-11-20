@@ -4,6 +4,9 @@
 const h=window.mixologyHooks;if(!h){console.error('V6 hooks unavailable');return}
 const s=h.state,$=id=>document.getElementById(id),isBubbly=id=>id==='soda'||id==='tonic';
 const prep=()=>s.flow==='stir'||s.flow==='shake', cap=()=>h.glasses[s.glass].capacity;
+const viewer=()=>!!(window.mixologyBridge&&window.mixologyBridge.isViewer());
+const scene=()=>s.flow==='stir'&&window.LCStirScene?window.LCStirScene:null;   // V9 STIR visuals
+const sceneBusy=()=>!!(scene()&&scene().busy());
 const iceVol=()=>window.LCIceV7?window.LCIceV7.displacement(s.iceKind,s.glass):(s.glass==='rocks'?50:60);
 const modes={
  build:{name:'直調 Build',help:'在成品杯調製；通常先放冰、再量酒倒入。',tool:'成品杯',ice:'先放入成品杯冰塊'},
@@ -26,7 +29,7 @@ function mount(){
  const right=document.querySelector('.side.right');const rt=[...right.querySelectorAll('h2')];
  const recipe=rt.find(e=>e.textContent.includes('你的配方'));if(recipe)recipe.textContent='04 · 你的配方';
  const craft=rt.find(e=>e.textContent.includes('調製手法'));if(craft)craft.textContent='05 · 調製與濾出';
- const actions=right.querySelector('.actions');if(actions)actions.insertAdjacentHTML('afterend','<button id="v6Strain" class="v6-strain" hidden>濾出至成品杯 · STRAIN</button><p class="v6-note" id="v6Instructions">完成調製後再加裝飾。</p>');
+ const actions=right.querySelector('.actions');if(actions)actions.insertAdjacentHTML('afterend','<button id="v6Strain" class="v6-strain" hidden>準備濾出 · STRAIN</button><p class="v6-note" id="v6Instructions">完成調製後再加裝飾。</p>');
  const old=right.querySelector('[data-deco="ice"]');if(old)old.remove();
  const ornament=document.querySelector('.stage-ornament');
  if(ornament)ornament.insertAdjacentHTML('afterend','<div id="v6Work" class="v6-work" hidden><strong id="v6WorkTitle">調酒器具</strong><div id="v6WorkDesc"></div><div class="v6-track"><span id="v6WorkProgress"></span></div></div>');
@@ -37,13 +40,13 @@ function mount(){
  h.updateUI();
 }
 function setMode(mode){
- if(!modes[mode]||s.busy||s.demo)return;
+ if(!modes[mode]||s.busy||s.demo||viewer()||sceneBusy())return;
  if(h.total()){h.notify('請先清空酒杯，再切換調製模式。');return}
- s.flow=mode;s.flowStep=mode==='build'?'served':'preparing';s.prepIce=false;s.dilutionMl=0;s.prepPour=null;s.layerIntent=false;s.visualML=0;s.decor.delete('ice');s.iceKind='none';s.iceStartedAt=0;s.iceSeed=(s.iceSeed||0)+1;
+ s.flow=mode;s.flowStep=mode==='build'?'served':'preparing';s.prepIce=false;s.dilutionMl=0;s.prepPour=null;s.layerIntent=false;s.visualML=0;s.decor.delete('ice');s.iceKind='none';s.iceStartedAt=0;s.iceSeed=(s.iceSeed||0)+1;s.stirAnim=null;s.stirManual=null;
  h.updateUI();h.syncRoom('snapshot');
 }
 function toggleIce(){
- if(s.busy||s.demo)return;
+ if(s.busy||s.demo||viewer()||sceneBusy())return;
  const serving=s.flow==='build'||s.flowStep==='ready'||s.flowStep==='served';
  if(serving){
   if(s.glass==='coupe'){h.notify('淺碟杯建議預先冰鎮，而不是放入成品冰塊。');return}
@@ -56,7 +59,7 @@ function shouldHandleAdd(id){
  return prep()&&(s.flowStep==='preparing'||s.flowStep==='ready'||s.flowStep==='transferring'||s.flowStep==='served'&&!isBubbly(id));
 }
 async function addPrep(id,ml,fromDemo){
- if(s.busy||(!fromDemo&&s.demo))return false;
+ if(s.busy||(!fromDemo&&s.demo)||viewer()||s.drag)return false;
  if(s.flowStep!=='preparing'){h.notify('請先完成這杯的調製與濾出；濾出後只可追加氣泡水。');return false}
  if(isBubbly(id)){h.notify('蘇打水或通寧水請在濾出後再加，不可放入調酒杯或雪克杯。');return false}
  if(h.total()+ml>cap()*.83){h.notify('請預留融冰稀釋與濾出空間。');return false}
@@ -72,6 +75,7 @@ function allowProcess(kind){
  if(s.flowStep!=='preparing'){h.notify('目前步驟不能再次攪拌或搖盪。');return false}
  if(s.flow==='stir'&&kind!=='stirred'||s.flow==='shake'&&kind!=='shaken'){h.notify('請使用此模式對應的調製手法。');return false}
  if(!s.prepIce){h.notify('請先加入調製用冰，再攪拌或搖盪。');return false}
+ if(sceneBusy())return false;
  return true;
 }
 function dilute(fraction){
@@ -84,9 +88,23 @@ function onProcessDone(){
  else{dilute(s.flow==='shake'?.18:.12);s.flowStep='ready';s.visualML=0}
 }
 async function strain(){
- if(!prep()||s.flowStep!=='ready'||s.busy)return;
+ if(viewer()||!prep()||s.flowStep!=='ready'||s.busy||sceneBusy())return;
  if(h.total()+(s.decor.has('ice')?iceVol():0)>cap()){h.notify('目前成品杯容量不足，請移除成品冰塊。');return}
- const duration=1450,rev=s.revision,vol=h.total();
+ const rev=s.revision,vol=h.total();
+ if(scene()){
+  // V9 STIR: the mixing glass comes in, tilts, pours through the strainer and leaves.
+  // The serving fill keeps the original volume maths; it simply starts when the glass is in place.
+  const T=scene().strainTiming();
+  s.flowStep='transferring';s.visualML=0;s.busy=true;scene().startStrain();
+  s.pour={kind:'strain',from:0,to:vol,start:performance.now()+T.pourStart,duration:T.pour,color:h.liquidAverage()};
+  h.updateUI();h.syncRoom('pour_begin');
+  await h.sleep(T.pourStart+T.pour+40);if(rev!==s.revision)return;
+  s.pour=null;s.visualML=vol;h.updateUI();h.syncRoom('pour_end');
+  await h.sleep(Math.max(0,T.end-T.pourStart-T.pour-40));if(rev!==s.revision)return;
+  s.flowStep='served';s.busy=false;h.updateUI();h.syncRoom('strain_done');h.notify('已濾出至成品杯。');
+  return;
+ }
+ const duration=1450;
  s.flowStep='transferring';s.visualML=0;s.busy=true;
  s.pour={kind:'strain',from:0,to:vol,start:performance.now(),duration,color:h.liquidAverage()};
  h.updateUI();h.syncRoom('pour_begin');
@@ -111,20 +129,21 @@ function updateUI(){
  const serving=s.flow==='build'||['ready','served'].includes(s.flowStep);
  const hasIce=serving?s.decor.has('ice'):s.prepIce;
  $('v6Ice').classList.toggle('active',hasIce);$('v6Ice').hidden=serving&&!!window.LCIceV7;
- $('v6Ice').disabled=s.busy||s.demo||serving&&s.glass==='coupe'||!serving&&!inPrep;
+ $('v6Ice').disabled=s.busy||s.demo||sceneBusy()||serving&&s.glass==='coupe'||!serving&&!inPrep;
  $('v6IceName').textContent=serving?(hasIce?'移除成品杯冰塊':'加入成品杯新冰'):(hasIce?'移除調製用冰':modes[s.flow].ice);
  $('v6IceHint').textContent=serving?'成品冰與攪拌／搖盪用冰分開處理。':'用於冷卻與稀釋，濾出時不帶入成品杯。';
  $('v6IceState').textContent=serving?'成品冰型由上方杯型選單決定 · 估計融冰 '+(s.dilutionMl||0)+' ml':('調製器具'+(hasIce?'已有冰':'尚未加冰')+' · 估計融冰 '+(s.dilutionMl||0)+' ml');
  $('v6Layer').hidden=s.flow!=='build';$('v6Layer').classList.toggle('active',s.layerIntent);$('v6Layer').disabled=s.busy||s.demo;
  $('stirBtn').hidden=s.flow==='shake';$('shakeBtn').hidden=s.flow!=='shake';
- $('stirBtn').disabled=s.busy||s.demo||!h.total()||prep()&&(!inPrep||!s.prepIce);
+ $('stirBtn').disabled=s.busy||s.demo||!h.total()||sceneBusy()||prep()&&(!inPrep||!s.prepIce);
  $('shakeBtn').disabled=s.busy||s.demo||!h.total()||!inPrep||!s.prepIce;
- $('v6Strain').hidden=!prep();$('v6Strain').disabled=s.busy||s.flowStep!=='ready';
+ $('v6Strain').hidden=!prep();$('v6Strain').disabled=s.busy||s.flowStep!=='ready'||sceneBusy();
  $('v6Instructions').textContent=prep()?(s.flowStep==='preparing'?'請加冰並完成調製。':s.flowStep==='ready'?'已冷卻與稀釋，可準備成品冰再濾出。':s.flowStep==='transferring'?'正在濾入成品杯。':'已濾出，可加入裝飾與氣泡水。'):'直調在成品杯進行，慢倒可保留分層。';
  $('finishBtn').disabled=s.busy||s.demo||!h.total()||prep()&&s.flowStep!=='served';
  document.querySelectorAll('#decorations .tag').forEach(b=>b.disabled=s.busy||s.demo||prep()&&s.flowStep!=='served');
  document.querySelectorAll('.ing').forEach(b=>{const id=b.dataset.ingredient;b.disabled=s.busy||s.demo||prep()&&!(inPrep&&!isBubbly(id)||s.flowStep==='served'&&isBubbly(id))});
- const work=$('v6Work');work.hidden=!prep()||s.flowStep==='served';
+ // STIR shows the real mixing glass on the stage, so the temporary status panel is only for SHAKE
+ const work=$('v6Work');work.hidden=!prep()||s.flowStep==='served'||s.flow==='stir';
  if(!work.hidden){
   $('v6WorkTitle').textContent=modes[s.flow].tool+' · '+s.flowStep.toUpperCase();
   $('v6WorkDesc').textContent=(s.flowStep==='ready'?'已攪拌／搖盪，等待濾出。':s.flowStep==='transferring'?'正在倒入成品杯。':'原料尚在調製器具中，成品杯保持空杯。')+' '+h.total()+' ml · 調製用冰 '+(s.prepIce?'已加入':'未加入');
@@ -132,7 +151,8 @@ function updateUI(){
  }
  if(prep()&&s.flowStep!=='served'){
   $('phaseLabel').textContent=s.flowStep==='ready'?'READY TO STRAIN':s.flowStep==='transferring'?'STRAINING':'PREPARING '+s.flow.toUpperCase();
-  $('stageHint').textContent='成品杯尚未裝入酒液；原料正在調製器具中。';
+  $('stageHint').textContent=s.flow==='stir'?(s.flowStep==='preparing'?(s.prepIce?(h.total()?'按「攪拌」，或在調酒杯上畫圈攪拌。':'倒入原料，開始調製。'):'原料在調酒杯中；加入調製用冰後即可攪拌。'):s.flowStep==='ready'?(sceneBusy()?'吧匙收回，調酒杯被拿起。':'成品杯準備好了；可選擇成品冰，再按「準備濾出」。'):'經濾冰器倒入成品杯，調製冰留在調酒杯內。'):'成品杯尚未裝入酒液；原料正在調製器具中。';
+  if(s.flow==='stir'&&s.flowStep==='preparing'&&s.processing)$('phaseLabel').textContent='STIRRING';
  }
 }
 window.flowV6={mount,updateUI,selectMode:setMode,toggleIce,shouldHandleAdd,addPrep,allowProcess,onProcessDone,strain,tick,
