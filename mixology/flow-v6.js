@@ -4,7 +4,7 @@
 const h=window.mixologyHooks;if(!h){console.error('V6 hooks unavailable');return}
 const s=h.state,$=id=>document.getElementById(id),isBubbly=id=>id==='soda'||id==='tonic';
 const prep=()=>s.flow==='stir'||s.flow==='shake', cap=()=>h.glasses[s.glass].capacity;
-const iceVol=()=>s.glass==='rocks'?50:60;
+const iceVol=()=>window.LCIceV7?window.LCIceV7.displacement(s.iceKind,s.glass):(s.glass==='rocks'?50:60);
 const modes={
  build:{name:'直調 Build',help:'在成品杯調製；通常先放冰、再量酒倒入。',tool:'成品杯',ice:'先放入成品杯冰塊'},
  stir:{name:'攪拌 Stir',help:'原料先進調酒杯，加冰攪拌，最後過濾入成品杯。',tool:'調酒杯',ice:'調酒杯加入調製用冰'},
@@ -39,7 +39,7 @@ function mount(){
 function setMode(mode){
  if(!modes[mode]||s.busy||s.demo)return;
  if(h.total()){h.notify('請先清空酒杯，再切換調製模式。');return}
- s.flow=mode;s.flowStep=mode==='build'?'served':'preparing';s.prepIce=false;s.dilutionMl=0;s.prepPour=null;s.layerIntent=false;s.visualML=0;s.decor.delete('ice');
+ s.flow=mode;s.flowStep=mode==='build'?'served':'preparing';s.prepIce=false;s.dilutionMl=0;s.prepPour=null;s.layerIntent=false;s.visualML=0;s.decor.delete('ice');s.iceKind='none';s.iceStartedAt=0;s.iceSeed=(s.iceSeed||0)+1;
  h.updateUI();h.syncRoom('snapshot');
 }
 function toggleIce(){
@@ -48,7 +48,7 @@ function toggleIce(){
  if(serving){
   if(s.glass==='coupe'){h.notify('淺碟杯建議預先冰鎮，而不是放入成品冰塊。');return}
   if(!s.decor.has('ice')&&h.total()+iceVol()>cap()){h.notify('成品杯剩餘容量不足以加入冰塊。');return}
-  if(s.decor.has('ice'))s.decor.delete('ice');else s.decor.add('ice');
+  if(window.LCIceV7){window.LCIceV7.pick(s.decor.has('ice')?'none':s.glass==='rocks'?'sphere':'spear');return}if(s.decor.has('ice'))s.decor.delete('ice');else s.decor.add('ice');
  }else if(s.flowStep==='preparing'){s.prepIce=!s.prepIce}
  h.updateUI();h.syncRoom('decor');
 }
@@ -110,11 +110,11 @@ function updateUI(){
  const inPrep=prep()&&s.flowStep==='preparing';
  const serving=s.flow==='build'||['ready','served'].includes(s.flowStep);
  const hasIce=serving?s.decor.has('ice'):s.prepIce;
- $('v6Ice').classList.toggle('active',hasIce);
+ $('v6Ice').classList.toggle('active',hasIce);$('v6Ice').hidden=serving&&!!window.LCIceV7;
  $('v6Ice').disabled=s.busy||s.demo||serving&&s.glass==='coupe'||!serving&&!inPrep;
  $('v6IceName').textContent=serving?(hasIce?'移除成品杯冰塊':'加入成品杯新冰'):(hasIce?'移除調製用冰':modes[s.flow].ice);
  $('v6IceHint').textContent=serving?'成品冰與攪拌／搖盪用冰分開處理。':'用於冷卻與稀釋，濾出時不帶入成品杯。';
- $('v6IceState').textContent=(serving?'成品杯':'調製器具')+(hasIce?'已有冰':'尚未加冰')+' · 估計融冰 '+(s.dilutionMl||0)+' ml';
+ $('v6IceState').textContent=serving?'成品冰型由上方杯型選單決定 · 估計融冰 '+(s.dilutionMl||0)+' ml':('調製器具'+(hasIce?'已有冰':'尚未加冰')+' · 估計融冰 '+(s.dilutionMl||0)+' ml');
  $('v6Layer').hidden=s.flow!=='build';$('v6Layer').classList.toggle('active',s.layerIntent);$('v6Layer').disabled=s.busy||s.demo;
  $('stirBtn').hidden=s.flow==='shake';$('shakeBtn').hidden=s.flow!=='shake';
  $('stirBtn').disabled=s.busy||s.demo||!h.total()||prep()&&(!inPrep||!s.prepIce);
@@ -140,7 +140,7 @@ window.flowV6={mount,updateUI,selectMode:setMode,toggleIce,shouldHandleAdd,addPr
  effectiveCapacity:()=>cap()-(s.decor.has('ice')?iceVol():0),
  canFinish:()=>!prep()||s.flowStep==='served',
  methodName:()=>modes[s.flow].name,
- onGlassChange:()=>{if(s.glass==='coupe')s.decor.delete('ice')}
+ onGlassChange:()=>{if(s.glass==='coupe'){s.decor.delete('ice');s.iceKind='none';s.iceStartedAt=0}}
 };
 mount();
 })();
