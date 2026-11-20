@@ -35,10 +35,27 @@ const bright=(a,q)=>blend(a,q>=0?[254,246,228]:[4,12,30],Math.abs(q));
 const gy=y=>IMG.y+y*SCALE, gx=x=>IMG.x+x*SCALE, sy=y=>(y-IMG.y)/SCALE;
 const loaded={};
 Object.keys(specs).forEach(id=>{
- const im=new Image();im.decoding='async';im.onload=()=>{loaded[id]='ready'};
+ const im=new Image();im.decoding='async';im.onload=()=>{buildGloss(id);loaded[id]='ready'};
  im.onerror=()=>{loaded[id]='error';console.warn('Cannot load cocktail glass asset',id)};
  im.src=specs[id].src;specs[id].img=im;
 });
+// Highlight-only copy of the original glass (V8.3). Bright pixels keep their opacity, mid/dark
+// pixels fade out. Drawn source-over in front of the drink it restores the wall's specular
+// streaks and facet edges that a coloured liquid otherwise washes out (screen alone cannot add
+// contrast over a pale drink). Built once per glass from the same-origin WebP.
+function buildGloss(id){
+ const g=specs[id],im=g.img;
+ try{
+  const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;
+  const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0);
+  const d=x.getImageData(0,0,c.width,c.height),p=d.data;
+  for(let i=0;i<p.length;i+=4){
+   const l=Math.max(p[i],p[i+1],p[i+2])/255,k=Math.min(1,Math.max(0,(l-.6)/.36));
+   p[i+3]=p[i+3]*k*k*(3-2*k);
+  }
+  x.putImageData(d,0,0);g.gloss=c;
+ }catch(e){console.warn('Glass gloss layer unavailable',id,e)}
+}
 function view(id){
  const g=specs[id],s=VIEW.scale;
  return {s,tx:CX*(1-s),ty:VIEW.ground-gy(g.base)*s};
@@ -194,12 +211,12 @@ function liquid(ctx,opts){
  };
  const bodyFill=(shade,r)=>{
   const s=ctx.createLinearGradient(CX-r,0,CX+r,0);
-  s.addColorStop(0,color(bright(shade,-.30),.80));
+  s.addColorStop(0,color(bright(shade,-.42),.82));
   s.addColorStop(.16,color(bright(shade,-.05),.86));
   s.addColorStop(.42,color(bright(shade,.13),.89));
   s.addColorStop(.67,color(bright(shade,.07),.88));
   s.addColorStop(.90,color(bright(shade,-.09),.85));
-  s.addColorStop(1,color(bright(shade,-.28),.79));
+  s.addColorStop(1,color(bright(shade,-.40),.81));
   return s;
  };
  let used=0,topColor=avg;const bands=[];
@@ -245,34 +262,48 @@ function liquid(ctx,opts){
  }
  // Free surface: a perspective ellipse in the drink's OWN colour (lit from above), not a
  // near-transparent plane that lets the dark stage show through as a grey "lid".
- lastLiquid.surface=surfaceY;
  const rad=sr,dep=depthScreen(id,surfaceY,INSET);
- ctx.beginPath();
- for(let j=0;j<=64;j++){
-  const x=CX-rad+(2*rad*j/64),u=clamp((x-CX)/rad,-1,1);
-  ctx.lineTo(x,surfaceY-dep*Math.sqrt(Math.max(0,1-u*u))+wobble(x)*.28);
- }
- for(let j=64;j>=0;j--){const x=CX-rad+(2*rad*j/64);ctx.lineTo(x,edgeAt(surfaceY,x,true))}
- ctx.closePath();
- const topGlow=ctx.createLinearGradient(0,surfaceY-dep,0,surfaceY+dep);
- topGlow.addColorStop(0,color(bright(topColor,.30),.62));
- topGlow.addColorStop(.45,color(bright(topColor,.16),.72));
- topGlow.addColorStop(1,color(bright(topColor,.04),.80));
- ctx.fillStyle=topGlow;ctx.fill();
+ lastLiquid.surface=surfaceY;lastLiquid.ratio=dep/Math.max(1,rad);lastLiquid.color=topColor;
+ const backY=x=>{const u=clamp((x-CX)/rad,-1,1);return surfaceY-dep*Math.sqrt(Math.max(0,1-u*u))+wobble(x)*.28};
+ const planePath=()=>{ctx.beginPath();
+  for(let j=0;j<=64;j++){const x=CX-rad+(2*rad*j/64);ctx.lineTo(x,backY(x))}
+  for(let j=64;j>=0;j--){const x=CX-rad+(2*rad*j/64);ctx.lineTo(x,edgeAt(surfaceY,x,true))}
+  ctx.closePath()};
+ // V8.3 free surface: the drink's own colour seen through a thin sheet, plus what a liquid
+ // surface actually reflects - more light towards the far edge (Fresnel), the dark room in the
+ // middle, a soft specular glint and bright meniscus lines where it meets the glass.
+ planePath();
+ const body=ctx.createLinearGradient(0,surfaceY-dep,0,surfaceY+dep);
+ body.addColorStop(0,color(bright(topColor,.20),.70));
+ body.addColorStop(.5,color(bright(topColor,.06),.74));
+ body.addColorStop(1,color(bright(topColor,.12),.80));
+ ctx.fillStyle=body;ctx.fill();
  ctx.save();ctx.clip();
- const sheen=ctx.createRadialGradient(CX-rad*.28,surfaceY-dep*.25,1,CX-rad*.28,surfaceY-dep*.25,rad*.75);
- sheen.addColorStop(0,'rgba(255,250,236,.20)');sheen.addColorStop(1,'rgba(255,250,236,0)');
- ctx.fillStyle=sheen;ctx.fillRect(CX-rad,surfaceY-dep-4,rad*2,dep*2+8);
+ const fres=ctx.createLinearGradient(0,surfaceY-dep,0,surfaceY+dep);
+ fres.addColorStop(0,'rgba(255,251,240,.20)');fres.addColorStop(.32,'rgba(255,251,240,.05)');
+ fres.addColorStop(.58,'rgba(6,14,30,.08)');fres.addColorStop(1,'rgba(255,251,240,.07)');
+ ctx.fillStyle=fres;ctx.fillRect(CX-rad-2,surfaceY-dep-4,rad*2+4,dep*2+8);
+ const gx0=CX-rad*.5,gy0=surfaceY-dep*.12;
+ ctx.save();ctx.translate(gx0,gy0);ctx.scale(1,Math.max(.12,dep/rad)*1.15);
+ const glint=ctx.createRadialGradient(0,0,0,0,0,rad*.46);
+ glint.addColorStop(0,'rgba(255,252,240,.42)');glint.addColorStop(.35,'rgba(255,252,240,.17)');glint.addColorStop(1,'rgba(255,252,240,0)');
+ ctx.fillStyle=glint;ctx.beginPath();ctx.arc(0,0,rad*.46,0,TAU);ctx.fill();
+ const spark=ctx.createRadialGradient(-rad*.06,0,0,-rad*.06,0,rad*.12);
+ spark.addColorStop(0,'rgba(255,255,250,.62)');spark.addColorStop(1,'rgba(255,255,250,0)');
+ ctx.fillStyle=spark;ctx.beginPath();ctx.arc(-rad*.06,0,rad*.12,0,TAU);ctx.fill();
  ctx.restore();
- ctx.beginPath();
- for(let j=0;j<=60;j++){const x=CX-rad+(2*rad*j/60);ctx.lineTo(x,edgeAt(surfaceY,x,true))}
- const rimGlow=ctx.createLinearGradient(CX-rad,0,CX+rad,0);
- rimGlow.addColorStop(0,'rgba(252,250,243,0)');
- rimGlow.addColorStop(.24,'rgba(255,249,239,.12)');
- rimGlow.addColorStop(.57,'rgba(255,250,239,.22)');
- rimGlow.addColorStop(.82,'rgba(250,251,250,.10)');
- rimGlow.addColorStop(1,'rgba(255,255,255,0)');
- ctx.strokeStyle=rimGlow;ctx.lineWidth=.9;ctx.stroke();
+ ctx.restore();
+ // Meniscus: thin bright line where the drink climbs the glass (back and front).
+ const lineGrad=(a)=>{const g2=ctx.createLinearGradient(CX-rad,0,CX+rad,0);
+  g2.addColorStop(0,'rgba(255,250,238,0)');g2.addColorStop(.18,'rgba(255,250,238,'+a*.55+')');
+  g2.addColorStop(.5,'rgba(255,250,238,'+a+')');g2.addColorStop(.82,'rgba(255,250,238,'+a*.55+')');
+  g2.addColorStop(1,'rgba(255,250,238,0)');return g2};
+ ctx.beginPath();for(let j=0;j<=60;j++){const x=CX-rad+(2*rad*j/60);ctx.lineTo(x,backY(x))}
+ ctx.strokeStyle=lineGrad(.30);ctx.lineWidth=1;ctx.stroke();
+ ctx.beginPath();for(let j=0;j<=60;j++){const x=CX-rad+(2*rad*j/60);ctx.lineTo(x,edgeAt(surfaceY,x,true))}
+ ctx.strokeStyle=lineGrad(.42);ctx.lineWidth=1.3;ctx.stroke();
+ ctx.beginPath();for(let j=0;j<=60;j++){const x=CX-rad+(2*rad*j/60);ctx.lineTo(x,edgeAt(surfaceY,x,true)+2.2)}
+ ctx.strokeStyle=color(bright(topColor,-.35),.16);ctx.lineWidth=1.6;ctx.stroke();
  if(impact>.035){
   const focal=ctx.createRadialGradient(CX+3,surfaceY+8,2,CX+3,surfaceY+22,Math.max(30,sr*.44));
   const injected=pour&&Array.isArray(pour.color)?pour.color:topColor;
@@ -351,8 +382,8 @@ function pour(ctx,id,state,t,cap){const p=state.pour;if(!p)return;
 //  2. the solid front rim band – normal compositing
 //  3. inside the silhouette: the transparent front wall only adds light (screen), so its cut
 //     facets and reflections lie over ice and liquid without hiding them.
-function frontGlass(ctx,id){
- const g=specs[id],im=g.img;
+function frontGlass(ctx,id,wet){
+ const g=specs[id],im=g.img,gl=g.gloss;
  ctx.save();
  ctx.beginPath();ctx.rect(-200,-200,960,1100);
  interior(ctx,id,0,false);
@@ -362,14 +393,51 @@ function frontGlass(ctx,id){
  ctx.save();rimBand(ctx,id);ctx.clip();ctx.drawImage(im,IMG.x,IMG.y,IMG.w,IMG.h);ctx.restore();
  ctx.save();
  interior(ctx,id,0);ctx.clip();
- ctx.globalCompositeOperation='screen';
- if(!g.floor){ctx.globalAlpha=.55;ctx.drawImage(im,IMG.x,IMG.y,IMG.w,IMG.h);ctx.restore();return}
- // Above the floor the front wall is clear glass: its reflections are fully visible.
- ctx.save();ctx.beginPath();ctx.rect(-200,-200,960,1100);floorEllipse(ctx,id,false);ctx.clip('evenodd');
- ctx.globalAlpha=id==='rocks'?.62:.5;ctx.drawImage(im,IMG.x,IMG.y,IMG.w,IMG.h);ctx.restore();
- // Over the floor the image also contains the (behind) floor itself; keep only a light pass.
- ctx.save();floorEllipse(ctx,id);ctx.clip();
- ctx.globalAlpha=id==='rocks'?.34:.2;ctx.drawImage(im,IMG.x,IMG.y,IMG.w,IMG.h);ctx.restore();
+ const pass=(a,b,c,d)=>{ // a: screen above floor, b: screen on floor, c/d: gloss above / on floor
+  ctx.save();ctx.globalCompositeOperation='screen';
+  if(!g.floor){ctx.globalAlpha=a;ctx.drawImage(im,IMG.x,IMG.y,IMG.w,IMG.h);
+   if(gl){ctx.globalCompositeOperation='source-over';ctx.globalAlpha=c;ctx.drawImage(gl,IMG.x,IMG.y,IMG.w,IMG.h)}
+   ctx.restore();return}
+  // Above the floor the front wall is clear glass: its reflections are fully visible.
+  ctx.save();ctx.beginPath();ctx.rect(-200,-200,960,1100);floorEllipse(ctx,id,false);ctx.clip('evenodd');
+  ctx.globalAlpha=a;ctx.drawImage(im,IMG.x,IMG.y,IMG.w,IMG.h);
+  if(gl){ctx.globalCompositeOperation='source-over';ctx.globalAlpha=c;ctx.drawImage(gl,IMG.x,IMG.y,IMG.w,IMG.h)}
+  ctx.restore();
+  // Over the floor the image also contains the (behind) floor itself; keep only a light pass.
+  ctx.save();floorEllipse(ctx,id);ctx.clip();
+  ctx.globalAlpha=b;ctx.drawImage(im,IMG.x,IMG.y,IMG.w,IMG.h);
+  if(gl){ctx.globalCompositeOperation='source-over';ctx.globalAlpha=d;ctx.drawImage(gl,IMG.x,IMG.y,IMG.w,IMG.h)}
+  ctx.restore();
+  ctx.restore();
+ };
+ // A drink behind the front wall needs a stronger specular pass than an empty glass.
+ // Over a drink the full-image screen pass only adds haze; the highlight pass carries the gloss.
+ if(id==='rocks')pass(wet?.4:.62,wet?.22:.34,wet?.78:.35,wet?.38:.16);
+ else if(id==='highball')pass(wet?.32:.5,wet?.14:.2,wet?.72:.3,wet?.3:.1);
+ else pass(wet?.38:.55,0,wet?.62:.25,0);
+ if(g.wall)wallSpecular(ctx,id,wet);
+ ctx.restore();
+}
+// Cylindrical front-wall reflections (V8.3): a wide soft sheen and two narrow window streaks
+// that follow the measured wall taper. They sit on the glass, so they cross liquid and ice.
+function wallSpecular(ctx,id,wet){
+ const g=specs[id],y0=gy(g.rim.cy)+g.rim.ry*SCALE+6,y1=gy(g.floor.cy);
+ const streak=(u0,u1,alpha)=>{
+  ctx.beginPath();
+  for(let y=y0;y<=y1;y+=6)ctx.lineTo(CX+u0*radScreen(id,y),y);
+  for(let y=y1;y>=y0;y-=6)ctx.lineTo(CX+u1*radScreen(id,y),y);
+  ctx.closePath();
+  const f=ctx.createLinearGradient(0,y0,0,y1);
+  f.addColorStop(0,'rgba(255,252,244,0)');f.addColorStop(.18,'rgba(255,252,244,'+alpha+')');
+  f.addColorStop(.72,'rgba(255,252,244,'+(alpha*.8)+')');f.addColorStop(1,'rgba(255,252,244,0)');
+  ctx.fillStyle=f;ctx.fill();
+ };
+ const k=wet?1:.55;
+ ctx.save();ctx.globalCompositeOperation='screen';
+ streak(-.66,-.53,.15*k);   // main window reflection, left
+ streak(-.47,-.43,.10*k);   // thin secondary line
+ streak(.74,.83,.12*k);     // right rim of the cylinder
+ streak(-.30,.05,.035*k);   // broad soft sheen across the face
  ctx.restore();
 }
 function draw(options){const {ctx,state,t,glasses}=options,id=state.glass,g=specs[id];if(!g)return false;
@@ -381,7 +449,7 @@ function draw(options){const {ctx,state,t,glasses}=options,id=state.glass,g=spec
  ctx.save();interior(ctx,id,0);ctx.clip();ctx.drawImage(g.img,IMG.x,IMG.y,IMG.w,IMG.h);ctx.restore();
  liquid(ctx,options);
  if(window.LCIceV8&&g.floor)window.LCIceV8.draw(ctx,state,t,lastLiquid);
- frontGlass(ctx,id);
+ frontGlass(ctx,id,state.visualML>.5);
  garnish(ctx,id,state,t);pour(ctx,id,state,t,capOf(state,glasses,id));
  ctx.restore();return true;
 }
@@ -389,5 +457,5 @@ window.LCArtV5={draw,liquidY,hitTest,
  clipInner:(ctx,id,inset=0)=>{interior(ctx,id,inset);ctx.clip()},
  innerRadius:(id,y,inset=0)=>Math.max(1,radScreen(id,y)-inset),
  frontArc,floor:floorInfo,rim:rimInfo,view,toScene,
- ready:()=>Object.values(loaded).every(x=>x==='ready'),specs,assetRect:IMG,version:'8.2'};
+ ready:()=>Object.values(loaded).every(x=>x==='ready'),specs,assetRect:IMG,version:'8.3'};
 })();

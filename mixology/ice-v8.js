@@ -283,14 +283,53 @@ function render(ctx,st,t,liquid){
  }
  lc.globalAlpha=1;
  if(water!=null&&liquid.bands.length){
-  lc.globalCompositeOperation='source-atop';
-  for(const b of liquid.bands){
-   const y0=Math.max(water,b.upper),y1=b.lower+40;if(y1<=y0)continue;
-   lc.fillStyle='rgba('+b.shade[0]+','+b.shade[1]+','+b.shade[2]+',.42)';
-   lc.fillRect(CX-200,y0,400,b.lower-y0+(b===liquid.bands[0]?60:0));
+  // V8.3 waterline: on each piece the dry/wet boundary is the FRONT arc of its waterline
+  // ellipse (same perspective as the drink's surface), not a straight cut across the canvas.
+  const k=liquid.ratio||.25,wl=[];
+  lc.beginPath();
+  for(const p of sys.particles){
+   if(!p.active)continue;
+   const e=extents(p),top=p.y-e.y,bot=p.y+e.y+4;
+   if(bot<water)continue;
+   if(top>water){lc.moveTo(p.x-e.x-2,top-2);lc.lineTo(p.x+e.x+2,top-2);lc.lineTo(p.x+e.x+2,bot);lc.lineTo(p.x-e.x-2,bot);lc.closePath();continue}
+   let rw=e.x-2;
+   if(p.k==='sphere'){const R=p.w*.5,d=water-p.y;rw=Math.sqrt(Math.max(0,R*R-d*d))}
+   const wide=p.y>=water?e.x+2:rw;
+   lc.moveTo(p.x-wide,water);lc.lineTo(p.x-rw,water);
+   for(let i=0;i<=28;i++){const u=-1+2*i/28;lc.lineTo(p.x+u*rw,water+k*rw*Math.sqrt(1-u*u))}
+   lc.lineTo(p.x+wide,water);lc.lineTo(p.x+wide,bot);lc.lineTo(p.x-wide,bot);lc.closePath();
+   wl.push([p.x,rw]);
   }
-  // A faint meniscus line where the ice breaks the surface.
-  lc.fillStyle='rgba(255,250,236,.22)';lc.fillRect(CX-200,water-.6,400,1.2);
+  lc.save();lc.clip();lc.globalCompositeOperation='source-atop';
+  // Layer colours on the ice follow the same curved front arcs as the visible liquid layers,
+  // so the tint on a submerged piece lines up with the drink around it.
+  const arc=(y,x)=>art.frontArc(g,y,x,-5),last=liquid.bands.length-1;
+  for(let i=0;i<=last;i++){
+   const b=liquid.bands[i];
+   lc.beginPath();
+   for(let x=CX-220;x<=CX+220;x+=8)lc.lineTo(x,i===last?water-2:arc(b.upper,x));
+   for(let x=CX+220;x>=CX-220;x-=8)lc.lineTo(x,i===0?b.lower+400:arc(b.lower,x));
+   lc.closePath();
+   lc.fillStyle='rgba('+b.shade[0]+','+b.shade[1]+','+b.shade[2]+',.42)';lc.fill();
+  }
+  lc.restore();
+  // Meniscus on the ice plus the thin surface sheet just in front of it.
+  lc.save();lc.globalCompositeOperation='source-atop';
+  const c=liquid.color||liquid.bands[liquid.bands.length-1].shade;
+  for(const [x,rw] of wl){
+   if(rw<3)continue;
+   lc.beginPath();
+   for(let i=0;i<=28;i++){const u=-1+2*i/28;lc.lineTo(x+u*rw,water+k*rw*Math.sqrt(1-u*u))}
+   for(let i=28;i>=0;i--){const u=-1+2*i/28;lc.lineTo(x+u*rw,water+k*rw*Math.sqrt(1-u*u)+6)}
+   lc.closePath();
+   const sh=lc.createLinearGradient(0,water,0,water+k*rw+6);
+   sh.addColorStop(0,'rgba('+c[0]+','+c[1]+','+c[2]+',.10)');sh.addColorStop(1,'rgba(255,252,242,.16)');
+   lc.fillStyle=sh;lc.fill();
+   lc.beginPath();
+   for(let i=0;i<=28;i++){const u=-1+2*i/28;lc.lineTo(x+u*rw,water+k*rw*Math.sqrt(1-u*u))}
+   lc.strokeStyle='rgba(255,251,238,.48)';lc.lineWidth=1.1;lc.stroke();
+  }
+  lc.restore();
  }
  lc.restore();
  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.drawImage(layer,0,0);ctx.restore();
