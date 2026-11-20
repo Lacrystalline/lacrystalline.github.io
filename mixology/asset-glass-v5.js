@@ -110,50 +110,111 @@ function liquid(ctx,opts){
   const sink=impact*Math.exp(-Math.pow((x-CX)/29,2))*1.6;
   return envelope*depth*(amp*cascade+sink);
  };
- ctx.save();mask(ctx,id,5);ctx.clip();
+ ctx.save();mask(ctx,id,9);ctx.clip();
+ // Every interface shares the same 3/4-view curved profile as the real glass.
+ // This removes the old flat rectangular bands and the white double half-ellipse.
+ const depthAt=(y)=>{
+  const rad=Math.max(2,radScreen(id,y)-10);
+  return clamp(rad*g.ellipse*(id==='coupe'?1.25:1.08),2,id==='coupe'?32:id==='rocks'?23:14);
+ };
+ const edgeAt=(y,x,onSurface=false)=>{
+  const rad=Math.max(2,radScreen(id,y)-10);
+  const u=clamp((x-CX)/rad,-1,1);
+  const front=depthAt(y)*Math.pow(Math.max(0,1-u*u),.58);
+  return y+front+(onSurface?wobble(x)*.75:0);
+ };
+ const bandPath=(upper,lower,topIsSurface)=>{
+  // Project the FRONT interface from left to right, then return on the lower arc.
+  const r1=Math.max(2,radScreen(id,upper)-10);
+  const r2=Math.max(2,radScreen(id,lower)-10);
+  ctx.beginPath();
+  for(let i=0;i<=60;i++){
+   const x=CX-r1+(r1*2*i/60),y=edgeAt(upper,x,topIsSurface);
+   if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  for(let i=60;i>=0;i--){
+   const x=CX-r2+(r2*2*i/60);
+   ctx.lineTo(x,edgeAt(lower,x,false));
+  }
+  ctx.closePath();
+ };
  let used=0,topColor=avg;
  for(const p of layers){
-  const take=Math.min(p.ml,Math.max(0,ml-used));if(take<=.001)break;
-  const top=liquidY(id,used+take,cap),bottom=liquidY(id,used,cap);
-  const isSurface=(used+take>=ml-.01);
-  const r=Math.max(2,radScreen(id,top)-4);
-  const ry=Math.max(1,r*g.ellipse*(isSurface?.76:.30));
+  const take=Math.min(p.ml,Math.max(0,ml-used));
+  if(take<=.001)break;
+  const upper=liquidY(id,used+take,cap),lower=liquidY(id,used,cap);
+  const topIsSurface=used+take>=ml-.01;
+  const r=Math.max(radScreen(id,upper),radScreen(id,lower));
   const shade=blend(p.layerColor,avg,mix);
   topColor=shade;
-  const gr=ctx.createLinearGradient(CX-r,top,CX+r,top);
-  gr.addColorStop(0,color(bright(shade,-.39),.86));
-  gr.addColorStop(.14,color(bright(shade,-.04),.91));
-  gr.addColorStop(.38,color(bright(shade,.19),.94));
-  gr.addColorStop(.64,color(bright(shade,.06),.93));
-  gr.addColorStop(.84,color(bright(shade,-.04),.90));
-  gr.addColorStop(1,color(bright(shade,-.34),.87));
-  // Paint the liquid body all the way to the FRONT edge of one meniscus.
-  // The back edge is rendered only as a light/shaded plane, not another line.
-  ctx.beginPath();ctx.moveTo(CX-r,top);
-  for(let x=CX-r+4;x<CX+r;x+=4){
-   const q=clamp((x-CX)/r,-1,1);
-   ctx.lineTo(x,top+ry*Math.sqrt(Math.max(0,1-q*q))+(isSurface?wobble(x):0));
+  bandPath(upper,lower,topIsSurface);
+  const glassShade=ctx.createLinearGradient(CX-r,0,CX+r,0);
+  glassShade.addColorStop(0,color(bright(shade,-.32),.81));
+  glassShade.addColorStop(.16,color(bright(shade,-.06),.87));
+  glassShade.addColorStop(.42,color(bright(shade,.12),.91));
+  glassShade.addColorStop(.67,color(bright(shade,.07),.90));
+  glassShade.addColorStop(.90,color(bright(shade,-.10),.86));
+  glassShade.addColorStop(1,color(bright(shade,-.30),.79));
+  ctx.fillStyle=glassShade;ctx.fill();
+  // Shadows are applied WITHIN the curved band, never as a horizontal fillRect.
+  ctx.save();ctx.clip();
+  const absorption=ctx.createLinearGradient(0,upper-4,0,Math.max(upper+5,lower+depthAt(lower)));
+  absorption.addColorStop(0,'rgba(255,252,242,.055)');
+  absorption.addColorStop(.43,'rgba(28,37,53,0)');
+  absorption.addColorStop(1,'rgba(11,19,31,.10)');
+  ctx.fillStyle=absorption;
+  ctx.fillRect(CX-r-10,upper-35,r*2+20,Math.max(60,lower-upper+76));
+  ctx.restore();
+  if(used>0){
+   // One faint curved refractive boundary with a horizontal falloff.
+   // There is no bright straight stripe or duplicated outline.
+   const ir=Math.max(2,radScreen(id,lower)-10);
+   const refraction=ctx.createLinearGradient(CX-ir,0,CX+ir,0);
+   refraction.addColorStop(0,'rgba(255,255,255,0)');
+   refraction.addColorStop(.17,'rgba(252,252,245,.055)');
+   refraction.addColorStop(.48,'rgba(254,245,229,.135)');
+   refraction.addColorStop(.83,'rgba(251,251,246,.055)');
+   refraction.addColorStop(1,'rgba(255,255,255,0)');
+   ctx.beginPath();
+   for(let j=0;j<=54;j++){
+    const x=CX-ir+2*ir*j/54,y=edgeAt(lower,x);
+    if(j===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+   }
+   ctx.strokeStyle=refraction;ctx.lineWidth=.85;ctx.stroke();
   }
-  ctx.lineTo(CX+r,top);ctx.lineTo(CX+r,bottom+8);
-  ctx.lineTo(CX-r,bottom+8);ctx.closePath();
-  ctx.fillStyle=gr;ctx.fill();
-  // Continuous vertical absorption, not independent rectangle banding.
-  const depth=ctx.createLinearGradient(0,top,0,bottom);
-  depth.addColorStop(0,'rgba(255,252,239,.045)');
-  depth.addColorStop(.8,'rgba(28,34,51,0)');
-  depth.addColorStop(1,'rgba(7,15,28,.10)');
-  ctx.fillStyle=depth;ctx.fillRect(CX-r-4,top,r*2+8,Math.max(2,bottom-top)+9);
   used+=take;
  }
- // Single transparent liquid surface, entirely inside the interior glass mask.
- // No front/back semicircle outlines; the body shares this exact meniscus.
- const plane=ctx.createRadialGradient(CX-18,surfaceY-surfaceDepth*.6,1,CX,surfaceY,sr);
- plane.addColorStop(0,color(bright(topColor,.43),.24));
- plane.addColorStop(.52,color(bright(topColor,.20),.11));
- plane.addColorStop(1,color(bright(topColor,-.13),.07));
- ctx.fillStyle=plane;
- ellipse(ctx,CX,surfaceY+wobble(CX)*.22,sr,surfaceDepth);
- ctx.fill();
+ // The actual free liquid surface is a softly lit ellipse in perspective.
+ // Only its front contour is given a restrained highlight; NO second outlined oval.
+ const rad=Math.max(2,radScreen(id,surfaceY)-10),dep=depthAt(surfaceY);
+ ctx.beginPath();
+ for(let j=0;j<=64;j++){
+  const x=CX-rad+(2*rad*j/64),u=clamp((x-CX)/rad,-1,1);
+  const y=surfaceY-dep*Math.pow(Math.max(0,1-u*u),.58)+wobble(x)*.28;
+  if(j===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+ }
+ for(let j=64;j>=0;j--){
+  const x=CX-rad+(2*rad*j/64);
+  ctx.lineTo(x,edgeAt(surfaceY,x,true));
+ }
+ ctx.closePath();
+ const topGlow=ctx.createLinearGradient(0,surfaceY-dep,0,surfaceY+dep+6);
+ topGlow.addColorStop(0,color(bright(topColor,.37),.045));
+ topGlow.addColorStop(.40,color(bright(topColor,.28),.10));
+ topGlow.addColorStop(1,color(bright(topColor,.18),.20));
+ ctx.fillStyle=topGlow;ctx.fill();
+ ctx.beginPath();
+ for(let j=0;j<=60;j++){
+  const x=CX-rad+(2*rad*j/60),y=edgeAt(surfaceY,x,true);
+  if(j===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+ }
+ const rimGlow=ctx.createLinearGradient(CX-rad,0,CX+rad,0);
+ rimGlow.addColorStop(0,'rgba(252,250,243,0)');
+ rimGlow.addColorStop(.24,'rgba(255,249,239,.11)');
+ rimGlow.addColorStop(.57,'rgba(255,250,239,.19)');
+ rimGlow.addColorStop(.82,'rgba(250,251,250,.09)');
+ rimGlow.addColorStop(1,'rgba(255,255,255,0)');
+ ctx.strokeStyle=rimGlow;ctx.lineWidth=.85;ctx.stroke();
  // Localized submerged currents at the impact point, fading after a pour.
  if(impact>.035){
   const focal=ctx.createRadialGradient(CX+3,surfaceY+8,2,CX+3,surfaceY+22,Math.max(30,sr*.44));
@@ -264,5 +325,7 @@ function draw(options){const {ctx,state,t,glasses}=options,id=state.glass,g=spec
  garnish(ctx,id,state,t);pour(ctx,id,state,t,glasses[id].capacity-(window.LCIceV7?window.LCIceV7.displacement(state.iceKind,id):(state.decor.has('ice')?(id==='rocks'?50:60):0)));
  ctx.restore();return true;
 }
-window.LCArtV5={draw,liquidY,hitTest,ready:()=>Object.values(loaded).every(x=>x==='ready'),specs,assetRect:IMG};
+window.LCArtV5={draw,liquidY,hitTest,clipInner:(ctx,id,inset=10)=>{mask(ctx,id,inset);ctx.clip()},
+ innerRadius:(id,y,inset=10)=>Math.max(1,radScreen(id,y)-inset),
+ ready:()=>Object.values(loaded).every(x=>x==='ready'),specs,assetRect:IMG};
 })();
