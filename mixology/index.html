@@ -31,12 +31,12 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 @media(max-width:720px){.topbar{height:72px;padding:0 19px}.brandmark{width:34px;height:34px}.brandmark span{font-size:19px}.brandname{font-size:17px}.brandname small{font-size:7px;letter-spacing:.18em}.headright .edition,.headright .dot{display:none}.prototype{font-size:9px;padding:5px 7px}.shell{padding:22px 12px 34px}.intro{display:block;padding:0 6px}.intro p{font-size:11px;margin-top:9px}.layout{display:flex;flex-direction:column;gap:11px}.stage{order:0}.left{order:1}.right{order:2}.stage-inner{min-height:0;padding:18px 10px 15px}.glass-canvas-wrap{width:min(100%,470px)}.stage-top-left,.stage-top-right{top:70px}.stage-foot{padding:12px 7px 0}.volume{font-size:22px}.side{padding:21px 18px}.right{display:block}.right>.hairline{display:block}.right .profile{margin:10px 0}.ingredients{grid-template-columns:repeat(2,minmax(0,1fr))}.recipe-list{min-height:90px}.recipe-empty{min-height:90px}}
 @media(max-width:370px){.qty-options button{padding:5px 7px}.ing-head{font-size:11px}.headright{gap:5px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
-.livebar{max-width:1660px;margin:0 auto 15px;border:1px solid #6b5a43;border-radius:13px;padding:14px 17px;background:#0c1b30;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.livebar strong{font-size:13px;color:#e9d8b9}.livebar small{display:block;font-size:11px;color:#9baebf;margin-top:5px}.livebar .buttons{display:flex;gap:8px;flex-wrap:wrap}.livebar button{border:1px solid #ad8d62;border-radius:8px;padding:8px 12px;background:#193149;color:#f0d5a8;font-size:12px}.livebar input{width:min(350px,60vw);border:1px solid #42566a;background:#081422;color:#bdd5df;padding:9px;border-radius:7px;font-size:10px}#viewLink,#copyView{display:none}.host-mode #viewLink,.host-mode #copyView{display:block}.host-mode #createRoom,.viewer-mode #createRoom{display:none}.viewer-mode .left,.viewer-mode .right{display:none!important}.viewer-mode .layout{display:block;max-width:740px;margin:auto}.viewer-mode .stage-inner{min-height:680px}.viewer-mode .glass-canvas-wrap canvas{pointer-events:none}.viewer-mode .livebar{max-width:740px}@media(max-width:720px){.viewer-mode .stage-inner{min-height:0}.livebar{padding:12px}}</style>
+.livebar{max-width:1660px;margin:0 auto 15px;border:1px solid #6b5a43;border-radius:13px;padding:14px 17px;background:#0c1b30;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.livebar strong{font-size:13px;color:#e9d8b9}.livebar small{display:block;font-size:11px;color:#9baebf;margin-top:5px}.livebar .buttons{display:flex;gap:8px;flex-wrap:wrap}.livebar button{border:1px solid #ad8d62;border-radius:8px;padding:8px 12px;background:#193149;color:#f0d5a8;font-size:12px}.livebar input{width:min(350px,60vw);border:1px solid #42566a;background:#081422;color:#bdd5df;padding:9px;border-radius:7px;font-size:10px}#viewLink,#copyView{display:none}.host-mode #viewLink,.host-mode #copyView{display:block}.host-mode #createRoom,.viewer-mode #createRoom{display:none}.viewer-mode .left,.viewer-mode .right{display:none!important}.viewer-mode .layout{display:block;max-width:740px;margin:auto}.viewer-mode .stage-inner{min-height:680px}.viewer-mode .glass-canvas-wrap canvas{pointer-events:none}.viewer-mode .livebar{max-width:740px}@media(max-width:720px){.viewer-mode .stage-inner{min-height:0}.livebar{padding:12px}}.stage-top-left span,.stage-top-right span{display:block}@media(max-width:720px){.stage-top-left,.stage-top-right{top:58px;font-size:8.5px;line-height:1.2;letter-spacing:.16em;white-space:nowrap}.stage-top-left span,.stage-top-right span{display:inline}.stage-top-left span:nth-child(2n):not(:last-child):after{content:" \00B7"}}</style>
 </head>
 <body>
 <header class="topbar">
  <div class="brand"><div class="brandmark" aria-hidden="true"><span>✧</span></div><div class="brandname">LA CRYSTALLINE<small>水晶庭 · MIXOLOGY ATELIER</small></div></div>
- <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V8.1</span></div>
+ <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V8.2</span></div>
 </header>
 <div class="shell">
  <div class="intro"><div><div class="eyebrow">An evening, made by your hands</div><h1>調製屬於你的那杯夜色</h1></div><p>選擇原料 · 觀察分層 · 親手攪拌 · 完成特調</p></div>
@@ -60,8 +60,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
   <main class="stage" aria-label="可互動調酒杯區域">
    <div class="stage-inner">
     <div class="stage-ornament">THE ART OF MIXING</div>
-    <div class="stage-top-left">01<br>POUR<br>02<br>LAYER<br>03<br>STIR</div>
-    <div class="stage-top-right">LA<br>CRYSTALLINE<br>✦</div>
+    <div class="stage-top-left"><span>01</span> <span>POUR</span> <span>02</span> <span>LAYER</span> <span>03</span> <span>STIR</span></div>
+    <div class="stage-top-right"><span>LA</span> <span>CRYSTALLINE</span> <span>✦</span></div>
     <div class="glass-canvas-wrap"><canvas id="glassCanvas" width="1120" height="1240" aria-label="調酒杯，加入材料後可用滑鼠或手指拖曳攪拌">瀏覽器需支援 Canvas</canvas></div>
     <div class="stage-bottom-band"></div>
     <div class="stage-foot"><div class="cue"><span id="phaseLabel">READY TO CREATE</span><div id="stageHint">從左側選一種原料，開始你的第一杯酒。</div></div><div class="volume"><span id="volume">0</span><small> / <span id="maxVolume">300</span> ml</small></div></div>
@@ -98,9 +98,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <script src="./realtime.js" defer></script>
 <script src="./visual-v3.js" defer></script>
 <script src="./layered-art-v4.js" defer></script>
-<script src="./asset-glass-v5.js?v=20261120-curve-wallfix" defer></script>
+<script src="./asset-glass-v5.js?v=20261120-v82-geometry" defer></script>
 <script src="./flow-v6.js?v=20261120-ice3" defer></script>
-<script src="./ice-v8.js?v=20261120-collins-spear-wallfix" defer></script>
+<script src="./ice-v8.js?v=20261120-v82-geometry" defer></script>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
@@ -162,7 +162,7 @@ async function loadPreset(p){if(state.busy||state.demo)return;reset(true);state.
 function freezePreviousBlend(){const averaged=liquidAverage();const weight=total();let density=0;state.portions.forEach(p=>density+=p.ml*(p.lockedDensity??byId[p.id].density));density=weight?density/weight:1;const gen=Math.max(state.mixGeneration,...state.portions.map(p=>Number(p.mixGroup)||0))+1;state.mixGeneration=gen;state.portions.forEach(p=>{p.lockedColor=blend(p.lockedColor||rgb(byId[p.id].color),averaged,state.mix);if(state.mix>.94){p.lockedDensity=density;p.mixGroup=gen}else{p.mixGroup=null}});state.mixedOnce=state.mixedOnce||state.mix>.65;state.mix=0}
 function startProcess(kind){if(state.busy||state.demo||!total())return;if(window.flowV6&&!window.flowV6.allowProcess(kind))return;state.processing={kind,start:performance.now(),duration:kind==='shaken'?1250:1600,from:state.mix};state.busy=true;state.mixKind=kind;state.mixedOnce=true;updateUI();syncRoom('mix_begin')}
 function changeDecoration(type){if(state.decor.has(type))state.decor.delete(type);else state.decor.add(type);updateUI();syncRoom('decor')}
-function fitCanvas(){const dpr=Math.min(window.devicePixelRatio||1,window.innerWidth<=720?1.5:2);const w=560*dpr,h=620*dpr;if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}ctx.setTransform(dpr,0,0,dpr,0,0)}
+function fitCanvas(){const dpr=Math.min(window.devicePixelRatio||1,2);const w=560*dpr,h=620*dpr;if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}ctx.setTransform(dpr,0,0,dpr,0,0)}
 function halfWidth(glass,y,outer=false){const s=glasses[glass],t=clamp((s.bottom-y)/(s.bottom-s.top),0,1);let w=glass==='coupe'?s.wt*Math.sqrt(Math.max(0,1-(1-t)*(1-t))):s.wb+(s.wt-s.wb)*t;return w+(outer?glass==='coupe'?5:9:0)}
 function vToY(ml){if(window.LCArtV5)return window.LCArtV5.liquidY(state.glass,ml,glasses[state.glass].capacity-(window.LCIceV7?window.LCIceV7.displacement(state.iceKind,state.glass):(state.decor.has('ice')?(state.glass==='rocks'?50:60):0)));const g=glasses[state.glass],cap=g.capacity;if(ml<=0)return g.bottom;if(ml>=cap)return g.top;let sum=0;const step=2,areas=[];for(let y=g.bottom;y>g.top;y-=step){const actual=Math.min(step,y-g.top);const mid=y-actual/2,a=Math.PI*Math.pow(halfWidth(state.glass,mid),2)*actual;areas.push([y,y-actual,a]);sum+=a}let target=ml/cap*sum,seen=0;for(const [bottom,top,a] of areas){if(seen+a>=target)return bottom-(target-seen)/a*(bottom-top);seen+=a}return g.top}
 function silhouette(outer=false){const g=glasses[state.glass];ctx.beginPath();const from=g.top-(outer?3:0),to=g.bottom+(outer?5:0);ctx.moveTo(280-halfWidth(state.glass,g.top,outer),from);for(let y=g.top;y<=g.bottom;y+=4)ctx.lineTo(280-halfWidth(state.glass,y,outer),y);ctx.lineTo(280-halfWidth(state.glass,g.bottom,outer),to);ctx.lineTo(280+halfWidth(state.glass,g.bottom,outer),to);for(let y=g.bottom;y>=g.top;y-=4)ctx.lineTo(280+halfWidth(state.glass,y,outer),y);ctx.lineTo(280+halfWidth(state.glass,g.top,outer),from);ctx.closePath()}

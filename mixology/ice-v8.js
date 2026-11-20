@@ -13,7 +13,7 @@ const TYPES={
  coupe:[['none','無冰','建議冰鎮杯身']]
 };
 const DISPLACEMENT={none:0,spear:47,cubes:52,crushed:67,sphere:48,large:52};
-const V8_VERSION=2,CX=280,S=400/1086,Y0=35,PI=Math.PI;
+const V8_VERSION=3,CX=280,S=400/1086,Y0=35,PI=Math.PI;
 const mix=(a,b,t)=>a+(b-a)*t,clamp=(a,l,h)=>Math.max(l,Math.min(h,a));
 let sys={key:'',particles:[],dtAccum:0,lastAt:0,recoveredAt:0,rested:false,lastImpulse:0};
 const spawnCache=new Map();
@@ -55,39 +55,43 @@ const V8_SIZES={
 };
 const type=st=>(st.decor?.has('ice')?st.iceKind||'cubes':'none');
 const displacement=(k,glass)=>glass==='coupe'?0:(DISPLACEMENT[k]||0);
-const gy=y=>Y0+y*S,rad=(g,y)=>{let f=clamp((y-g.top)/(g.bottom-g.top),0,1);
- if(g===art.specs.coupe)return Math.max(g.radBottom,g.radTop*Math.pow(Math.max(0,1-Math.pow(f,1.68)),.58))*S;
- const taper=Math.pow(f,g===art.specs.highball?.8:.68);
- return mix(g.radTop,g.radBottom,taper)*S;
-};
-function boundary(glass,y){
- const g=art.specs[glass];if(!g)return 30;
- return Math.max(7,rad(g,clamp((y-Y0)/S,g.top,g.bottom))-7);
-}
-const bottom=glass=>gy(art.specs[glass].bottom)-7;
-const top=glass=>gy(art.specs[glass].top)+7;
+// V8.2: every bound below comes from LCArtV5's measured glass geometry - the same
+// interior that clips the ice and the liquid and that the front-glass pass is built from.
+const boundary=(glass,y)=>{const f=art.floor(glass),r=art.rim(glass);
+ return art.innerRadius(glass,clamp(y,r.y,f.y),3)};
+const bottom=glass=>art.floor(glass).y;
+const top=glass=>art.rim(glass).back+2;
 function extents(p){
  const cos=Math.abs(Math.cos(p.angle)),sin=Math.abs(Math.sin(p.angle));
  if(p.k==='sphere')return {x:p.w*.5,y:p.height*.5};
  // Rotation changes the entire silhouette, not just the proxy-circle centre.
  return {x:(p.w*cos+p.height*sin)*.5+2,y:(p.height*cos+p.w*sin)*.5+2};
 }
+// Lowest allowed sprite row. A body resting on the centre of the floor has its footprint
+// centred on the floor ellipse; the sprite's lowest pixel is the FRONT edge of that footprint
+// (half its width in the floor's perspective). A sphere touches at one point.
+function rest(p,glass){
+ const f=art.floor(glass);
+ if(p.k==='sphere')return f.y+p.w*.5*.045;
+ const half=(p.w*Math.abs(Math.cos(p.angle))+p.height*Math.abs(Math.sin(p.angle)))*.5;
+ // ...and the footprint's front corners must stay on the floor ellipse (matters for the
+ // large rocks cube, whose width is ~80% of the floor).
+ const corner=Math.min(art.frontArc(glass,f.y,p.x-half*.9,0),art.frontArc(glass,f.y,p.x+half*.9,0));
+ return Math.min(f.y+half*f.ratio,corner-1);
+}
 function keepInside(p,glass){
- const lo=top(glass)+2,hi=bottom(glass);
- // The ice must fit both walls throughout its ENTIRE vertical silhouette.
- const e=extents(p);
+ const lo=top(glass),e=extents(p),hi=rest(p,glass)+2;
  if(p.y+e.y>hi)p.y=hi-e.y;
  // Ice still descends through the open mouth; do NOT teleport it to the floor.
  if(p.y-e.y<lo&&p.vy<0)p.y=lo+e.y;
- const radiusAt=y=>boundary(glass,y);
- const width=Math.min(radiusAt(p.y-e.y*.84),radiusAt(p.y),radiusAt(p.y+e.y*.84))-9;
+ // The whole silhouette (top, middle, bottom rows) must clear the measured inner wall.
+ const width=Math.min(boundary(glass,p.y-e.y),boundary(glass,p.y),boundary(glass,p.y+e.y));
  const xSpace=Math.max(0,width-e.x);
  const nx=clamp(p.x,CX-xSpace,CX+xSpace);
- if(nx!==p.x){p.x=nx;p.vx=-p.vx*.18;p.angular*=.54}
- // Large rigid shapes cannot rotate so far that their corners cut through the wall.
+ if(nx!==p.x){p.vx=(nx>p.x?1:-1)*Math.abs(p.vx)*.25;p.x=nx;p.angular*=.54}
  if(e.x>width+1&&p.k!=='sphere'){
   p.angle*=.67;p.angular*=.40;
-  p.x=clamp(p.x,CX-Math.max(0,width-extents(p).x),CX+Math.max(0,width-extents(p).x));
+  const x2=Math.max(0,width-extents(p).x);p.x=clamp(p.x,CX-x2,CX+x2);
  }
 }
 function rng(seed){let x=(seed|0)||1;return ()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return ((x>>>0)%100000)/100000}}
@@ -135,9 +139,9 @@ function step(st,dt,clock){
  for(const p of particles){
   if(clock<p.delay/1000)continue;
   p.active=true;p.age+=dt;
-  const r=p.r,verticalHalf=extents(p).y;
-  const left=CX-boundary(st.glass,p.y)+r,right=CX+boundary(st.glass,p.y)-r;
-  const immersion=liquidActive?clamp((p.y+r-surface)/Math.max(1,r*2),0,1):0;
+  const r=p.r,verticalHalf=extents(p).y,floor=rest(p,st.glass);
+  // Immersion of the REAL silhouette height (a 350 px spear is not a 39 px ball).
+  const immersion=liquidActive?clamp((p.y+verticalHalf-surface)/Math.max(1,verticalHalf*2),0,1):0;
   if(immersion>.03&&!p.wet&&p.vy>40){sys.lastImpulse=Math.max(sys.lastImpulse,clamp(p.vy/560,0,.85));p.wet=true}
   if(!liquidActive)p.wet=false;
   const buoyance=immersion*610;
@@ -149,14 +153,12 @@ function step(st,dt,clock){
   p.angular*=Math.pow(liquidActive?.955:.989,dt*60);
   const maxAngle=k==='spear'?.11:k==='sphere'?.2:k==='crushed'?.65:.42;
   p.angle=clamp(p.angle,-maxAngle,maxAngle);
-  if(p.y+verticalHalf>=b){
+  if(p.y+verticalHalf>=floor){
    if(p.vy>70)sys.lastImpulse=Math.max(sys.lastImpulse,clamp(p.vy/700,0,.62));
-   p.y=b-verticalHalf;p.vy=p.vy>28?-p.vy*(k==='crushed'?.17:.23):0;
+   p.y=floor-verticalHalf;p.vy=p.vy>28?-p.vy*(k==='crushed'?.17:.23):0;
    p.vx*=.77;p.angular+=p.vx*.001;
   }
   if(p.y-verticalHalf<t&&p.vy<0){p.y=t+verticalHalf;p.vy=0}
-  if(p.x<left){p.x=left;p.vx=Math.abs(p.vx)*.33;p.angular+=.11}
-  if(p.x>right){p.x=right;p.vx=-Math.abs(p.vx)*.33;p.angular-=.11}
   // Light restoring torque for standing spear; broad collision proxy for rigid body.
   if(k==='spear'){p.angular+=-p.angle*3.6*dt;p.x=clamp(p.x,CX-9,CX+9)}
   keepInside(p,st.glass);
@@ -258,39 +260,40 @@ function drawSprite(ctx,p,t){
  }
  ctx.restore();
 }
-function render(ctx,st,t){
+let layer=null;
+function render(ctx,st,t,liquid){
  if(type(st)==='none'||st.glass==='coupe')return;
  update(st,t);
- const g=st.glass,config=art.specs[g],c=Math.max(40,h.glasses[g].capacity-displacement(type(st),g));
- const water=st.visualML>0?art.liquidY(g,st.visualML,c):bottom(g)+100;
- // Use exactly the SAME calibrated glass interior as the liquid renderer.
- // One shared clip eliminates the old mismatch between the ice & drink outlines.
- ctx.save();
- if(typeof art.clipInner==='function')art.clipInner(ctx,g,10);
- else{
-  ctx.beginPath();
-  for(let j=0;j<=60;j++){
-   const sy=config.top+(config.bottom-config.top)*j/60,yy=gy(sy),width=rad(config,sy)-12;
-   if(j===0)ctx.moveTo(CX-width,yy);else ctx.lineTo(CX-width,yy);
-  }
-  for(let j=60;j>=0;j--){
-   const sy=config.top+(config.bottom-config.top)*j/60,yy=gy(sy),width=rad(config,sy)-12;
-   ctx.lineTo(CX+width,yy);
-  }ctx.closePath();ctx.clip();
- }
+ const g=st.glass,cv=ctx.canvas;
+ // Ice is composed on its own layer so the drink can tint ONLY the ice pixels that are
+ // under the waterline (the submerged ice is seen through the liquid, not pasted over it).
+ if(!layer)layer=document.createElement('canvas');
+ if(layer.width!==cv.width||layer.height!==cv.height){layer.width=cv.width;layer.height=cv.height}
+ const lc=layer.getContext('2d');
+ lc.setTransform(1,0,0,1,0,0);lc.globalCompositeOperation='source-over';lc.globalAlpha=1;
+ lc.clearRect(0,0,layer.width,layer.height);
+ lc.setTransform(ctx.getTransform());
+ const water=liquid&&liquid.surface!=null?liquid.surface:null;
+ lc.save();art.clipInner(lc,g,1);
  for(const p of sys.particles){
   if(!p.active)continue;
-  const submerged=st.visualML>0?clamp((p.y+p.r-water)/(p.r*2),0,1):0;
-  ctx.save();ctx.globalAlpha=1-submerged*.17;
-  drawSprite(ctx,p,t);ctx.restore();
-  if(submerged>.2){
-   ctx.save();ctx.globalAlpha=submerged*.22;
-   const gleam=ctx.createLinearGradient(p.x,p.y-p.r,p.x,p.y+p.r);
-   gleam.addColorStop(0,'rgba(234,246,251,.33)');gleam.addColorStop(1,'rgba(70,137,170,.05)');
-   ctx.fillStyle=gleam;ctx.beginPath();ctx.ellipse(p.x,p.y,p.r,p.r*.77,0,0,2*PI);ctx.fill();ctx.restore();
-  }
+  const submerged=water!=null?clamp((p.y+p.r-water)/(p.r*2),0,1):0;
+  lc.globalAlpha=1-submerged*.12;
+  drawSprite(lc,p,t);
  }
- ctx.restore();
+ lc.globalAlpha=1;
+ if(water!=null&&liquid.bands.length){
+  lc.globalCompositeOperation='source-atop';
+  for(const b of liquid.bands){
+   const y0=Math.max(water,b.upper),y1=b.lower+40;if(y1<=y0)continue;
+   lc.fillStyle='rgba('+b.shade[0]+','+b.shade[1]+','+b.shade[2]+',.42)';
+   lc.fillRect(CX-200,y0,400,b.lower-y0+(b===liquid.bands[0]?60:0));
+  }
+  // A faint meniscus line where the ice breaks the surface.
+  lc.fillStyle='rgba(255,250,236,.22)';lc.fillRect(CX-200,water-.6,400,1.2);
+ }
+ lc.restore();
+ ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.drawImage(layer,0,0);ctx.restore();
 }
 function impact(st){
  if(type(st)==='none')return 0;
