@@ -172,7 +172,9 @@ function liquid(ctx,opts){
  if(!g)return;
  lastLiquid={bands:[],surface:null};
  const ml=clamp(state.visualML,0,total());if(ml<=.08){waterMotion.wasPouring=!!state.pour;return}
- const cap=capOf(state,glasses,id),layers=getLayers(),avg=liquidAverage();
+ const cap=capOf(state,glasses,id),layers=getLayers(),avg=liquidAverage(),avgOp=opts.liquidOpacity?opts.liquidOpacity():1;
+ // V9.6: clear spirits are water-white; ink() scales the body paint so they read as clear liquid
+ const ink=op=>.10+.90*clamp(op,0,1);
  const mix=clamp(state.mix,0,1),stir=Math.max(0,state.stirMotion||0),pour=state.pour;
  if(pour)waterMotion.wasPouring=true;
  else if(waterMotion.wasPouring){waterMotion.wasPouring=false;waterMotion.lastPourEnd=t}
@@ -209,27 +211,27 @@ function liquid(ctx,opts){
   ctx.lineTo(CX-r2,deep);ctx.lineTo(CX-r1,deep);
   ctx.closePath();
  };
- const bodyFill=(shade,r)=>{
-  const s=ctx.createLinearGradient(CX-r,0,CX+r,0);
-  s.addColorStop(0,color(bright(shade,-.42),.82));
-  s.addColorStop(.16,color(bright(shade,-.05),.86));
-  s.addColorStop(.42,color(bright(shade,.13),.89));
-  s.addColorStop(.67,color(bright(shade,.07),.88));
-  s.addColorStop(.90,color(bright(shade,-.09),.85));
-  s.addColorStop(1,color(bright(shade,-.40),.81));
+ const bodyFill=(shade,r,op=1)=>{
+  const s=ctx.createLinearGradient(CX-r,0,CX+r,0),k=ink(op);
+  s.addColorStop(0,color(bright(shade,-.42),.82*k));
+  s.addColorStop(.16,color(bright(shade,-.05),.86*k));
+  s.addColorStop(.42,color(bright(shade,.13),.89*k));
+  s.addColorStop(.67,color(bright(shade,.07),.88*k));
+  s.addColorStop(.90,color(bright(shade,-.09),.85*k));
+  s.addColorStop(1,color(bright(shade,-.40),.81*k));
   return s;
  };
- let used=0,topColor=avg;const bands=[];
+ let used=0,topColor=avg,topOp=avgOp;const bands=[];
  for(const p of layers){
   const take=Math.min(p.ml,Math.max(0,ml-used));
   if(take<=.001)break;
   const upper=liquidY(id,used+take,cap),lower=liquidY(id,used,cap);
   const topIsSurface=used+take>=ml-.01;
   const r=Math.max(rAt(upper),rAt(lower));
-  const shade=blend(p.layerColor,avg,mix);
-  topColor=shade;bands.push({upper,lower,shade});
+  const shade=blend(p.layerColor,avg,mix),op=lerp(p.opacity??1,avgOp,mix);
+  topColor=shade;topOp=op;bands.push({upper,lower,shade,op});
   bandPath(upper,lower,topIsSurface,used<=.001);
-  ctx.fillStyle=bodyFill(shade,r);ctx.fill();
+  ctx.fillStyle=bodyFill(shade,r,op);ctx.fill();
   ctx.save();ctx.clip();
   const absorption=ctx.createLinearGradient(0,upper-4,0,Math.max(upper+5,lower+depthScreen(id,lower,INSET)));
   absorption.addColorStop(0,'rgba(255,252,242,.05)');
@@ -253,7 +255,7 @@ function liquid(ctx,opts){
   for(let j=54;j>=0;j--){const x=CX-r+2*r*j/54;ctx.lineTo(x,edgeAt(y,x)+feather)}
   ctx.closePath();
   const f=ctx.createLinearGradient(0,y-feather,0,y+depthScreen(id,y,INSET)+feather);
-  f.addColorStop(0,color(above.shade,0));f.addColorStop(.5,color(mid,.42));f.addColorStop(1,color(below.shade,0));
+  f.addColorStop(0,color(above.shade,0));f.addColorStop(.5,color(mid,.42*Math.max(ink(above.op),ink(below.op))));f.addColorStop(1,color(below.shade,0));
   ctx.fillStyle=f;ctx.fill();
   const shine=ctx.createLinearGradient(CX-r,0,CX+r,0);
   shine.addColorStop(0,'rgba(255,250,236,0)');shine.addColorStop(.45,color(bright(mid,.45),.12));shine.addColorStop(1,'rgba(255,250,236,0)');
@@ -274,9 +276,10 @@ function liquid(ctx,opts){
  // middle, a soft specular glint and bright meniscus lines where it meets the glass.
  planePath();
  const body=ctx.createLinearGradient(0,surfaceY-dep,0,surfaceY+dep);
- body.addColorStop(0,color(bright(topColor,.20),.70));
- body.addColorStop(.5,color(bright(topColor,.06),.74));
- body.addColorStop(1,color(bright(topColor,.12),.80));
+ const tk=ink(topOp);
+ body.addColorStop(0,color(bright(topColor,.20),.70*tk));
+ body.addColorStop(.5,color(bright(topColor,.06),.74*tk));
+ body.addColorStop(1,color(bright(topColor,.12),.80*tk));
  ctx.fillStyle=body;ctx.fill();
  ctx.save();ctx.clip();
  const fres=ctx.createLinearGradient(0,surfaceY-dep,0,surfaceY+dep);
@@ -303,7 +306,7 @@ function liquid(ctx,opts){
  ctx.beginPath();for(let j=0;j<=60;j++){const x=CX-rad+(2*rad*j/60);ctx.lineTo(x,edgeAt(surfaceY,x,true))}
  ctx.strokeStyle=lineGrad(.42);ctx.lineWidth=1.3;ctx.stroke();
  ctx.beginPath();for(let j=0;j<=60;j++){const x=CX-rad+(2*rad*j/60);ctx.lineTo(x,edgeAt(surfaceY,x,true)+2.2)}
- ctx.strokeStyle=color(bright(topColor,-.35),.16);ctx.lineWidth=1.6;ctx.stroke();
+ ctx.strokeStyle=color(bright(topColor,-.35),.16*tk);ctx.lineWidth=1.6;ctx.stroke();
  if(impact>.035){
   const focal=ctx.createRadialGradient(CX+3,surfaceY+8,2,CX+3,surfaceY+22,Math.max(30,sr*.44));
   const injected=pour&&Array.isArray(pour.color)?pour.color:topColor;
@@ -370,9 +373,10 @@ function pour(ctx,id,state,t,cap){const p=state.pour;if(!p)return;
  if(p.kind==='strain'&&state.flow==='stir'&&window.LCStirScene)return;
  const z=clamp((t-p.start)/p.duration,0,1),force=Math.sin(Math.PI*z);if(force<=.008)return;
  const pc=Array.isArray(p.color)?p.color:[188,211,217],surface=liquidY(id,state.visualML,cap);
+ const hk=window.mixologyHooks,lp=state.portions[state.portions.length-1],sk=.25+.75*clamp(lp&&hk&&hk.byId[lp.id]?(hk.byId[lp.id].op??1):1,0,1);
  const g=specs[id],rimTop=gy(g.rim.cy)-g.rim.ry*SCALE;
  const sx=376,sy0=Math.min(59,rimTop-40),ex=CX+6,ey=surface+2;
- const gr=ctx.createLinearGradient(sx,sy0,ex,ey);gr.addColorStop(0,color(bright(pc,.30),.64*force));gr.addColorStop(.65,color(pc,.85*force));gr.addColorStop(1,color(bright(pc,.16),.95*force));
+ const gr=ctx.createLinearGradient(sx,sy0,ex,ey);gr.addColorStop(0,color(bright(pc,.30),.64*force*sk));gr.addColorStop(.65,color(pc,.85*force*sk));gr.addColorStop(1,color(bright(pc,.16),.95*force*sk));
  ctx.strokeStyle=gr;ctx.lineCap='round';ctx.lineWidth=3+2*force;
  ctx.beginPath();ctx.moveTo(sx,sy0);ctx.bezierCurveTo(sx+4,sy0+47,ex-7,ey-45,ex,ey);ctx.stroke();
  ctx.lineWidth=1;ctx.strokeStyle=`rgba(247,254,253,${.49*force})`;ctx.stroke();

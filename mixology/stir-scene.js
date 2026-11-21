@@ -20,6 +20,7 @@ const inOut=t=>{t=clamp(t,0,1);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
 const rgba=(c,a)=>'rgba('+Math.round(c[0])+','+Math.round(c[1])+','+Math.round(c[2])+','+a+')';
 const mixc=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
 const lift=(c,q)=>mixc(c,q>=0?[254,246,228]:[4,12,30],Math.abs(q));
+const INK=op=>.10+.90*clamp(op,0,1);   // V9.6 tint strength -> paint opacity (clear spirits read as clear)
 
 // ---------- assets ----------
 const DIR='./assets/stir/';
@@ -110,11 +111,13 @@ function layersFor(visualMl){
  for(const p of s.portions){
   if(left<=.0001)break;const ml=Math.min(p.ml,left);left-=ml;
   const info=h.byId[p.id];if(!info)continue;
-  items.push({ml,color:p.lockedColor||h.rgb(info.color),density:p.lockedDensity??info.density});
+  items.push({ml,color:p.lockedColor||h.rgb(info.color),op:p.lockedOp??(info.op??1),density:p.lockedDensity??info.density});
  }
- const vol=items.reduce((a,p)=>a+p.ml,0);
- const avg=vol?[0,1,2].map(i=>items.reduce((a,p)=>a+p.color[i]*p.ml,0)/vol):[200,220,230];
- return {layers:items.sort((a,b)=>b.density-a.density),avg,vol};
+ const vol=items.reduce((a,p)=>a+p.ml,0),inkSum=items.reduce((a,p)=>a+p.ml*p.op,0);
+ // same rule as index.html liquidAverage(): clear spirits dilute the colour instead of whitening it
+ const avg=inkSum>1e-6?[0,1,2].map(i=>items.reduce((a,p)=>a+p.color[i]*p.ml*p.op,0)/inkSum):[236,242,240];
+ const op=vol?inkSum/vol:1;
+ return {layers:items.sort((a,b)=>b.density-a.density),avg,op,vol};
 }
 
 // ---------- ice ----------
@@ -192,7 +195,7 @@ function drawUprightLiquid(c,o){
  c.save();interior(c,-5);c.clip();
  // bands bottom -> top, boundaries at volume-proportional heights
  let acc=0;const bands=[];
- for(const p of L.layers){const zl=DIM.HB+hm*acc/L.vol;acc+=p.ml;const zu=DIM.HB+hm*acc/L.vol;bands.push({zl,zu,color:mixc(p.color,L.avg,mix)})}
+ for(const p of L.layers){const zl=DIM.HB+hm*acc/L.vol;acc+=p.ml;const zu=DIM.HB+hm*acc/L.vol;bands.push({zl,zu,color:mixc(p.color,L.avg,mix),k:INK(lerp(p.op,L.op,mix))})}
  bands.forEach((b,i)=>{
   const top=i===bands.length-1,eu=ell(b.zu),el=ell(b.zl),r1=eu.rx+3,r2=i===0?0:Math.min(r1,el.rx+3);
   const swirlK=(1-mix)*speed*7;
@@ -202,8 +205,8 @@ function drawUprightLiquid(c,o){
   if(r2>0)for(let j=48;j>=0;j--){const x=G.cx-r2+2*r2*j/48;c.lineTo(x,frontY(b.zl,x)+Math.sin(x*.045+spin*1.7+i-1)*swirlK)}
   c.lineTo(G.cx-r2,1700);c.lineTo(G.cx-r1,1700);c.closePath();
   const g=c.createLinearGradient(G.cx-r1,0,G.cx+r1,0);
-  g.addColorStop(0,rgba(lift(b.color,-.42),.80));g.addColorStop(.2,rgba(lift(b.color,-.06),.84));g.addColorStop(.45,rgba(lift(b.color,.12),.86));
-  g.addColorStop(.75,rgba(lift(b.color,.02),.85));g.addColorStop(1,rgba(lift(b.color,-.40),.80));
+  g.addColorStop(0,rgba(lift(b.color,-.42),.80*b.k));g.addColorStop(.2,rgba(lift(b.color,-.06),.84*b.k));g.addColorStop(.45,rgba(lift(b.color,.12),.86*b.k));
+  g.addColorStop(.75,rgba(lift(b.color,.02),.85*b.k));g.addColorStop(1,rgba(lift(b.color,-.40),.80*b.k));
   c.fillStyle=g;c.fill();
  });
  // stirring: colour tendrils of the lower layers spiral up and fade as the drink becomes one
@@ -212,17 +215,17 @@ function drawUprightLiquid(c,o){
    c.beginPath();
    for(let k=0;k<=40;k++){const q=k/40,z=lerp(bands[i].zu,zs,q*.92),e=ell(z),a=spin*.85+q*3.4+j*Math.PI+i;
     c.lineTo(G.cx+e.rx*.72*Math.cos(a),e.cy+e.ry*.9*Math.sin(a))}
-   c.strokeStyle=rgba(lift(bands[i].color,.08),.42*(1-mix)*Math.min(1,speed*1.6));c.lineWidth=24;c.lineCap='round';c.stroke();
+   c.strokeStyle=rgba(lift(bands[i].color,.08),.42*bands[i].k*(1-mix)*Math.min(1,speed*1.6));c.lineWidth=24;c.lineCap='round';c.stroke();
   }
  }
  // free surface (V8.3 treatment) + vortex while stirring
- const top=mixc(bands[bands.length-1].color,L.avg,mix),rx=es.rx+3,ry=es.ry;
+ const top=mixc(bands[bands.length-1].color,L.avg,mix),tk=bands[bands.length-1].k,rx=es.rx+3,ry=es.ry;
  const back=x=>{const u=clamp((x-G.cx)/rx,-1,1);return es.cy-ry*Math.sqrt(1-u*u)+wob(x,.3)};
  const front=x=>frontY(zs,x)+wob(x,.8);
  c.beginPath();for(let j=0;j<=64;j++){const x=G.cx-rx+2*rx*j/64;c.lineTo(x,back(x))}
  for(let j=64;j>=0;j--){const x=G.cx-rx+2*rx*j/64;c.lineTo(x,front(x))}c.closePath();
  const pl=c.createLinearGradient(0,es.cy-ry,0,es.cy+ry);
- pl.addColorStop(0,rgba(lift(top,.22),.70));pl.addColorStop(.5,rgba(lift(top,.06),.74));pl.addColorStop(1,rgba(lift(top,.12),.80));
+ pl.addColorStop(0,rgba(lift(top,.22),.70*tk));pl.addColorStop(.5,rgba(lift(top,.06),.74*tk));pl.addColorStop(1,rgba(lift(top,.12),.80*tk));
  c.fillStyle=pl;c.fill();
  c.save();c.clip();
  if(speed>.02){
@@ -408,13 +411,13 @@ function jiggerPose(q,m){
  const u=inOut((q-PREP.pourB)/(1-PREP.pourB)),P=jiggerAt(L,-2.2);
  return {x:lerp(P.x,off.x,u),y:lerp(P.y,off.y,u),rot:lerp(P.rot,off.rot,u),alpha:1-smooth((u-.6)/.4)};
 }
-function drawJigger(ctx,jp,col,full){
+function drawJigger(ctx,jp,col,full,op=1){
  if(!ok.jigger)return;
  ctx.save();ctx.globalAlpha=jp.alpha;ctx.translate(jp.x,jp.y);ctx.rotate(jp.rot);ctx.scale(JK,JK);ctx.translate(-JG.pivot[0],-JG.pivot[1]);
  ctx.drawImage(img.jigger,0,0);
  if(full>.01){ // the measure brimming in the cup while it is carried in
   const r=JG.rim;ctx.beginPath();ctx.ellipse(JG.cx,r.cy+6,r.rx*.9,r.ry*.84,0,0,TAU);ctx.clip();
-  const g=ctx.createLinearGradient(0,r.cy-r.ry,0,r.cy+r.ry);g.addColorStop(0,rgba(lift(col,.25),.92*full));g.addColorStop(1,rgba(lift(col,-.12),.92*full));
+  const g=ctx.createLinearGradient(0,r.cy-r.ry,0,r.cy+r.ry);const jk=INK(op);g.addColorStop(0,rgba(lift(col,.25),.92*full*jk));g.addColorStop(1,rgba(lift(col,-.12),.92*full*jk));
   ctx.fillStyle=g;ctx.fillRect(JG.cx-r.rx,r.cy-r.ry,r.rx*2,r.ry*2);
   ctx.strokeStyle='rgba(255,252,240,'+(.35*full)+')';ctx.lineWidth=6;ctx.beginPath();ctx.ellipse(JG.cx-r.rx*.2,r.cy-r.ry*.25,r.rx*.45,r.ry*.3,0,Math.PI*1.05,Math.PI*1.6);ctx.stroke();
  }
@@ -427,8 +430,9 @@ function drawPrepPour(ctx,pose,mlv,t){
  const hm=levelFor(Math.max(mlv,.5)),e=ell(DIM.HB+hm);
  const tg={x:m.x,y:pose.y+(e.cy-G.pivot[1])*K*pose.sc,mouth:m.back,r:e.rx*K*pose.sc};
  const full=q<PREP.enter?1:1-clamp((jp.rot+1.25)/-.6,0,1);
- if(sq>0&&sq<1)drawStream(ctx,(()=>{const lp=jiggerLip(jp.rot),vx=(lp[0]-JG.pivot[0])*JK,vy=(lp[1]-JG.pivot[1])*JK,c=Math.cos(jp.rot),sn=Math.sin(jp.rot);return [jp.x+vx*c-vy*sn,jp.y+vx*sn+vy*c]})(),tg,sq,t,col,.72);
- drawJigger(ctx,jp,col,full);
+  const lastP=s.portions[s.portions.length-1],pop=lastP&&h.byId[lastP.id]?(h.byId[lastP.id].op??1):1;
+ if(sq>0&&sq<1)drawStream(ctx,(()=>{const lp=jiggerLip(jp.rot),vx=(lp[0]-JG.pivot[0])*JK,vy=(lp[1]-JG.pivot[1])*JK,c=Math.cos(jp.rot),sn=Math.sin(jp.rot);return [jp.x+vx*c-vy*sn,jp.y+vx*sn+vy*c]})(),tg,sq,t,col,.72,pop);
+ drawJigger(ctx,jp,col,full,pop);
 }
 function prepLanding(){const p=s.prepPour;if(!p)return 0;const sq=prepStreamQ(prepQ());return sq>.1&&sq<.95?.6:0}
 
@@ -548,7 +552,8 @@ function spoutOf(pose){
 }
 // A falling stream: leaves the lip with a little forward speed, narrows as it accelerates,
 // head falls in at the start and the tail drops away at the end.
-function drawStream(ctx,sp,tg,q,t,col,wk=1){
+function drawStream(ctx,sp,tg,q,t,col,wk=1,op=1){
+ const sk=.25+.75*clamp(op,0,1);
  const sx=sp[0],sy=sp[1]+1,ex=clamp(tg.x+(sx-tg.x)*.35,tg.x-tg.r*.5,tg.x+tg.r*.5),ey=tg.y+1;
  const fall=Math.max(20,ey-sy),vx=(ex-sx);
  const P=u=>[sx+vx*(1-Math.pow(1-u,2.2))-6*Math.sin(Math.PI*u)*(1-u),sy+fall*u*u*.55+fall*u*.45];
@@ -564,13 +569,13 @@ function drawStream(ctx,sp,tg,q,t,col,wk=1){
  for(const part of ['above','inside']){
   ctx.save();ctx.beginPath();if(part==='above')ctx.rect(-400,-900,1400,mouthY+900);else ctx.rect(-400,mouthY,1400,1200);ctx.clip();
   const a=part==='above'?1:.72;
-  const g=ctx.createLinearGradient(sx,sy,ex,ey);g.addColorStop(0,rgba(lift(col,.22),.86*a));g.addColorStop(1,rgba(lift(col,.06),.80*a));
+  const g=ctx.createLinearGradient(sx,sy,ex,ey);g.addColorStop(0,rgba(lift(col,.22),.86*a*sk));g.addColorStop(1,rgba(lift(col,.06),.80*a*sk));
   body(ctx);ctx.fillStyle=g;ctx.fill();
   // glassy core highlight and a darker trailing edge give the ribbon volume
   ctx.lineCap='round';ctx.lineJoin='round';
   ctx.beginPath();L.forEach((p,i)=>{const m=[lerp(p[0],R[i][0],.32),lerp(p[1],R[i][1],.32)];i?ctx.lineTo(m[0],m[1]):ctx.moveTo(m[0],m[1])});
   ctx.strokeStyle='rgba(255,253,244,'+(.55*a)+')';ctx.lineWidth=1.3;ctx.stroke();
-  ctx.beginPath();R.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.strokeStyle=rgba(lift(col,-.25),.45*a);ctx.lineWidth=1;ctx.stroke();
+  ctx.beginPath();R.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.strokeStyle=rgba(lift(col,-.25),.45*a*sk);ctx.lineWidth=1;ctx.stroke();
   // light glints running down the stream
   for(let k=0;k<6;k++){const f=((t*.0024)+k/6)%1,u=lerp(u0,u1,f),p=P(u);
    ctx.fillStyle='rgba(255,255,250,'+(.42*a*force)+')';ctx.beginPath();ctx.ellipse(p[0]-1,p[1],1.1,3.2,0,0,TAU);ctx.fill()}
@@ -598,7 +603,7 @@ function drawStrain(ctx,base,e,t,tg){
  });
  const o={mlv:left,tilted:true,rot:pose.rot,color:p&&Array.isArray(p.color)?p.color:layersFor(vol).avg,ice,spoon:null,strainer:true};
  withFade(ctx,base,pose.alpha,c=>drawGlassScene(c,base,pose,o));
- if(p&&q>0)drawStream(ctx,spoutOf(pose),tg,q,t,o.color);
+ if(p&&q>0)drawStream(ctx,spoutOf(pose),tg,q,t,o.color,1,h.liquidOpacity?h.liquidOpacity():1);
 }
 
 // ---------- host-side actions (never run on a viewer) ----------
@@ -666,5 +671,5 @@ function schedule(){lastPhase=null}
 
 window.LCStirScene={frame,phase,busy,begin,processMs,onReset,strainTiming,startStrain,schedule,
  freezeAt:ms=>{frozen=ms===null?null:Number(s.stirAnim?.startAt||0)+ms},
- timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'9.5'};
+ timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'9.6'};
 })();

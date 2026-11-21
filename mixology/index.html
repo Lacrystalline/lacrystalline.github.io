@@ -37,7 +37,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <body>
 <header class="topbar">
  <div class="brand"><div class="brandmark" aria-hidden="true"><span>✧</span></div><div class="brandname">LA CRYSTALLINE<small>水晶庭 · MIXOLOGY ATELIER</small></div></div>
- <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V9.5</span></div>
+ <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V9.6</span></div>
 </header>
 <div class="shell">
  <div class="intro"><div><div class="eyebrow">An evening, made by your hands</div><h1>調製屬於你的那杯夜色</h1></div><p>選擇原料 · 觀察分層 · 親手攪拌 · 完成特調</p></div>
@@ -97,10 +97,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 </div>
 <script src="./visual-v3.js" defer></script>
 <script src="./layered-art-v4.js" defer></script>
-<script src="./asset-glass-v5.js?v=20261121-v92" defer></script>
+<script src="./asset-glass-v5.js?v=20261121-v96" defer></script>
 <script src="./flow-v6.js?v=20261121-v93" defer></script>
 <script src="./ice-v8.js?v=20261121-v94" defer></script>
-<script src="./stir-scene.js?v=20261121-v95" defer></script>
+<script src="./stir-scene.js?v=20261121-v96" defer></script>
 <!-- sync library last: a slow CDN must not hold back the glass artwork -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js" defer></script>
 <script src="./realtime.js?v=20261121-room-pin-v95" defer></script>
@@ -108,8 +108,14 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
 const ingredientData=[
- {id:'gin',name:'琴酒',en:'GIN',color:'#d4e7ed',density:.95,taste:[0,0,2,5],desc:'草本・清冽'},
- {id:'vodka',name:'伏特加',en:'VODKA',color:'#ecf5f1',density:.95,taste:[0,0,0,5],desc:'純淨・俐落'},
+ // Six base spirits. op = how strongly the spirit tints the drink (1 = fully coloured liqueur/juice):
+ // clear spirits are water-white, aged ones are transparent amber - not opaque paint.
+ {id:'vodka',name:'伏特加',en:'VODKA',color:'#eef3f2',op:.1,density:.95,taste:[0,0,0,5],desc:'純淨・俐落'},
+ {id:'gin',name:'琴酒',en:'GIN',color:'#ecf2f1',op:.1,density:.95,taste:[0,0,2,5],desc:'草本・清冽'},
+ {id:'rum',name:'白蘭姆酒',en:'RUM',color:'#f1f1ea',op:.1,density:.95,taste:[1,0,0,5],desc:'甘蔗・圓潤'},
+ {id:'tequila',name:'龍舌蘭',en:'TEQUILA',color:'#eef1e8',op:.1,density:.95,taste:[0,0,1,5],desc:'銀色未陳・辛香'},
+ {id:'whisky',name:'威士忌',en:'WHISKY',color:'#cf8e3a',op:.86,density:.95,taste:[1,0,2,5],desc:'橡木桶・琥珀'},
+ {id:'brandy',name:'白蘭地',en:'BRANDY',color:'#94461d',op:.9,density:.95,taste:[2,0,1,5],desc:'葡萄・深琥珀'},
  {id:'blue',name:'藍柑橘酒',en:'BLUE CURAÇAO',color:'#208fd3',density:1.12,taste:[4,1,1,2],desc:'柑橘・湛藍'},
  {id:'grenadine',name:'紅石榴糖漿',en:'GRENADINE',color:'#c92865',density:1.20,taste:[5,1,0,0],desc:'果紅・濃甜'},
  {id:'lemon',name:'檸檬汁',en:'LEMON',color:'#ffe48b',density:1.04,taste:[1,5,0,0],desc:'清酸・明亮'},
@@ -139,7 +145,7 @@ function notify(message){const t=$('toast');t.textContent=message;t.classList.ad
 // broadcast arrival times), so animations stay in step even if the two devices' clocks disagree.
 // deferred scripts have all run once DOMContentLoaded fires; until then nothing is painted
 let pageScriptsDone=false;document.addEventListener('DOMContentLoaded',()=>{pageScriptsDone=true},{once:true});
-const APP_VER='9.5',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
+const APP_VER='9.6',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
 window.mixologyBridge={
  state,
  take(){return {appVer:APP_VER,sentAt:Date.now(),stirAnim:state.stirAnim?{...state.stirAnim}:null,stirManual:state.stirManual?{...state.stirManual}:null,iceKind:state.iceKind,iceStartedAt:state.iceStartedAt,iceSeed:state.iceSeed,flow:state.flow,flowStep:state.flowStep,prepIce:state.prepIce,layerIntent:state.layerIntent,dilutionMl:state.dilutionMl,prepPour:state.prepPour?{from:state.prepPour.from,to:state.prepPour.to,color:state.prepPour.color,duration:state.prepPour.duration,startAt:Date.now()-(performance.now()-state.prepPour.start)}:null,glass:state.glass,qty:state.qty,portions:state.portions.map(p=>({...p})),decor:[...state.decor],mix:state.mix,mixKind:state.mixKind,mixedOnce:state.mixedOnce,visualML:state.visualML,pour:state.pour?{kind:state.pour.kind||'build',from:state.pour.from,to:state.pour.to,color:state.pour.color,duration:state.pour.duration,startAt:Date.now()-(performance.now()-state.pour.start)}:null,processing:state.processing?{from:state.processing.from,kind:state.processing.kind,duration:state.processing.duration,startAt:Date.now()-(performance.now()-state.processing.start)}:null}},
@@ -149,7 +155,7 @@ window.mixologyBridge={
 };
 function syncRoom(e){window.mixologyBridge.emit(e)}
 
-window.mixologyHooks={state,glasses,byId,updateUI,notify,sleep,syncRoom,total,rgb,liquidAverage};
+window.mixologyHooks={state,glasses,byId,updateUI,notify,sleep,syncRoom,total,rgb,liquidAverage,liquidOpacity};
 function updateBusy(){document.querySelectorAll('.ing,.preset,#stirBtn,#shakeBtn,#finishBtn').forEach(el=>el.disabled=state.busy||state.demo||(el.id==='finishBtn'&&total()===0)||(el.id==='stirBtn'&&total()===0)||(el.id==='shakeBtn'&&total()===0));$('resetBtn').disabled=false}
 function renderIngredients(){const box=$('ingredients');box.textContent='';for(const i of ingredientData){if(i.hidden)continue;const b=document.createElement('button');b.dataset.ingredient=i.id;b.className='ing';b.style.setProperty('--swatch',i.color);b.innerHTML=`<div class="ing-head"><span class="swatch"></span><span>${i.name}</span></div><div class="ing-sub">${i.desc}</div><div class="ing-meta">SG ${i.density.toFixed(2)} · ${i.en}</div><span class="plus">＋</span>`;b.addEventListener('click',()=>add(i.id,state.qty));box.appendChild(b)}}
 function renderPresets(){const box=$('presets');for(const p of presets){let b=document.createElement('button');b.className='preset';b.innerHTML=`<span><strong>${p.name}</strong><small>${p.en}</small></span><span class="arr">↗</span>`;b.addEventListener('click',()=>loadPreset(p));box.appendChild(b)}}
@@ -167,7 +173,7 @@ function selectGlass(type){if(state.busy||state.demo)return;const ml=total();if(
 async function add(id,ml,fromDemo=false){if(window.flowV6&&window.flowV6.shouldHandleAdd(id))return window.flowV6.addPrep(id,ml,fromDemo);if(state.busy||(!fromDemo&&state.demo))return false;const cap=window.flowV6?window.flowV6.effectiveCapacity():glasses[state.glass].capacity;if(total()+ml>cap){notify(`這只杯子最多可裝 ${cap} ml，請減少倒入量。`);return false}const currentRev=state.revision;const previous=total();if(state.mix>.001)freezePreviousBlend();state.portions.push({id,ml});state.busy=true;state.pour={start:performance.now(),kind:'build',duration:state.layerIntent?1500:900,from:state.visualML,to:previous+ml,color:rgb(byId[id].color)};
  state.stirMotion=state.layerIntent?.14:.76;updateUI();syncRoom('pour_begin');await sleep(state.pour.duration+25);if(currentRev!==state.revision)return false;state.visualML=total();state.pour=null;state.busy=false;updateUI();syncRoom('pour_end');return true}
 async function loadPreset(p){if(state.busy||state.demo)return;reset(true);state.glass=p.glass;state.demo=true;state.flow='build';state.flowStep='served';state.layerIntent=true;state.prepIce=false;updateUI();syncRoom('glass');const revision=state.revision;for(const [id,ml] of p.recipe){if(revision!==state.revision)return;await add(id,ml,true);await sleep(110)}if(revision===state.revision){state.demo=false;updateUI();notify(`${p.name} 已完成。試試攪拌，觀察酒液的變化。`)}}
-function freezePreviousBlend(){const averaged=liquidAverage();const weight=total();let density=0;state.portions.forEach(p=>density+=p.ml*(p.lockedDensity??byId[p.id].density));density=weight?density/weight:1;const gen=Math.max(state.mixGeneration,...state.portions.map(p=>Number(p.mixGroup)||0))+1;state.mixGeneration=gen;state.portions.forEach(p=>{p.lockedColor=blend(p.lockedColor||rgb(byId[p.id].color),averaged,state.mix);if(state.mix>.94){p.lockedDensity=density;p.mixGroup=gen}else{p.mixGroup=null}});state.mixedOnce=state.mixedOnce||state.mix>.65;state.mix=0}
+function freezePreviousBlend(){const averaged=liquidAverage(),avgOp=liquidOpacity();const weight=total();let density=0;state.portions.forEach(p=>density+=p.ml*(p.lockedDensity??byId[p.id].density));density=weight?density/weight:1;const gen=Math.max(state.mixGeneration,...state.portions.map(p=>Number(p.mixGroup)||0))+1;state.mixGeneration=gen;state.portions.forEach(p=>{p.lockedColor=blend(p.lockedColor||rgb(byId[p.id].color),averaged,state.mix);const ownOp=p.lockedOp??(byId[p.id].op??1);p.lockedOp=ownOp+(avgOp-ownOp)*state.mix;if(state.mix>.94){p.lockedDensity=density;p.mixGroup=gen}else{p.mixGroup=null}});state.mixedOnce=state.mixedOnce||state.mix>.65;state.mix=0}
 function startProcess(kind){if(window.mixologyBridge.isViewer()||state.busy||state.demo||state.drag||!total())return;if(window.flowV6&&!window.flowV6.allowProcess(kind))return;const stirScene=state.flow==='stir'&&kind==='stirred'&&window.LCStirScene;state.processing={kind,start:performance.now(),duration:kind==='shaken'?1250:stirScene?window.LCStirScene.processMs():1600,from:state.mix};if(stirScene)window.LCStirScene.begin(kind);state.busy=true;state.mixKind=kind;state.mixedOnce=true;updateUI();syncRoom('mix_begin')}
 function changeDecoration(type){if(state.decor.has(type))state.decor.delete(type);else state.decor.add(type);updateUI();syncRoom('decor')}
 function fitCanvas(){const dpr=Math.min(window.devicePixelRatio||1,2);const w=560*dpr,h=620*dpr;if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}ctx.setTransform(dpr,0,0,dpr,0,0)}
@@ -186,15 +192,23 @@ function visiblePortions(){
  const last=state.portions.length-1;
  return state.portions.map((p,index)=>{
   const liveMl=state.pour&&state.pour.kind!=='strain'&&index===last?clamp(state.visualML-state.pour.from,0,p.ml):p.ml;
-  return {...p,ml:liveMl,layerColor:p.lockedColor||rgb(byId[p.id].color),density:p.lockedDensity??byId[p.id].density};
+  return {...p,ml:liveMl,layerColor:p.lockedColor||rgb(byId[p.id].color),opacity:p.lockedOp??(byId[p.id].op??1),density:p.lockedDensity??byId[p.id].density};
  }).filter(p=>p.ml>0.00001);
 }
+// Colour of the blend = colours weighted by how strongly each part tints (a clear spirit dilutes
+// the colour instead of whitening it); liquidOpacity() = how strongly the whole blend tints.
 function liquidAverage(){
  const items=visiblePortions(),volume=items.reduce((s,p)=>s+p.ml,0);
  if(!volume)return [150,190,210];
+ const ink=items.reduce((s,p)=>s+p.ml*p.opacity,0);
+ if(ink<1e-6)return [236,242,240];
  const sum=[0,0,0];
- for(const p of items)for(let i=0;i<3;i++)sum[i]+=p.layerColor[i]*p.ml;
- return sum.map(x=>Math.round(x/volume));
+ for(const p of items)for(let i=0;i<3;i++)sum[i]+=p.layerColor[i]*p.ml*p.opacity;
+ return sum.map(x=>Math.round(x/ink));
+}
+function liquidOpacity(){
+ const items=visiblePortions(),volume=items.reduce((s,p)=>s+p.ml,0);
+ return volume?items.reduce((s,p)=>s+p.ml*p.opacity,0)/volume:1;
 }
 function getLayers(){
  const items=visiblePortions();
@@ -202,7 +216,7 @@ function getLayers(){
  const sum=items.reduce((s,p)=>s+p.ml,0);
  // Completed stirring is ONE liquid body, not identically colored stripes.
  if(state.mix>=.995){
-  return [{ml:sum,layerColor:liquidAverage(),density:items.reduce((s,p)=>s+p.density*p.ml,0)/sum,mixGroup:'all'}];
+  return [{ml:sum,layerColor:liquidAverage(),opacity:liquidOpacity(),density:items.reduce((s,p)=>s+p.density*p.ml,0)/sum,mixGroup:'all'}];
  }
  // Preserve an already-stirred body as one layer if more alcohol is poured.
  const groups=new Map(),layers=[];
@@ -210,8 +224,8 @@ function getLayers(){
   if(p.mixGroup!==null&&p.mixGroup!==undefined&&p.mixGroup!==0){
    const key=String(p.mixGroup),g=groups.get(key);
    if(g){
-    const nextMl=g.ml+p.ml;
-    g.layerColor=g.layerColor.map((v,i)=>Math.round((v*g.ml+p.layerColor[i]*p.ml)/nextMl));
+    const nextMl=g.ml+p.ml,wa=g.ml*g.opacity,wb=p.ml*p.opacity,wt=Math.max(1e-6,wa+wb);
+    g.layerColor=g.layerColor.map((v,i)=>Math.round((v*wa+p.layerColor[i]*wb)/wt));g.opacity=(g.opacity*g.ml+p.opacity*p.ml)/nextMl;
     g.density=(g.density*g.ml+p.density*p.ml)/nextMl;g.ml=nextMl;
    }else{const merged={...p};groups.set(key,merged);layers.push(merged)}
   }else layers.push({...p});
@@ -249,7 +263,7 @@ function frame(t){fitCanvas();const dt=Math.min(45,t-lastTime);lastTime=t;ctx.cl
  if(state.processing){const p=state.processing,progress=clamp((t-p.start)/p.duration,0,1);state.mix=p.from+(1-p.from)*progress;state.stirMotion=Math.max(state.stirMotion,Math.sin(progress*Math.PI));if(progress>=1){state.mix=1;state.processing=null;state.stirMotion=.35;state.busy=false;if(!window.mixologyBridge.isViewer()){if(window.flowV6)window.flowV6.onProcessDone(p.kind);updateUI();syncRoom('mix_end')}else updateUI()}}
  state.stirMotion*=Math.pow(.977,dt/16);if(state.drag&&total())state.stirMotion=Math.max(state.stirMotion,.8);
  if(window.flowV6)window.flowV6.tick(t);const visibleState=window.flowV6?window.flowV6.renderState():state;
- const drawServing=c=>window.LCArtV5&&window.LCArtV5.draw({ctx:c,state:visibleState,t,glasses,byId,getLayers,liquidAverage,vToY,total});
+ const drawServing=c=>window.LCArtV5&&window.LCArtV5.draw({ctx:c,state:visibleState,t,glasses,byId,getLayers,liquidAverage,liquidOpacity,vToY,total});
  // Boot: never paint the legacy renderers while the real-glass artwork is still on its way;
  // keep the stage empty and fade it in once the current glass has decoded (V9.2).
  const v5=window.LCArtV5,bootWait=!(pageScriptsDone||window.LCStirScene)||(v5&&v5.status&&v5.status(visibleState.glass)==='loading');
