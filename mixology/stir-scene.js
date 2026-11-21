@@ -111,14 +111,13 @@ function layersFor(visualMl){
  for(const p of s.portions){
   if(left<=.0001)break;const ml=Math.min(p.ml,left);left-=ml;
   const info=h.byId[p.id];if(!info)continue;
-  items.push({id:p.id,locked:!!p.lockedColor,ml,color:p.lockedColor||h.rgb(info.color),op:p.lockedOp??(info.op??1),density:p.lockedDensity??info.density});
+  const L=h.lookOf?h.lookOf(p):{abs:[0,0,0],haze:0,color:h.rgb(info.color),op:1};
+  items.push({id:p.id,locked:!!(p.lockedAbs||p.lockedColor),ml,abs:L.abs,haze:L.haze,color:L.color,op:L.op,density:p.lockedDensity??info.density});
  }
- const tinted=h.phAdjust?h.phAdjust(items):items;   // butterfly pea + acid, as in index.html
- const vol=items.reduce((a,p)=>a+p.ml,0),inkSum=items.reduce((a,p)=>a+p.ml*p.op,0);
- // same rule as index.html liquidAverage(): clear spirits dilute the colour instead of whitening it
- const avg=inkSum>1e-6?[0,1,2].map(i=>tinted.reduce((a,p)=>a+p.color[i]*p.ml*p.op,0)/inkSum):[236,242,240];
- const op=vol?inkSum/vol:1;
- return {layers:items.sort((a,b)=>b.density-a.density),avg,op,vol};
+ const vol=items.reduce((a,p)=>a+p.ml,0);
+ // V10: same Beer-Lambert blend as index.html (butterfly pea reacts to acid there too)
+ const M=vol&&h.mixLook?h.mixLook(h.phAdjust?h.phAdjust(items):items):{color:[236,242,240],op:1};
+ return {layers:items.sort((a,b)=>b.density-a.density),avg:M.color,op:M.op,vol};
 }
 
 // ---------- ice ----------
@@ -672,5 +671,5 @@ function schedule(){lastPhase=null}
 
 window.LCStirScene={frame,phase,busy,begin,processMs,onReset,strainTiming,startStrain,schedule,
  freezeAt:ms=>{frozen=ms===null?null:Number(s.stirAnim?.startAt||0)+ms},
- timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'9.9'};
+ timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'10.0'};
 })();
