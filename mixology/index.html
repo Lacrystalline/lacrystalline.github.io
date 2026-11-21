@@ -38,7 +38,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <body>
 <header class="topbar">
  <div class="brand"><div class="brandmark" aria-hidden="true"><span>✧</span></div><div class="brandname">LA CRYSTALLINE<small>水晶庭 · MIXOLOGY ATELIER</small></div></div>
- <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V10.6</span></div>
+ <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V10.6.1</span></div>
 </header>
 <div class="shell">
  <div class="intro"><div><div class="eyebrow">An evening, made by your hands</div><h1>調製屬於你的那杯夜色</h1></div><p>選擇原料 · 觀察分層 · 親手攪拌 · 完成特調</p></div>
@@ -138,7 +138,7 @@ const ingredientData=[
  {id:'jasmine',pH:6.63,cat:'tea',name:'茉莉綠茶',en:'JASMINE GREEN',color:'#e2db8a',density:1.00,taste:[0,0,1,0],desc:'花香・淡黃綠'},
  {id:'matcha',cat:'tea',name:'抹茶',en:'MATCHA',color:'#7fa53b',haze:0.9,density:1.02,taste:[0,0,3,0],desc:'茶粉懸浮・翠綠'},
  {id:'chamomile',cat:'tea',name:'洋甘菊茶',en:'CHAMOMILE',color:'#f0cf5a',density:1.00,taste:[1,0,0,0],desc:'蜜香・明黃'},
- {id:'hibiscus',cat:'tea',name:'洛神花茶',en:'HIBISCUS',color:'#7c0a22',pH:2.5,density:1.01,taste:[0,3,0,0],desc:'酸香・深紅'},
+ {id:'hibiscus',cat:'tea',name:'洛神花茶',en:'HIBISCUS',color:'#7c140a',pH:2.5,density:1.01,taste:[0,3,0,0],desc:'酸香・深紅'},
  {id:'melt',name:'融冰稀釋',en:'MELT WATER',color:'#f8fbfb',density:1.0,taste:[0,0,0,0],desc:'調製用冰融化',hidden:true}
 ];
 const byId=Object.fromEntries(ingredientData.map(i=>[i.id,i]));
@@ -160,7 +160,7 @@ function notify(message){const t=$('toast');t.textContent=message;t.classList.ad
 // broadcast arrival times), so animations stay in step even if the two devices' clocks disagree.
 // deferred scripts have all run once DOMContentLoaded fires; until then nothing is painted
 let pageScriptsDone=false;document.addEventListener('DOMContentLoaded',()=>{pageScriptsDone=true;renderGarnishes()},{once:true});
-const APP_VER='10.6',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
+const APP_VER='10.61',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
 window.mixologyBridge={
  state,
  take(){return {appVer:APP_VER,sentAt:Date.now(),stirAnim:state.stirAnim?{...state.stirAnim}:null,stirManual:state.stirManual?{...state.stirManual}:null,iceKind:state.iceKind,iceStartedAt:state.iceStartedAt,iceSeed:state.iceSeed,flow:state.flow,flowStep:state.flowStep,shakeDry:!!state.shakeDry,dryShaken:!!state.dryShaken,foam:state.foam?{...state.foam}:null,prepIce:state.prepIce,layerIntent:state.layerIntent,dilutionMl:state.dilutionMl,prepPour:state.prepPour?{from:state.prepPour.from,to:state.prepPour.to,color:state.prepPour.color,duration:state.prepPour.duration,startAt:Date.now()-(performance.now()-state.prepPour.start)}:null,glass:state.glass,qty:state.qty,portions:state.portions.map(p=>({...p})),decor:[...state.decor],mix:state.mix,mixKind:state.mixKind,mixedOnce:state.mixedOnce,visualML:state.visualML,pour:state.pour?{kind:state.pour.kind||'build',from:state.pour.from,to:state.pour.to,color:state.pour.color,duration:state.pour.duration,startAt:Date.now()-(performance.now()-state.pour.start)}:null,processing:state.processing?{from:state.processing.from,kind:state.processing.kind,duration:state.processing.duration,startAt:Date.now()-(performance.now()-state.processing.start)}:null}},
@@ -236,10 +236,23 @@ const bandSpec=(c,sg,h)=>SPEC_L.map(w=>h*Math.exp(-.5*((w-c)/sg)**2));
 const addSpec=(...a)=>SPEC_L.map((_,i)=>a.reduce((s,x)=>s+x[i],0));
 const fitCache=new Map();
 function fitSpec(c){ // smooth blue/green/red absorbance spectrum that reproduces an sRGB transmitted colour
+ // V10.6.1: damped Gauss-Newton on log10 of the linear channels, band absorbances kept within [0,6].
+ // (The earlier per-channel fixed-point update diverged for deep, saturated colours: a deep red such
+ // as hibiscus came out violet or green.)
  const key=c.join(',');if(fitCache.has(key))return fitCache.get(key);
- const target=c.map(v=>Math.max(1e-4,toLin(v)));let h=target.map(t=>-Math.log10(t));
  const mk=h=>SPEC_L.map(w=>Math.max(0,w<=470?h[2]:w<=500?h[2]+(h[1]-h[2])*(w-470)/30:w<=570?h[1]:w<=600?h[1]+(h[0]-h[1])*(w-570)/30:h[0]));
- for(let k=0;k<40;k++){const cur=linOfSpec(mk(h));h=h.map((v,i)=>Math.max(0,v+.8*(Math.log10(Math.max(1e-5,cur[i]))-Math.log10(target[i]))))}
+ const target=c.map(v=>Math.log10(Math.max(1e-4,toLin(v))));
+ const f=h=>linOfSpec(mk(h)).map(v=>Math.log10(Math.max(1e-6,v)));
+ const sq=e=>e.reduce((s,x)=>s+x*x,0);
+ let h=target.map(t=>Math.min(6,Math.max(0,-t))),r=f(h).map((v,i)=>v-target[i]),E=sq(r),lam=1e-3;
+ for(let it=0;it<80&&E>1e-10;it++){
+  const J=[[0,0,0],[0,0,0],[0,0,0]];
+  for(let k=0;k<3;k++){const hp=h.slice();hp[k]+=1e-4;const fp=f(hp);for(let q=0;q<3;q++)J[q][k]=(fp[q]-r[q]-target[q])/1e-4}
+  const M=[0,1,2].map(a=>[...[0,1,2].map(b=>J[0][a]*J[0][b]+J[1][a]*J[1][b]+J[2][a]*J[2][b]+(a===b?lam:0)),-(J[0][a]*r[0]+J[1][a]*r[1]+J[2][a]*r[2])]);
+  for(let a=0;a<3;a++){let p=a;for(let b=a+1;b<3;b++)if(Math.abs(M[b][a])>Math.abs(M[p][a]))p=b;[M[a],M[p]]=[M[p],M[a]];const d=M[a][a]||1e-12;for(let b=a;b<4;b++)M[a][b]/=d;for(let q=0;q<3;q++)if(q!==a){const m=M[q][a];for(let b=a;b<4;b++)M[q][b]-=m*M[a][b]}}
+  const hn=h.map((v,k)=>Math.min(6,Math.max(0,v+M[k][3]))),rn=f(hn).map((v,q)=>v-target[q]),En=sq(rn);
+  if(En<E){h=hn;r=rn;E=En;lam=Math.max(1e-7,lam/3)}else lam*=4;
+ }
  const out=mk(h);fitCache.set(key,out);if(fitCache.size>400)fitCache.delete(fitCache.keys().next().value);return out;
 }
 // Blue curacao is coloured with Brilliant Blue FCF (E133): absorption maximum ~629 nm (JECFA).
