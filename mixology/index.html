@@ -37,7 +37,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <body>
 <header class="topbar">
  <div class="brand"><div class="brandmark" aria-hidden="true"><span>✧</span></div><div class="brandname">LA CRYSTALLINE<small>水晶庭 · MIXOLOGY ATELIER</small></div></div>
- <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V9.8</span></div>
+ <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V9.9</span></div>
 </header>
 <div class="shell">
  <div class="intro"><div><div class="eyebrow">An evening, made by your hands</div><h1>調製屬於你的那杯夜色</h1></div><p>選擇原料 · 觀察分層 · 親手攪拌 · 完成特調</p></div>
@@ -121,12 +121,19 @@ const ingredientData=[
  {id:'brandy',cat:'spirit',name:'白蘭地',en:'BRANDY',color:'#94461d',op:.9,density:.95,taste:[2,0,1,5],desc:'葡萄・深琥珀'},
  {id:'blue',cat:'spirit',name:'藍柑橘酒',en:'BLUE CURAÇAO',color:'#208fd3',density:1.12,taste:[4,1,1,2],desc:'柑橘・湛藍'},
  {id:'grenadine',cat:'mixer',name:'紅石榴糖漿',en:'GRENADINE',color:'#c92865',density:1.20,taste:[5,1,0,0],desc:'果紅・濃甜'},
- {id:'lemon',cat:'mixer',name:'檸檬汁',en:'LEMON',color:'#ffe48b',density:1.04,taste:[1,5,0,0],desc:'清酸・明亮'},
- {id:'grapefruit',cat:'mixer',name:'葡萄柚汁',en:'GRAPEFRUIT',color:'#f49b96',density:1.05,taste:[2,3,2,0],desc:'微苦・果香'},
+ {id:'lemon',op:.6,cat:'mixer',acid:1,name:'檸檬汁',en:'LEMON',color:'#ffe48b',density:1.04,taste:[1,5,0,0],desc:'清酸・明亮'},
+ {id:'grapefruit',cat:'mixer',acid:.7,name:'葡萄柚汁',en:'GRAPEFRUIT',color:'#f49b96',density:1.05,taste:[2,3,2,0],desc:'微苦・果香'},
  {id:'elder',cat:'mixer',name:'接骨木花糖漿',en:'ELDERFLOWER',color:'#e8cb9d',density:1.18,taste:[5,0,0,0],desc:'花香・柔甜'},
- {id:'soda',cat:'soda',name:'蘇打水',en:'SODA',color:'#bcecf1',density:1.00,taste:[0,0,0,0],desc:'氣泡・清爽'},
- {id:'tonic',cat:'soda',name:'通寧水',en:'TONIC',color:'#c1e5d8',density:1.02,taste:[1,0,4,0],desc:'氣泡・微苦'},
- {id:'butterfly',cat:'tea',name:'蝶豆花茶',en:'BUTTERFLY PEA',color:'#6a75c8',density:1.01,taste:[0,0,0,0],desc:'花影・靛紫'},
+ {id:'soda',op:.08,cat:'soda',name:'蘇打水',en:'SODA',color:'#bcecf1',density:1.00,taste:[0,0,0,0],desc:'氣泡・清爽'},
+ {id:'tonic',op:.1,cat:'soda',acid:.5,name:'通寧水',en:'TONIC',color:'#c1e5d8',density:1.02,taste:[1,0,4,0],desc:'氣泡・微苦'},
+ // Teas (V9.9). Brewed teas are clear but tinted; matcha is a suspension, so it is opaque.
+ {id:'butterfly',cat:'tea',name:'蝶豆花茶',en:'BUTTERFLY PEA',color:'#2f56c6',op:.9,density:1.01,taste:[0,0,0,0],desc:'深藍・遇酸轉紫'},
+ {id:'earlgrey',cat:'tea',name:'伯爵茶',en:'EARL GREY',color:'#a9481d',op:.8,density:1.00,taste:[0,0,2,0],desc:'佛手柑・紅琥珀'},
+ {id:'oolong',cat:'tea',name:'烏龍茶',en:'OOLONG',color:'#d9a03a',op:.7,density:1.00,taste:[0,0,2,0],desc:'焙香・金黃'},
+ {id:'jasmine',cat:'tea',name:'茉莉綠茶',en:'JASMINE GREEN',color:'#e2db8a',op:.5,density:1.00,taste:[0,0,1,0],desc:'花香・淡黃綠'},
+ {id:'matcha',cat:'tea',name:'抹茶',en:'MATCHA',color:'#7fa53b',op:1,density:1.02,taste:[0,0,3,0],desc:'茶粉懸浮・翠綠'},
+ {id:'chamomile',cat:'tea',name:'洋甘菊茶',en:'CHAMOMILE',color:'#f0cf5a',op:.65,density:1.00,taste:[1,0,0,0],desc:'蜜香・明黃'},
+ {id:'hibiscus',cat:'tea',name:'洛神花茶',en:'HIBISCUS',color:'#a3132f',op:.9,acid:2,density:1.01,taste:[0,3,0,0],desc:'酸香・深紅'},
  {id:'melt',name:'融冰稀釋',en:'MELT WATER',color:'#dbe8e9',density:1.0,taste:[0,0,0,0],desc:'調製用冰融化',hidden:true}
 ];
 const byId=Object.fromEntries(ingredientData.map(i=>[i.id,i]));
@@ -148,7 +155,7 @@ function notify(message){const t=$('toast');t.textContent=message;t.classList.ad
 // broadcast arrival times), so animations stay in step even if the two devices' clocks disagree.
 // deferred scripts have all run once DOMContentLoaded fires; until then nothing is painted
 let pageScriptsDone=false;document.addEventListener('DOMContentLoaded',()=>{pageScriptsDone=true},{once:true});
-const APP_VER='9.8',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
+const APP_VER='9.9',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
 window.mixologyBridge={
  state,
  take(){return {appVer:APP_VER,sentAt:Date.now(),stirAnim:state.stirAnim?{...state.stirAnim}:null,stirManual:state.stirManual?{...state.stirManual}:null,iceKind:state.iceKind,iceStartedAt:state.iceStartedAt,iceSeed:state.iceSeed,flow:state.flow,flowStep:state.flowStep,prepIce:state.prepIce,layerIntent:state.layerIntent,dilutionMl:state.dilutionMl,prepPour:state.prepPour?{from:state.prepPour.from,to:state.prepPour.to,color:state.prepPour.color,duration:state.prepPour.duration,startAt:Date.now()-(performance.now()-state.prepPour.start)}:null,glass:state.glass,qty:state.qty,portions:state.portions.map(p=>({...p})),decor:[...state.decor],mix:state.mix,mixKind:state.mixKind,mixedOnce:state.mixedOnce,visualML:state.visualML,pour:state.pour?{kind:state.pour.kind||'build',from:state.pour.from,to:state.pour.to,color:state.pour.color,duration:state.pour.duration,startAt:Date.now()-(performance.now()-state.pour.start)}:null,processing:state.processing?{from:state.processing.from,kind:state.processing.kind,duration:state.processing.duration,startAt:Date.now()-(performance.now()-state.processing.start)}:null}},
@@ -158,7 +165,7 @@ window.mixologyBridge={
 };
 function syncRoom(e){window.mixologyBridge.emit(e)}
 
-window.mixologyHooks={state,glasses,byId,updateUI,notify,sleep,syncRoom,total,rgb,liquidAverage,liquidOpacity};
+window.mixologyHooks={state,glasses,byId,updateUI,notify,sleep,syncRoom,total,rgb,liquidAverage,liquidOpacity,phAdjust};
 function updateBusy(){document.querySelectorAll('.ing,.preset,#stirBtn,#shakeBtn,#finishBtn').forEach(el=>el.disabled=state.busy||state.demo||(el.id==='finishBtn'&&total()===0)||(el.id==='stirBtn'&&total()===0)||(el.id==='shakeBtn'&&total()===0));$('resetBtn').disabled=false}
 // V9.8: ingredients grouped under four tabs (spirits / tea / syrups & juices / sodas)
 const ING_CATS=[['spirit','酒','SPIRITS'],['tea','茶','TEA'],['mixer','糖漿／果汁','SYRUP · JUICE'],['soda','蘇打水','SODA']];let ingCat='spirit';
@@ -203,8 +210,17 @@ function visiblePortions(){
 }
 // Colour of the blend = colours weighted by how strongly each part tints (a clear spirit dilutes
 // the colour instead of whitening it); liquidOpacity() = how strongly the whole blend tints.
+// Butterfly pea is a pH indicator: blue alone, violet with some acid, magenta with a lot.
+// Applied to the blended colour only - a floated blue layer stays blue until it is stirred in.
+function phAdjust(items){
+ let pea=0,acid=0;for(const p of items){const d=byId[p.id];if(!d||p.locked)continue;if(p.id==='butterfly')pea+=p.ml;acid+=p.ml*(d.acid||0)}
+ if(!pea||!acid)return items;
+ const k=Math.min(1,acid/(pea*1.2)),blue=rgb(byId.butterfly.color),violet=[118,58,176],magenta=[196,44,122];
+ const c=k<.6?blend(blue,violet,k/.6):blend(violet,magenta,(k-.6)/.4);
+ return items.map(p=>p.id==='butterfly'&&!p.locked?{...p,layerColor:c,color:c}:p);
+}
 function liquidAverage(){
- const items=visiblePortions(),volume=items.reduce((s,p)=>s+p.ml,0);
+ const items=phAdjust(visiblePortions().map(p=>({...p,locked:!!p.lockedColor}))),volume=items.reduce((s,p)=>s+p.ml,0);
  if(!volume)return [150,190,210];
  const ink=items.reduce((s,p)=>s+p.ml*p.opacity,0);
  if(ink<1e-6)return [236,242,240];
