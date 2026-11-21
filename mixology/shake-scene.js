@@ -135,10 +135,12 @@ function drawJiggerPour(c,f,ly){const p=s.prepPour;if(!p||!jigOk)return;const q=
 
 // ---------- scene ----------
 const local={iceAt:0,iceWas:false,shakeAt:0,lastStep:'',readyAt:0};
+let scratch=null;
+function layer(ref){if(!scratch)scratch=document.createElement('canvas');if(scratch.width!==ref.width||scratch.height!==ref.height){scratch.width=ref.width;scratch.height=ref.height}return scratch.getContext('2d')}
 function groundShadow(c,x,w,a){const g=c.createRadialGradient(x,GROUND+4,2,x,GROUND+4,w);g.addColorStop(0,'rgba(0,0,0,'+a+')');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.save();c.translate(x,GROUND+4);c.scale(1,.18);c.translate(-x,-(GROUND+4));c.beginPath();c.arc(x,GROUND+4,w,0,Math.PI*2);c.fill();c.restore()}
 function servingTarget(){const art=window.LCArtV5,g=s.glass;if(!art||!art.view)return {x:280,mouth:330};
  const v=art.view(g),r=art.rim(g);return {x:280,mouth:r.back*v.s+v.ty}}
-function active(){return s.flow==='shake'&&['preparing','shaking','ready','transferring'].includes(s.flowStep)}
+function active(){return s.flow==='shake'&&['preparing','shaking','transferring'].includes(s.flowStep)}
 function frame(ctx,t,drawServing){
  if(!active())return false;
  const step=s.flowStep,nowp=performance.now();
@@ -156,24 +158,29 @@ function frame(ctx,t,drawServing){
   return true;
  }
  if(step==='shaking'){
-  // tin upside down over the glass; a gentle rock while the bartender shakes in game
-  const e=(nowp-local.shakeAt)/1000,cool=smooth(e/12),wob=Math.sin(nowp*.018)*.035*(1-cool*.4),bob=Math.sin(nowp*.036)*2.5;
-  const X=CX+95,gf=glassFrame(X),tf=frustum(X,gf.yt+OVERLAP*CM,TIN.rTop*CM,TIN.rBase*CM,TIN.h*CM);
-  groundShadow(ctx,X,gf.r0*1.6,.4);
-  ctx.save();ctx.translate(X,GROUND);ctx.rotate(wob);ctx.translate(-X,-GROUND+bob);
-  drawGlass(ctx,gf,{ml:h.total(),levelY:levelY(gf,h.total()),color:col,op,ice:s.prepIce&&!s.shakeDry,iceDrop:[],impact:.4});
-  drawTin(ctx,tf,{down:true,frost:s.shakeDry?0:cool});
-  ctx.restore();return true;
- }
- if(step==='ready'){
-  // turned upright: the drink is in the frosted tin; the glass is set aside
-  const q=smooth((nowp-local.readyAt)/500),tf=tinFrame(CX-20,GROUND),gf=glassFrame(CX+135);
-  const ly=tf.yt+lerp(1.2,3.2,1-clamp(h.total()/220,0,1))*CM;
-  ctx.save();ctx.globalAlpha=q;groundShadow(ctx,gf.x,gf.r0*1.4,.3);drawGlass(ctx,gf,{ml:0,levelY:gf.yb,color:col,op,ice:false,iceDrop:[]});ctx.restore();
-  groundShadow(ctx,tf.x,tf.r0*1.5,.4);
-  drawTin(ctx,tf,{frost:1,liquid:{y:ly,color:col,foam:s.portions.some(p=>h.byId[p.id]&&h.byId[p.id].shakeOnly)?.75:.25}});
+  // like the mixing glass after a stir: the tin goes on, then the bartender takes the shaker away (the
+  // shake happens in the game); the serving glass waits on the stage until they confirm.
+  const e=nowp-local.shakeAt,X=CX-45,gf=glassFrame(X),ml=h.total();
+  const CAP=520,HOLD=380,LIFT=800,lt=e-CAP-HOLD;
+  if(lt<LIFT){
+   const capq=inOut(e/CAP),tf=frustum(X,gf.yt+OVERLAP*CM-(1-capq)*70,TIN.rTop*CM,TIN.rBase*CM,TIN.h*CM);
+   let px=0,py=0,rot=0,alpha=1,sc=1;
+   if(lt>0){const q=inOut(lt/LIFT),u=1-q,P=[[0,-6],[20,-60],[160,-190],[380,-300]];
+    px=u*u*u*P[0][0]+3*u*u*q*P[1][0]+3*u*q*q*P[2][0]+q*q*q*P[3][0];py=u*u*u*P[0][1]+3*u*u*q*P[1][1]+3*u*q*q*P[2][1]+q*q*q*P[3][1];
+    rot=.18*q;sc=1-.1*q;alpha=1-smooth((q-.6)/.4)}
+   groundShadow(ctx,X,gf.r0*1.6,.4*(1-clamp(lt/300,0,1)));
+   ctx.save();ctx.globalAlpha=alpha;ctx.translate(X+px,GROUND+py);ctx.rotate(rot);ctx.scale(sc,sc);ctx.translate(-X,-GROUND);
+   drawGlass(ctx,gf,{ml,levelY:levelY(gf,ml),color:col,op,ice:s.prepIce&&!s.shakeDry,iceDrop:[],impact:0});
+   if(capq>0){ctx.globalAlpha=alpha*Math.min(1,capq*3);drawTin(ctx,tf,{down:true})}
+   ctx.restore();
+  }
+  // the serving glass fades in where the shaker stood
+  const q=smooth((lt-LIFT*.55)/350);
+  if(q>0){const c=layer(ctx.canvas),base=ctx.getTransform();c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,c.canvas.width,c.canvas.height);c.setTransform(base);
+   drawServing(c);ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=q;ctx.drawImage(c.canvas,0,0);ctx.restore()}
   return true;
  }
+ // ready: the shaker is in the bartender's hands; the stage shows the serving glass (normal rendering)
  if(step==='transferring'){
   drawServing(ctx);
   const p=s.pour;const q=p?clamp((nowp-p.start)/p.duration,0,1):1,tg=servingTarget();
