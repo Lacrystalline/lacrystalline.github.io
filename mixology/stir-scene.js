@@ -108,16 +108,17 @@ function phase(){
 // ---------- recipe -> layers (mirrors index.html getLayers, prep-vessel volumes) ----------
 function layersFor(visualMl){
  const items=[];let left=visualMl;
- for(const p of s.portions){
-  if(left<=.0001)break;const ml=Math.min(p.ml,left);left-=ml;
-  const info=h.byId[p.id];if(!info)continue;
+ s.portions.forEach((p,idx)=>{
+  if(left<=.0001)return;const ml=Math.min(p.ml,left);left-=ml;
+  const info=h.byId[p.id];if(!info)return;
   const L=h.lookOf(p);
-  items.push({id:p.id,locked:!!p.lockedColor,ml,spec:L.spec,haze:L.haze,color:L.color,op:L.op,density:p.lockedDensity??info.density});
- }
+  items.push({...p,idx,full:p.ml,locked:!!p.lockedColor,ml,spec:L.spec,haze:L.haze,layerColor:L.color,opacity:L.op,density:p.lockedDensity??info.density});
+ });
  const vol=items.reduce((a,p)=>a+p.ml,0);
- // same spectral Beer-Lambert blend as index.html (butterfly pea reacts to the blend's pH there)
+ // same spectral blend + pour zones as index.html (butterfly pea reacts to the blend's pH there)
  const M=vol?h.mixLook(items):{color:[236,242,240],op:1};
- return {layers:items.sort((a,b)=>b.density-a.density),avg:M.color,op:M.op,vol};
+ const layers=h.layerize(items.map(p=>({...p}))).map(l=>({ml:l.ml,color:l.layerColor,op:l.opacity,density:l.density,soft:!!l.soft}));
+ return {layers,avg:M.color,op:M.op,vol};
 }
 
 // ---------- ice ----------
@@ -671,5 +672,5 @@ function schedule(){lastPhase=null}
 
 window.LCStirScene={frame,phase,busy,begin,processMs,onReset,strainTiming,startStrain,schedule,
  freezeAt:ms=>{frozen=ms===null?null:Number(s.stirAnim?.startAt||0)+ms},
- timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'10.1'};
+ timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'10.2'};
 })();

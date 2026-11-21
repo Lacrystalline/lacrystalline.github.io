@@ -229,7 +229,7 @@ function liquid(ctx,opts){
   const topIsSurface=used+take>=ml-.01;
   const r=Math.max(rAt(upper),rAt(lower));
   const shade=blend(p.layerColor,avg,mix),op=lerp(p.opacity??1,avgOp,mix);
-  topColor=shade;topOp=op;bands.push({upper,lower,shade,op});
+  topColor=shade;topOp=op;bands.push({upper,lower,shade,op,soft:!!p.soft});
   bandPath(upper,lower,topIsSurface,used<=.001);
   ctx.fillStyle=bodyFill(shade,r,op);ctx.fill();
   ctx.save();ctx.clip();
@@ -247,7 +247,9 @@ function liquid(ctx,opts){
  // No white line, no straight stripe: the two neighbouring colours are feathered together.
  for(let i=1;i<bands.length;i++){
   const below=bands[i-1],above=bands[i],y=above.lower,r=rAt(y);
-  const feather=clamp((above.lower-above.upper)*.18,2.5,7)*(1-mix*.8);
+  // a blended pour zone (V10.2) fades into its neighbours instead of meeting them at a crisp line
+  const soft=above.soft||below.soft,thin=Math.min(above.lower-above.upper,below.lower-below.upper);
+  const feather=(soft?clamp(thin*.5,4,16):clamp((above.lower-above.upper)*.18,2.5,7))*(1-mix*.8);
   if(feather<.6)continue;
   const mid=blend(below.shade,above.shade,.5);
   ctx.beginPath();

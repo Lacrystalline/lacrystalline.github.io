@@ -64,7 +64,8 @@ async function addPrep(id,ml,fromDemo){
  if(isBubbly(id)){h.notify('蘇打水或通寧水請在濾出後再加，不可放入調酒杯或雪克杯。');return false}
  if(h.total()+ml>cap()*.83){h.notify('請預留融冰稀釋與濾出空間。');return false}
  const rev=s.revision,from=h.total(),duration=s.flow==='stir'&&window.LCStirScene?1500:750;   // stir: jigger in, pour, out
- s.portions.push({id,ml});s.prepPour={from,to:h.total(),start:performance.now(),duration,color:h.rgb(h.byId[id].color)};
+ const plan=h.pourPlan?h.pourPlan(id,ml,false):null;   // jigger = free pour: it blends where it lands
+ s.portions.push(plan?{id,ml,...plan}:{id,ml});s.prepPour={from,to:h.total(),start:performance.now(),duration,color:h.rgb(h.byId[id].color)};
  s.busy=true;h.updateUI();h.syncRoom('pour_begin');
  await h.sleep(duration+40);
  if(rev!==s.revision)return false;
