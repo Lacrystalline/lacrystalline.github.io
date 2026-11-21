@@ -37,7 +37,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <body>
 <header class="topbar">
  <div class="brand"><div class="brandmark" aria-hidden="true"><span>✧</span></div><div class="brandname">LA CRYSTALLINE<small>水晶庭 · MIXOLOGY ATELIER</small></div></div>
- <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V9.4</span></div>
+ <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V9.5</span></div>
 </header>
 <div class="shell">
  <div class="intro"><div><div class="eyebrow">An evening, made by your hands</div><h1>調製屬於你的那杯夜色</h1></div><p>選擇原料 · 觀察分層 · 親手攪拌 · 完成特調</p></div>
@@ -95,14 +95,15 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
  <div class="summary" id="summary"></div><div class="modal-buttons"><button class="outline-btn" id="copyBtn">複製我的配方</button><button class="solid-btn" id="newBtn">再調製一杯</button></div><div class="help">單機配方只保留在當前頁面；建立房間後會同步酒杯狀態。</div>
  </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js" defer></script>
-<script src="./realtime.js?v=20261121-room-pin" defer></script>
 <script src="./visual-v3.js" defer></script>
 <script src="./layered-art-v4.js" defer></script>
 <script src="./asset-glass-v5.js?v=20261121-v92" defer></script>
 <script src="./flow-v6.js?v=20261121-v93" defer></script>
 <script src="./ice-v8.js?v=20261121-v94" defer></script>
-<script src="./stir-scene.js?v=20261121-v94" defer></script>
+<script src="./stir-scene.js?v=20261121-v95" defer></script>
+<!-- sync library last: a slow CDN must not hold back the glass artwork -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js" defer></script>
+<script src="./realtime.js?v=20261121-room-pin-v95" defer></script>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
@@ -136,7 +137,9 @@ function notify(message){const t=$('toast');t.textContent=message;t.classList.ad
 
 // Viewers map the bartender's timestamps onto their own clock (offset measured by realtime.js from
 // broadcast arrival times), so animations stay in step even if the two devices' clocks disagree.
-const APP_VER='9.4',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
+// deferred scripts have all run once DOMContentLoaded fires; until then nothing is painted
+let pageScriptsDone=false;document.addEventListener('DOMContentLoaded',()=>{pageScriptsDone=true},{once:true});
+const APP_VER='9.5',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
 window.mixologyBridge={
  state,
  take(){return {appVer:APP_VER,sentAt:Date.now(),stirAnim:state.stirAnim?{...state.stirAnim}:null,stirManual:state.stirManual?{...state.stirManual}:null,iceKind:state.iceKind,iceStartedAt:state.iceStartedAt,iceSeed:state.iceSeed,flow:state.flow,flowStep:state.flowStep,prepIce:state.prepIce,layerIntent:state.layerIntent,dilutionMl:state.dilutionMl,prepPour:state.prepPour?{from:state.prepPour.from,to:state.prepPour.to,color:state.prepPour.color,duration:state.prepPour.duration,startAt:Date.now()-(performance.now()-state.prepPour.start)}:null,glass:state.glass,qty:state.qty,portions:state.portions.map(p=>({...p})),decor:[...state.decor],mix:state.mix,mixKind:state.mixKind,mixedOnce:state.mixedOnce,visualML:state.visualML,pour:state.pour?{kind:state.pour.kind||'build',from:state.pour.from,to:state.pour.to,color:state.pour.color,duration:state.pour.duration,startAt:Date.now()-(performance.now()-state.pour.start)}:null,processing:state.processing?{from:state.processing.from,kind:state.processing.kind,duration:state.processing.duration,startAt:Date.now()-(performance.now()-state.processing.start)}:null}},
@@ -249,7 +252,7 @@ function frame(t){fitCanvas();const dt=Math.min(45,t-lastTime);lastTime=t;ctx.cl
  const drawServing=c=>window.LCArtV5&&window.LCArtV5.draw({ctx:c,state:visibleState,t,glasses,byId,getLayers,liquidAverage,vToY,total});
  // Boot: never paint the legacy renderers while the real-glass artwork is still on its way;
  // keep the stage empty and fade it in once the current glass has decoded (V9.2).
- const v5=window.LCArtV5,bootWait=v5?(v5.status?v5.status(visibleState.glass)==='loading':false):document.readyState==='loading';
+ const v5=window.LCArtV5,bootWait=!(pageScriptsDone||window.LCStirScene)||(v5&&v5.status&&v5.status(visibleState.glass)==='loading');
  if(bootWait){raf=requestAnimationFrame(frame);return}
  if(!canvas.classList.contains('is-live'))canvas.classList.add('is-live');
  if(window.LCStirScene&&window.LCStirScene.frame(ctx,t,drawServing)){/* STIR: mixing glass, spoon, lift-out, strain */}else if(drawServing(ctx)){/* real-glass asset rendering */}else if(window.LCArtV4){window.LCArtV4.draw({ctx,state:visibleState,t,glasses,byId,getLayers,liquidAverage,vToY,total});}else if(window.LCArtV3){window.LCArtV3.draw({ctx,state:visibleState,t,glasses,byId,getLayers,liquidAverage,vToY,total});}else{drawBackground(t);ctx.save();if(state.processing?.kind==='shaken')ctx.translate(Math.sin(t*.037)*6*Math.sin((t-state.processing.start)/state.processing.duration*Math.PI),0);drawGlassBack();drawLiquid(t);drawGlassFront(t);drawEmptyCue(t);ctx.restore();drawPour(t)}raf=requestAnimationFrame(frame)}
