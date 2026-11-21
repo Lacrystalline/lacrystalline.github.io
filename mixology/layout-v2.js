@@ -22,6 +22,8 @@ const css=document.createElement('style');css.textContent=`
 .fold-head .fold-sum{margin:0 0 0 auto;padding-left:10px}
 .fold:not(.open)>.fold-body{display:none}
 .fold-body{padding-top:2px}
+.stage .v6-work{width:calc(100% - 192px);max-width:560px;margin:10px auto 0;box-sizing:border-box}
+@media(max-width:720px){.stage .v6-work{width:calc(100% - 16px);margin:26px auto 0}}
 .fold{margin:0}
 .fold+.fold,.fold+.hairline{margin-top:0}
 .side .fold{padding:2px 0 10px}
@@ -39,7 +41,8 @@ const css=document.createElement('style');css.textContent=`
  .side .sidesub{margin:3px 0 8px}
  .stage{position:sticky;top:8px}
  .stage-inner{min-height:0!important;padding:16px 14px 12px}
- .glass-canvas-wrap{max-width:min(565px,calc((100vh - 150px)*560/620))!important;width:100%}
+ .glass-canvas-wrap{max-width:min(565px,calc((100vh - 250px)*560/620))!important;width:100%}
+ .stage .v6-work:not([hidden])~.glass-canvas-wrap{max-width:min(565px,calc((100vh - 320px)*560/620))!important}
  .ingredients{gap:6px}
  .ing{min-height:58px;padding:7px 8px 6px 10px;gap:2px}
  .ing-meta{display:none}
