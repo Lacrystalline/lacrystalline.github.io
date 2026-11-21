@@ -67,17 +67,30 @@ window.mixologyEmit=event=>{
   if(error)throw error;r.rev=Number(data.revision);
  }).catch(e=>{console.error('Sync write:',e);status('遠端同步失敗，請檢查連線。')});
 };
+const pinField=$('roomPin');
+pinField.addEventListener('input',()=>{
+ const sanitized=pinField.value.replace(/[^0-9]/g,'').slice(0,6);
+ if(pinField.value!==sanitized)pinField.value=sanitized;
+});
+pinField.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('createRoom').click()}});
 $('createRoom').addEventListener('click',async()=>{
  if(!client){status('Supabase 程式庫未載入，請重新整理。');return}
- $('createRoom').disabled=true;status('正在建立遠端房間…');
+ const pin=pinField.value.trim();
+ if(!/^[0-9]{6}$/.test(pin)){status('請先輸入 6 位數調酒師密碼。');pinField.focus();return}
+ $('createRoom').disabled=true;status('正在驗證調酒師密碼…');
+ pinField.value='';
  try{
-  const {data,error}=await client.rpc('mixology_create_room');
+  const {data,error}=await client.rpc('mixology_create_room_with_pin',{p_pin:pin});
   if(error)throw error;
+  if(data?.error==='invalid_pin'){status('密碼錯誤，請重試。');pinField.focus();return}
+  if(data?.error==='rate_limited'){status('密碼嘗試次數過多，請約 '+Math.ceil((data.retry_after_seconds||300)/60)+' 分鐘後再試。');return}
+  if(data?.error||!data?.host_token){status('無法驗證密碼，請稍後重試。');return}
   history.replaceState(null,'','#room='+data.id+'&host='+data.host_token);
   await enter('host',data.id,data.host_token,data,true);
   window.mixologyEmit('snapshot');
   status('房間已建立，請複製觀看連結。');
- }catch(e){console.error(e);status('建立房間失敗：'+(e.message||'請稍後重試'));$('createRoom').disabled=false}
+ }catch(e){console.error('Room PIN:',e);status('建立房間失敗，請檢查連線後重試。')}
+ finally{$('createRoom').disabled=false}
 });
 $('copyView').addEventListener('click',async()=>{
  const v=$('viewLink').value;if(!v)return;
