@@ -137,6 +137,16 @@ img{display:block;max-width:100%}
 .opt .qty .pr{margin-left:0}
 .qbtn{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--crys);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .qbtn:hover{border-color:var(--crys)}
+
+.confide-time-panel{display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:10px 16px;margin:-4px 0 3px;padding:11px 14px;border:1px solid rgba(127,211,214,.22);border-radius:3px;background:rgba(17,33,48,.28)}
+.confide-time-copy{display:flex;flex-direction:column;gap:4px;color:var(--mist);font-size:.82rem;line-height:1.45}
+.confide-time-note{color:var(--mute);font-size:.72rem}
+.confide-time-controls{display:flex;align-items:center;gap:11px}
+.confide-time-controls .qbtn{width:32px;height:32px;flex:none}
+.confide-time-controls .qbtn:disabled{opacity:.35;cursor:not-allowed}
+.confide-time-value{min-width:78px;text-align:center;color:var(--crys);font-family:var(--tc);font-size:.9rem;white-space:nowrap}
+@media(max-width:640px){.confide-time-panel{margin-left:0}.confide-time-controls{width:100%;justify-content:flex-end}}
+
 .qn{min-width:18px;text-align:center;color:var(--mist)}
 .cat{color:var(--crys-dim);font-size:.78rem;letter-spacing:.2em;margin:16px 0 8px;font-family:var(--serif);font-style:italic}
 
@@ -670,7 +680,7 @@ const MEMBERS = [
 const SERVICES = [
   { id:"custom",  name:"光釀", en:"Custom Blend", price:null, priceLabel:"時價" },
   { id:"tailor",  name:"裁光", en:"Tailored",     price:null, priceLabel:"時價" },
-  { id:"confide", name:"密談", en:"Confided",     price:250000 },
+  { id:"confide", name:"密談", en:"Confided",     price:250000, unit:"每 30 分鐘" },
   { id:"prom",    name:"同行", en:"Promenade",    price:500000 },
   { id:"photo_polaroid", serviceId:"photo", name:"拍立得", en:"Polaroid", price:250000, unit:"一人・一張", exclusiveGroup:"photo" },
   { id:"photo_signed", serviceId:"photo", name:"拍立得＋簽繪", en:"Signed Polaroid", price:350000, unit:"一人・一張", exclusiveGroup:"photo" },
@@ -696,7 +706,7 @@ const BITES = [
 ].filter(item => HALLOWEEN_MENU_ACTIVE || !item.limited);
 
 // ---- 狀態 ----
-const state = { member:null, services:new Set(), qty:{}, joinToken:null, joinSession:null, identityBound:false, memberToken:null, memberOrderCount:0, specialServiceEnabled:null, isVip:false, membershipTier:"standard", vipCardText:"" };
+const state = { member:null, services:new Set(), confideBlocks:1, qty:{}, joinToken:null, joinSession:null, identityBound:false, memberToken:null, memberOrderCount:0, specialServiceEnabled:null, isVip:false, membershipTier:"standard", vipCardText:"" };
 
 const fmt = n => n.toLocaleString('en-US');
 // 僅菜單／體驗價目：千位分隔符前的首段數字略放大，維持價格數值不變。
@@ -864,6 +874,7 @@ async function loadJoinSession(){
     }
 
     syncIdentityUI();
+    await loadPublicStaffStatus();
     banner.innerHTML=`<div>${data.status==='waiting'?'等待帶位':'已完成帶位'}</div><div class="ticket">${esc(data.ticket_code)}</div><div class="subline">來店 ${data.party_size} 人 · 已登錄 ${data.identified_count}/${data.party_size}${data.pending_count?` · 尚有 ${data.pending_count} 位待自行加入`:''}${data.status==='waiting'?' · 帶位後開放點餐':' · 每位旅者各自點餐'}</div>`;
     syncOrderStageVisibility();
     update();
@@ -944,7 +955,7 @@ function renderMembers(){
         <div class="role">${m.role}</div>
         <div class="rp"><span class="mini-label">RP</span>${m.rp}</div>
         <div class="tags"><span class="mini-label">體驗項目</span>${m.tags}${(m.contactServices&&m.contactServices.length)?'｜洽店長':''}</div>
-        <div class="status-badge ${status}">${staffStatusLabel(status)}</div>
+        <div class="status-badge ${status}">${m.renewalOnly ? "原指名續時・可加點" : staffStatusLabel(status)}</div>
       </div>
       ${selectable?'<div class="pick"></div>':''}
     </div>`;
@@ -962,9 +973,11 @@ function renderMembers(){
         state.services.clear();
       }else{
         state.member=id;
-        // 指名必須重新選擇服務；切換成員時不得沿用上一位的服務。
+        // 切換成員時不得沿用前一位的服務或密談時數。
         state.services.clear();
+        if(picked.renewalOnly) state.services.add('confide');
       }
+      state.confideBlocks=1;
 
       renderMembers();
       renderServices();
@@ -1015,7 +1028,7 @@ function renderServices(){
     hint.textContent='請先於上方選擇一位接待成員，即會顯示其可提供的體驗項目。';
     return;
   }
-  const avail = SERVICES.filter(s=>member.services.includes(s.id));
+  const avail = SERVICES.filter(s=>member.services.includes(s.id) && (!member.renewalOnly || s.id==='confide'));
   const contactOnly = new Set(member.contactServices || []);
   [...state.services].forEach(sid=>{ if(contactOnly.has(sid)) state.services.delete(sid); });
   if(!avail.length){
@@ -1025,7 +1038,9 @@ function renderServices(){
     return;
   }
   const hasPhotoVariants = avail.some(s=>s.exclusiveGroup==='photo');
-  hint.textContent = contactOnly.size
+  hint.textContent = member.renewalOnly
+    ? `${member.name} 的密談仍在進行，可按每 30 分鐘加點續時；不開放其他服務。`
+    : contactOnly.size
     ? `${member.name} 的體驗項目可於此查看；如需預約，請洽店長。`
     : hasPhotoVariants
       ? `${member.name} 可提供以下服務；攝影方案請擇一。已帶位後可直接追加，不需重新取號。`
@@ -1036,8 +1051,21 @@ function renderServices(){
     <div class="opt${isContact?' contact-only':(state.services.has(s.id)?' sel':'')}" data-id="${s.id}" aria-disabled="${isContact?'true':'false'}">
       ${isContact?'<div class="contact-mark">◇</div>':'<div class="box"></div>'}
       <div class="nm">${s.name}<span class="en">${s.en}</span>${s.id==='custom'?'<span class="svc-leadtime">須事先向店長下訂・確認後製作約一週</span>':''}</div>
-      <div class="pr">${isContact?'洽店長':(s.price===null?s.priceLabel:fmtMenuPrice(s.price)+'<small>Gil</small>'+(s.unit?'<small class="svc-unit">'+s.unit+'</small>':''))}</div>
-    </div>`;
+      <div class="pr">${isContact?'洽店長':(s.price===null?s.priceLabel:fmtMenuPrice(s.id==='confide' && state.services.has(s.id) ? s.price*state.confideBlocks : s.price)+'<small>Gil</small>'+(s.unit?'<small class="svc-unit">'+s.unit+'</small>':''))}</div>
+
+    </div>
+    ${s.id==='confide' && state.services.has('confide') ? `
+    <div class="confide-time-panel" role="group" aria-label="密談加時">
+      <div class="confide-time-copy">
+        <span>密談時長 · DURATION</span>
+        <span class="confide-time-note">每加 30 分鐘，加收 250,000 Gil</span>
+      </div>
+      <div class="confide-time-controls">
+        <button class="qbtn" type="button" data-confide-adjust="-1" aria-label="減少 30 分鐘" ${state.confideBlocks<=1?'disabled':''}>−</button>
+        <span class="confide-time-value">${state.confideBlocks*30} 分鐘</span>
+        <button class="qbtn" type="button" data-confide-adjust="1" aria-label="增加 30 分鐘" ${state.confideBlocks>=8?'disabled':''}>＋</button>
+      </div>
+    </div>` : ''}`;
   }).join('');
   box.querySelectorAll('.opt:not(.contact-only)').forEach(el=>{
     el.addEventListener('click',()=>{
@@ -1046,6 +1074,7 @@ function renderServices(){
       if(state.services.has(id)){
         state.services.delete(id);
         el.classList.remove('sel');
+        if(id==='confide') state.confideBlocks=1;
       }else{
         const service = SERVICES.find(s=>s.id===id);
         if(service?.exclusiveGroup){
@@ -1060,6 +1089,16 @@ function renderServices(){
         state.services.add(id);
         el.classList.add('sel');
       }
+      renderServices();
+      update();
+    });
+  });
+  box.querySelectorAll('[data-confide-adjust]').forEach(button=>{
+    button.addEventListener('click',event=>{
+      event.stopPropagation();
+      const delta=Number(button.dataset.confideAdjust||0);
+      state.confideBlocks=Math.max(1,Math.min(8,state.confideBlocks+delta));
+      renderServices();
       update();
     });
   });
@@ -1112,7 +1151,7 @@ function renderMenu(listId, items){
 // ---- 計算 / 更新 ----
 function calcTotal(){
   let t=0;
-  SERVICES.forEach(s=>{ if(state.services.has(s.id) && s.price) t+=s.price; });
+  SERVICES.forEach(s=>{ if(state.services.has(s.id) && s.price) t+=s.price*(s.id==='confide'?state.confideBlocks:1); });
   if(!state.isVip){
     [...DRINKS,...BITES].forEach(it=>{ t += (state.qty[it.id]||0)*it.price; });
   }
@@ -1444,17 +1483,22 @@ $("companionInviteBtn").addEventListener('click',copyCompanionInvitation);
 // ---- 組訂單物件 ----
 function buildOrder(){
   const member = MEMBERS.find(m=>m.id===state.member);
-  const services = SERVICES.filter(s=>state.services.has(s.id)).map(s=>({
-    id:s.serviceId || s.id,
-    variant_id:s.id,
-    name:s.name,
-    price:s.price,
-    provider_staff_id:member ? member.id : null
-  }));
+  const services = SERVICES.filter(s=>state.services.has(s.id)).map(s=>{
+    const isConfide=s.id==='confide';
+    const blocks=isConfide?state.confideBlocks:1;
+    return {
+      id:s.serviceId || s.id,
+      variant_id:s.id,
+      name:isConfide ? (member?.renewalOnly?'密談續時':'密談')+'（'+(blocks*30)+' 分鐘）' : s.name,
+      price:s.price,
+      ...(isConfide ? {qty:blocks,duration_minutes:blocks*30,subtotal:s.price*blocks} : {}),
+      provider_staff_id:member ? member.id : null
+    };
+  });
   const items = [...DRINKS,...BITES].filter(it=>state.qty[it.id]>0)
                  .map(it=>({id:it.id,name:it.name,qty:state.qty[it.id],price:state.isVip?0:it.price}));
   const diningTotal = state.isVip?0:items.reduce((sum,it)=>sum + (Number(it.qty)||0) * (Number(it.price)||0), 0);
-  const serviceTotal = services.reduce((sum,s)=>sum + (Number(s.price)||0), 0);
+  const serviceTotal = services.reduce((sum,s)=>sum + (Number(s.subtotal??s.price)||0), 0);
   return {
     code: genCode(),
     guest_name: $("guestName").value.trim(),
@@ -1845,30 +1889,44 @@ async function addGuestSlot(){
 
 async function loadPublicStaffStatus(){
   if(!sb){
-    MEMBERS.forEach(m=>{ m.status="error"; m.selectable=false; });
+    MEMBERS.forEach(m=>{ m.status="error"; m.selectable=false; m.renewalOnly=false; });
     syncSelectedMemberAvailability();
     renderMembers();
     return;
   }
 
   try{
-    const { data, error } = await sb.rpc('get_public_staff_status');
+    // 續時資格只對原本下單且密談仍未結束的旅者開放。
+    let ownRenewable=new Set();
+    if(state.joinToken && state.memberToken && state.joinSession?.status==='seated'){
+      const {data:member,error:memberError}=await sb.rpc('get_dining_member_public',{
+        p_join_token:state.joinToken,
+        p_member_token:state.memberToken
+      });
+      if(!memberError && Array.isArray(member?.renewable_confide_staff_ids)){
+        ownRenewable=new Set(member.renewable_confide_staff_ids);
+      }
+    }
+
+    const {data,error}=await sb.rpc('get_public_staff_status');
     if(error) throw error;
 
-    const byId = new Map((data || []).map(row=>[row.id, row]));
+    const byId=new Map((data||[]).map(row=>[row.id,row]));
     MEMBERS.forEach(m=>{
-      const row = byId.get(m.id);
+      const row=byId.get(m.id);
       if(!row){
-        m.status = "offline";
-        m.selectable = false;
+        m.status="offline";
+        m.selectable=false;
+        m.renewalOnly=false;
         return;
       }
-      m.status = row.status || "offline";
-      m.selectable = row.selectable === true && row.status === "on_duty";
+      m.status=row.status||"offline";
+      m.renewalOnly=m.status==='busy' && m.services.includes('confide') && ownRenewable.has(m.id);
+      m.selectable=(row.selectable===true && m.status==='on_duty') || m.renewalOnly;
     });
   }catch(err){
-    console.warn('店員狀態讀取失敗', err);
-    MEMBERS.forEach(m=>{ m.status="error"; m.selectable=false; });
+    console.warn('店員狀態讀取失敗',err);
+    MEMBERS.forEach(m=>{ m.status="error"; m.selectable=false; m.renewalOnly=false; });
   }
 
   syncSelectedMemberAvailability();
@@ -1989,7 +2047,7 @@ $("submitBtn").addEventListener('click', async ()=>{
     await refreshVisitCard(true);
     toast(`訂單 ${esc(data.order_code)} 已送出。`,data,false); startSubmitCooldown();
     await loadPublicStaffStatus();
-    state.member=null; state.services.clear(); state.qty={};
+    state.member=null; state.services.clear(); state.confideBlocks=1; state.qty={};
     document.querySelectorAll('.opt').forEach(el=>el.classList.remove('sel'));
     renderMembers(); renderServices(); document.querySelectorAll('.qn').forEach(el=>el.textContent='0'); $("note").value='';
   }catch(err){
