@@ -344,32 +344,64 @@ function liquid(ctx,opts){
  }
  ctx.restore();
 }
-function garnish(ctx,id,state,t){
- const g=specs[id],baseY=gy(g.rim.cy)-11,rx=g.rim.hw*SCALE,x=CX+rx*.77;
- if(state.decor.has('citrus')){
-  ctx.save();ctx.translate(x,baseY-2);ctx.rotate(-.31);ctx.fillStyle='#d6a244';ctx.beginPath();ctx.ellipse(0,0,21,21,0,0,TAU);ctx.fill();ctx.strokeStyle='#efc16e';ctx.lineWidth=3;ctx.stroke();
-  ctx.fillStyle='#f7d8a2';ctx.beginPath();ctx.arc(0,0,17,0,TAU);ctx.fill();ctx.strokeStyle='rgba(255,249,212,.85)';ctx.lineWidth=1;
-  for(let k=0;k<7;k++){const a=k*TAU/7;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(17*Math.cos(a),17*Math.sin(a));ctx.stroke()}
-  ctx.restore();
- }
- if(state.decor.has('cherry')){
-  ctx.beginPath();ctx.moveTo(x-12,baseY);ctx.quadraticCurveTo(x+8,baseY-24,x+3,baseY-34);ctx.strokeStyle='#728366';ctx.lineWidth=1.7;ctx.stroke();
-  ctx.fillStyle='#8d243c';ellipse(ctx,x-12,baseY,10,10);ctx.fill();ctx.fillStyle='rgba(251,229,222,.7)';ellipse(ctx,x-15,baseY-3,2.4,2.4);ctx.fill();
- }
- if(state.decor.has('rosemary')){
-  ctx.save();ctx.translate(CX+rx*.41,baseY);ctx.rotate(-.45);
-  ctx.strokeStyle='#617a51';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,8);ctx.lineTo(0,-57);ctx.stroke();
-  for(let j=0;j<11;j++){let yy=-j*5;ctx.strokeStyle=j%2?'#788e65':'#a1b08d';ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(j%2?13:-12,yy-13);ctx.stroke();
-  }ctx.restore();
- }
- if(state.decor.has('flower')){
-  let fx=CX+rx*.28,fy=baseY-9;
-  ctx.fillStyle='#e6bdcd';
-  for(let k=0;k<5;k++){let a=k*TAU/5;ellipse(ctx,fx+8*Math.cos(a),fy+8*Math.sin(a),7,10);ctx.fill();}
-  ctx.fillStyle='#edce7c';ellipse(ctx,fx,fy,4,4);ctx.fill();
- }
+// ---- V10.4 painted garnish (catalogue + images from garnish-v1.js) ----
+// Real rim diameters (outer, cm) of the three glass assets; they turn asset centimetres into scene
+// pixels per glass. Typical bar glassware sizes, consistent with each image's width/height ratio.
+const RIM_CM={highball:6.5,rocks:8.5,coupe:11};
+const STAND={mint_sprig:{d:3.2,r:-.05},rosemary_sprig:{d:5.5,r:-.12},cinnamon_stick:{d:4,r:-1.05},cucumber_ribbon:{d:6.5,r:-1.15}};
+function gItems(state){const G=window.LCGarnish,out=[];if(!G||!state.decor)return out;
+ for(const k of state.decor){const m=G.meta[k];if(!m)continue;const im=G.img(k);if(im)out.push({k,m,im})}return out}
+function gPose(id,state,glasses,k,m){
+ const g=specs[id],kcm=2*g.rim.hw*SCALE/RIM_CM[id],s=kcm/64;
+ const rimY=gy(g.rim.cy),rIn=radScreen(id,rimY),rOut=g.rim.hw*SCALE;
+ const bottomY=g.floor?gy(g.floor.cy):gy(g.bowl.yb);
+ let x=CX,y=rimY,rot=0,q=1;
+ if(m.slot==='rim'){x=CX+(rIn+rOut)/2;y=rimY;rot=.06}
+ else if(m.slot==='stand'){const st=STAND[k]||{d:4,r:0};x=CX-rIn*.42;y=Math.min(rimY+st.d*kcm,bottomY-2);rot=st.r}
+ else if(m.slot==='pick'){
+  if(g.bowl){ // coupe: the pick lies low across the shallow bowl so the olives sit in the drink
+   let yc=g.rim.cy;const want=half(id,g.rim.cy)*.32;while(yc<g.bowl.yb&&half(id,yc)>want)yc+=2;
+   x=CX-want*SCALE;y=gy(yc)-3;rot=.05}
+  else{x=CX-rIn*.18;y=Math.min(rimY+4.5*kcm,bottomY-3);rot=-.45}}
+ else if(m.slot==='float'){const sv=liquidY(id,state.visualML,capOf(state,glasses,id));x=CX+rIn*.06;
+  y=sv+depthScreen(id,sv)*.12;if(m.squash)q=Math.max(.12,ratio(id,sy(sv))*1.15)}
+ else if(m.slot==='sink'){x=CX+rIn*.28;y=g.floor?bottomY+g.floor.ry*SCALE*.3:bottomY}
+ return {x,y,rot,s,q};
 }
+function gPaint(ctx,it,p){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.scale(p.s,p.s*p.q);
+ ctx.drawImage(it.im,-it.m.ax,-it.m.ay,it.m.w,it.m.h);ctx.restore()}
+// Front arc of the rim opening; garnish below it and inside the glass is seen through the front wall.
+function rimArc(ctx,id,below,dy=0){const g=specs[id],y=gy(g.rim.cy)+dy,rr=radScreen(id,y),rd=rr*ratio(id,g.rim.cy),W=rr+400,N=40;
+ ctx.beginPath();ctx.moveTo(CX-W,y);
+ for(let i=0;i<=N;i++){const u=-1+2*i/N;ctx.lineTo(CX+u*rr,y+rd*Math.sqrt(Math.max(0,1-u*u)))}
+ ctx.lineTo(CX+W,y);ctx.lineTo(CX+W,below?2400:-2400);ctx.lineTo(CX-W,below?2400:-2400);ctx.closePath()}
+const CROSS={rim:1,stand:1,pick:1};
+// Before the liquid: sunken fruit and the parts of rim / stem / pick garnish that are inside the glass
+// below the rim, so the drink tints what is submerged and the front wall later lies over all of it.
+function garnishInside(ctx,id,state,glasses){const its=gItems(state);if(!its.length)return;
+ for(const it of its){if(!CROSS[it.m.slot]&&it.m.slot!=='sink')continue;
+  const p=gPose(id,state,glasses,it.k,it.m);ctx.save();interior(ctx,id,0);ctx.clip();
+  if(CROSS[it.m.slot]){rimArc(ctx,id,true,-1.5);ctx.clip()} // overlaps the outside layer by 1.5 px: no seam
+  gPaint(ctx,it,p);ctx.restore()}
+}
+// After the liquid and ice: pieces floating on the surface.
+function garnishFloat(ctx,id,state,glasses){if(!(state.visualML>=8))return; // nothing to float on
+ for(const it of gItems(state)){if(it.m.slot!=='float')continue;
+ const p=gPose(id,state,glasses,it.k,it.m);ctx.save();interior(ctx,id,0);ctx.clip();gPaint(ctx,it,p);ctx.restore()}}
+// After the front glass: what is outside the glass, or above the rim opening.
+// Painted whole on a scratch layer, then the part inside the glass below the front rim is erased in one
+// cut, so there is a single edge (on the rim line) instead of two clip edges meeting with a seam.
+// The layer does not depend on the liquid, so it is rebuilt only when glass, garnish or canvas change.
+let gScratch=null,gKey='';
+function garnishOutside(ctx,id,state,glasses){const its=gItems(state).filter(it=>CROSS[it.m.slot]);if(!its.length)return;
+ const W=ctx.canvas.width,H=ctx.canvas.height,T=ctx.getTransform();
+ const key=[id,W,H,T.a,T.b,T.c,T.d,T.e,T.f,...its.map(it=>it.k)].join('|');
+ if(!gScratch)gScratch=document.createElement('canvas');
+ if(key!==gKey){if(gScratch.width!==W||gScratch.height!==H){gScratch.width=W;gScratch.height=H}
+  const o=gScratch.getContext('2d');o.setTransform(1,0,0,1,0,0);o.clearRect(0,0,W,H);o.setTransform(T);
+  for(const it of its)gPaint(o,it,gPose(id,state,glasses,it.k,it.m));
+  o.save();o.globalCompositeOperation='destination-out';interior(o,id,0);o.clip();rimArc(o,id,true);o.fill();o.restore();gKey=key}
+ ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(gScratch,0,0);ctx.restore()}
 function pour(ctx,id,state,t,cap){const p=state.pour;if(!p)return;
  // V9 STIR: the stream comes from the mixing glass spout, drawn by stir-scene.js
  if(p.kind==='strain'&&state.flow==='stir'&&window.LCStirScene)return;
@@ -455,15 +487,17 @@ function draw(options){const {ctx,state,t,glasses}=options,id=state.glass,g=spec
  ground(ctx,id);
  // Back: only the inside of the glass (back wall, back rim, floor / bowl).
  ctx.save();interior(ctx,id,0);ctx.clip();ctx.drawImage(g.img,IMG.x,IMG.y,IMG.w,IMG.h);ctx.restore();
+ garnishInside(ctx,id,state,glasses);
  liquid(ctx,options);
  if(window.LCIceV8&&g.floor)window.LCIceV8.draw(ctx,state,t,lastLiquid);
+ garnishFloat(ctx,id,state,glasses);
  frontGlass(ctx,id,state.visualML>.5);
- garnish(ctx,id,state,t);pour(ctx,id,state,t,capOf(state,glasses,id));
+ garnishOutside(ctx,id,state,glasses);pour(ctx,id,state,t,capOf(state,glasses,id));
  ctx.restore();return true;
 }
 window.LCArtV5={draw,liquidY,hitTest,
  clipInner:(ctx,id,inset=0)=>{interior(ctx,id,inset);ctx.clip()},
  innerRadius:(id,y,inset=0)=>Math.max(1,radScreen(id,y)-inset),
  frontArc,floor:floorInfo,rim:rimInfo,view,toScene,
- ready:()=>Object.values(loaded).every(x=>x==='ready'),status:id=>loaded[id]||'loading',specs,assetRect:IMG,version:'8.3'};
+ ready:()=>Object.values(loaded).every(x=>x==='ready'),status:id=>loaded[id]||'loading',specs,assetRect:IMG,version:'10.4'};
 })();
