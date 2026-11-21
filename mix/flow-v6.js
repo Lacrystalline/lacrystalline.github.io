@@ -89,7 +89,7 @@ function allowProcess(kind){
 const has=id=>s.portions.some(p=>p.id===id);
 const hasEgg=()=>s.portions.some(p=>h.byId[p.id]&&h.byId[p.id].shakeOnly);
 const dryShakeDue=()=>hasEgg()&&!s.dryShaken;
-const CITRUS=['lemon','grapefruit'];
+const CITRUS=['lemon','grapefruit','orange'];
 function shakeTips(){
  const tips=[];
  if(s.shakeDry){tips.push('蛋白先「乾搖」：不加冰用力搖，讓蛋白打出綿密泡沫。','搖完按下一步，再加入冰塊搖第二次。');return tips}
