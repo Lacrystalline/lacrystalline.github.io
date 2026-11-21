@@ -342,6 +342,32 @@ function liquid(ctx,opts){
    ctx.lineWidth=.8;ellipse(ctx,x,y,1+k%3*.3,1.5);ctx.stroke();
   }
  }
+ // V10.5 shaken texture: air beaten in by the shake. A citrus / syrup drink gets a thin head of fine
+ // froth that thins out over about a minute and a pale haze in the body that clears; egg white keeps a
+ // thick, fine, matte foam. The foam takes the top of the liquid column, coloured by the drink.
+ const foam=state.foam&&state.flowStep==='served'?state.foam:null;
+ if(foam){
+  const age=Math.max(0,(Date.now()-foam.at)/1000),egg=foam.kind==='egg',kcm=2*g.rim.hw*SCALE/RIM_CM[id];
+  const thick=Math.max(1.2,(egg?1.1*(.86+.14*Math.exp(-age/90)):.3*(.2+.8*Math.exp(-age/30)))*kcm);
+  const haze=egg?.08:.2*Math.exp(-age/25);
+  if(haze>.01){bandPath(surfaceY,liquidY(id,0,cap),true,true);ctx.fillStyle='rgba(248,246,238,'+haze.toFixed(3)+')';ctx.fill()}
+  const fc=blend(topColor,[250,248,240],egg?.84:.6),fa=egg?.96:.14+.5*Math.exp(-age/40);
+  bandPath(surfaceY,surfaceY+thick,true);
+  const fg=ctx.createLinearGradient(0,surfaceY,0,surfaceY+thick+dep);
+  fg.addColorStop(0,color(bright(fc,.06),fa));fg.addColorStop(.7,color(fc,fa*.92));fg.addColorStop(1,color(bright(fc,-.06),fa*.35));
+  ctx.fillStyle=fg;ctx.fill();
+  planePath();const top=ctx.createLinearGradient(0,surfaceY-dep,0,surfaceY+dep);
+  top.addColorStop(0,color(bright(fc,.10),fa));top.addColorStop(1,color(bright(fc,-.02),fa));ctx.fillStyle=top;ctx.fill();
+  ctx.save();ctx.clip();
+  // bubbles: froth shows a few visible ones, egg foam is too fine to resolve
+  const nB=egg?10:26;
+  for(let k=0;k<nB;k++){const u=Math.sin(k*12.9898)*43758.5453%1,v=Math.sin(k*78.233)*12345.678%1;
+   const x=CX+(Math.abs(u)*2-1)*rad*.9,y=surfaceY+(Math.abs(v)*2-1)*dep*.8,r=egg?.7:.8+(k%3)*.45;
+   ctx.strokeStyle='rgba(255,255,252,'+(egg?.25:.42*fa).toFixed(3)+')';ctx.lineWidth=.7;ellipse(ctx,x,y,r,r*.6);ctx.stroke()}
+  ctx.restore();
+  ctx.beginPath();for(let j=0;j<=60;j++){const x=CX-rad+(2*rad*j/60);ctx.lineTo(x,edgeAt(surfaceY,x,true))}
+  ctx.strokeStyle='rgba(255,253,246,'+(.35*fa).toFixed(3)+')';ctx.lineWidth=1.2;ctx.stroke();
+ }
  ctx.restore();
 }
 // ---- V10.4 painted garnish (catalogue + images from garnish-v1.js) ----
