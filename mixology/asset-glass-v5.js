@@ -481,7 +481,7 @@ function garnishOutside(ctx,id,state,glasses){const all=gItems(state),its=all.fi
 }
 function pour(ctx,id,state,t,cap){const p=state.pour;if(!p)return;
  // V9 STIR: the stream comes from the mixing glass spout, drawn by stir-scene.js
- if(p.kind==='strain'&&state.flow==='stir'&&window.LCStirScene)return;
+ if(p.kind==='strain'&&(state.flow==='stir'&&window.LCStirScene||state.flow==='shake'&&window.LCShakeScene))return;   // the scene draws its own stream
  const z=clamp((t-p.start)/p.duration,0,1),force=Math.sin(Math.PI*z);if(force<=.008)return;
  const pc=Array.isArray(p.color)?p.color:[188,211,217],surface=liquidY(id,state.visualML,cap);
  const hk=window.mixologyHooks,lp=state.portions[state.portions.length-1],sk=.25+.75*clamp(lp&&hk&&hk.byId[lp.id]?(hk.byId[lp.id].op??1):1,0,1);
