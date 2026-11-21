@@ -63,7 +63,7 @@ async function addPrep(id,ml,fromDemo){
  if(s.flowStep!=='preparing'){h.notify('請先完成這杯的調製與濾出；濾出後只可追加氣泡水。');return false}
  if(isBubbly(id)){h.notify('蘇打水或通寧水請在濾出後再加，不可放入調酒杯或雪克杯。');return false}
  if(h.total()+ml>cap()*.83){h.notify('請預留融冰稀釋與濾出空間。');return false}
- const rev=s.revision,from=h.total(),duration=750;
+ const rev=s.revision,from=h.total(),duration=s.flow==='stir'&&window.LCStirScene?1500:750;   // stir: jigger in, pour, out
  s.portions.push({id,ml});s.prepPour={from,to:h.total(),start:performance.now(),duration,color:h.rgb(h.byId[id].color)};
  s.busy=true;h.updateUI();h.syncRoom('pour_begin');
  await h.sleep(duration+40);

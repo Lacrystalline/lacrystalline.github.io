@@ -23,7 +23,7 @@ const lift=(c,q)=>mixc(c,q>=0?[254,246,228]:[4,12,30],Math.abs(q));
 
 // ---------- assets ----------
 const DIR='./assets/stir/';
-const SRC={glass:DIR+'mixing_glass.webp',strainer:DIR+'strainer.webp',spoon:DIR+'bar_spoon.webp',ice:'./ice-v8-preview/assets/ice-cube.webp'};
+const SRC={glass:DIR+'mixing_glass.webp',strainer:DIR+'strainer.webp',spoon:DIR+'bar_spoon.webp',jigger:DIR+'jigger.webp',ice:'./ice-v8-preview/assets/ice-cube.webp'};
 const img={},ok={};
 for(const [k,src] of Object.entries(SRC)){const im=new Image();im.decoding='async';
  im.onload=()=>{if(k==='glass')buildGloss();ok[k]=true};im.onerror=()=>console.warn('stir-scene: cannot load',src);im.src=src;img[k]=im}
@@ -374,23 +374,63 @@ function spinAt(a,e){
 
 // ---------- pours into the mixing glass ----------
 const local={iceSeenAt:0,iceWas:false,drag:null,manualSpeed:0,lastManual:0};
+// Each ingredient is measured in the jigger and tipped into the mixing glass:
+// the jigger comes in over the mouth, tips past horizontal, the stream falls in, then it rights itself and leaves.
+// Jigger artwork (jigger.webp, 597 x 1116): large-cup rim ellipse, foot, rotation pivot.
+const JG={cx:298,rim:{cy:140,rx:284,ry:128},foot:1106,pivot:[298,560]},JK=.198;
+const PREP={enter:.22,pourA:.30,pourB:.80};          // fractions of the prep pour duration
+function prepQ(){const p=s.prepPour;return p?clamp((performance.now()-p.start)/p.duration,0,1):1}
+function prepStreamQ(q){return clamp((q-PREP.pourA)/(PREP.pourB+.05-PREP.pourA),0,1)}
 function prepVisualMl(){
  const p=s.prepPour,vol=h.total();
  if(!p)return vol;
- const q=clamp((performance.now()-p.start)/p.duration,0,1),e=q*q*(3-2*q);
+ const u=clamp((prepStreamQ(prepQ())-.08)/.86,0,1),e=u*u*(3-2*u);   // rises only once the stream has landed
  return p.from+(p.to-p.from)*e;
 }
-function drawPrepStream(ctx,pose,mlv){
- const p=s.prepPour;if(!p)return;
- const q=clamp((performance.now()-p.start)/p.duration,0,1),force=Math.sin(Math.PI*q);if(force<.02)return;
- const hm=levelFor(Math.max(mlv,.5)),e=ell(DIM.HB+hm);
- const ex=pose.x+(G.cx+18-G.pivot[0])*K,ey=pose.y+(e.cy-G.pivot[1])*K;
- const col=Array.isArray(p.color)?p.color:[190,215,220],sx=400,sy=40;
- const g=ctx.createLinearGradient(sx,sy,ex,ey);g.addColorStop(0,rgba(lift(col,.3),.55*force));g.addColorStop(1,rgba(col,.9*force));
- ctx.save();ctx.strokeStyle=g;ctx.lineCap='round';ctx.lineWidth=3+2.2*force;
- ctx.beginPath();ctx.moveTo(sx,sy);ctx.bezierCurveTo(sx+4,sy+60,ex-8,ey-70,ex,ey);ctx.stroke();
- ctx.lineWidth=1;ctx.strokeStyle='rgba(247,254,253,'+(.45*force)+')';ctx.stroke();ctx.restore();
+function mouthOf(pose){ // canvas-space mouth of the upright mixing glass
+ const k=K*pose.sc;
+ return {x:pose.x+(G.cx-G.pivot[0])*k,back:pose.y+(G.rim.cy-G.rim.ry-G.pivot[1])*k,cy:pose.y+(G.rim.cy-G.pivot[1])*k,r:G.rim.rx*k};
 }
+function jiggerLip(rot){ // lowest point of the tipped rim ellipse, in artwork pixels
+ const f=Math.atan2(JG.rim.ry*Math.cos(rot),JG.rim.rx*Math.sin(rot));
+ return [JG.cx+JG.rim.rx*Math.cos(f),JG.rim.cy+JG.rim.ry*Math.sin(f)];
+}
+function jiggerAt(L,rot){ // pose whose pouring lip sits on L
+ const lp=jiggerLip(rot),vx=(lp[0]-JG.pivot[0])*JK,vy=(lp[1]-JG.pivot[1])*JK,c=Math.cos(rot),sn=Math.sin(rot);
+ return {x:L[0]-(vx*c-vy*sn),y:L[1]-(vx*sn+vy*c),rot,alpha:1};
+}
+function jiggerPose(q,m){
+ const L=[m.x+m.r*.22,m.back-12],off={x:m.x+300,y:m.back-250,rot:-.35,alpha:1};
+ if(q<PREP.enter){const u=inOut(q/PREP.enter),P=jiggerAt(L,-1.25);
+  return {x:lerp(off.x,P.x,u),y:lerp(off.y,P.y,u),rot:lerp(off.rot,P.rot,u),alpha:1}}
+ if(q<PREP.pourA)return jiggerAt(L,lerp(-1.25,-1.95,inOut((q-PREP.enter)/(PREP.pourA-PREP.enter))));
+ if(q<PREP.pourB)return jiggerAt(L,lerp(-1.95,-2.2,smooth((q-PREP.pourA)/(PREP.pourB-PREP.pourA))));
+ const u=inOut((q-PREP.pourB)/(1-PREP.pourB)),P=jiggerAt(L,-2.2);
+ return {x:lerp(P.x,off.x,u),y:lerp(P.y,off.y,u),rot:lerp(P.rot,off.rot,u),alpha:1-smooth((u-.6)/.4)};
+}
+function drawJigger(ctx,jp,col,full){
+ if(!ok.jigger)return;
+ ctx.save();ctx.globalAlpha=jp.alpha;ctx.translate(jp.x,jp.y);ctx.rotate(jp.rot);ctx.scale(JK,JK);ctx.translate(-JG.pivot[0],-JG.pivot[1]);
+ ctx.drawImage(img.jigger,0,0);
+ if(full>.01){ // the measure brimming in the cup while it is carried in
+  const r=JG.rim;ctx.beginPath();ctx.ellipse(JG.cx,r.cy+6,r.rx*.9,r.ry*.84,0,0,TAU);ctx.clip();
+  const g=ctx.createLinearGradient(0,r.cy-r.ry,0,r.cy+r.ry);g.addColorStop(0,rgba(lift(col,.25),.92*full));g.addColorStop(1,rgba(lift(col,-.12),.92*full));
+  ctx.fillStyle=g;ctx.fillRect(JG.cx-r.rx,r.cy-r.ry,r.rx*2,r.ry*2);
+  ctx.strokeStyle='rgba(255,252,240,'+(.35*full)+')';ctx.lineWidth=6;ctx.beginPath();ctx.ellipse(JG.cx-r.rx*.2,r.cy-r.ry*.25,r.rx*.45,r.ry*.3,0,Math.PI*1.05,Math.PI*1.6);ctx.stroke();
+ }
+ ctx.restore();
+}
+function drawPrepPour(ctx,pose,mlv,t){
+ const p=s.prepPour;if(!p)return;
+ const q=prepQ(),m=mouthOf(pose),col=Array.isArray(p.color)?p.color:[190,215,220];
+ const jp=jiggerPose(q,m),sq=prepStreamQ(q);
+ const hm=levelFor(Math.max(mlv,.5)),e=ell(DIM.HB+hm);
+ const tg={x:m.x,y:pose.y+(e.cy-G.pivot[1])*K*pose.sc,mouth:m.back,r:e.rx*K*pose.sc};
+ const full=q<PREP.enter?1:1-clamp((jp.rot+1.25)/-.6,0,1);
+ if(sq>0&&sq<1)drawStream(ctx,(()=>{const lp=jiggerLip(jp.rot),vx=(lp[0]-JG.pivot[0])*JK,vy=(lp[1]-JG.pivot[1])*JK,c=Math.cos(jp.rot),sn=Math.sin(jp.rot);return [jp.x+vx*c-vy*sn,jp.y+vx*sn+vy*c]})(),tg,sq,t,col,.72);
+ drawJigger(ctx,jp,col,full);
+}
+function prepLanding(){const p=s.prepPour;if(!p)return 0;const sq=prepStreamQ(prepQ());return sq>.1&&sq<.95?.6:0}
 
 // ---------- the frame entry point ----------
 function frame(ctx,t,drawServing){
@@ -430,12 +470,12 @@ function frame(ctx,t,drawServing){
    }
   }
   const ice=iceList(theta*.32,theta,ph==='prep'?iceDrop:0);
-  const o={mlv,mix,spin:theta,speed,t,impact:s.prepPour?.6:0,ice,spoon,tilted:ph==='glass_lift'&&Math.abs(pose.rot)>.001,rot:pose.rot,color:layersFor(mlv).avg};
+  const o={mlv,mix,spin:theta,speed,t,impact:ph==='prep'?prepLanding():0,ice,spoon,tilted:ph==='glass_lift'&&Math.abs(pose.rot)>.001,rot:pose.rot,color:layersFor(mlv).avg};
   const lifted=ph==='glass_lift'?clamp((e-T.liftStart)/(T.tilt+T.exit*.5),0,1):0;
   shadow(ctx,1-lifted);
   if(ph==='glass_lift')withFade(ctx,base,pose.alpha,c=>drawGlassScene(c,base,pose,o));
   else drawGlassScene(ctx,base,pose,o);
-  if(ph==='prep')drawPrepStream(ctx,pose,mlv);
+  if(ph==='prep')drawPrepPour(ctx,pose,mlv,t);
   return true;
  }
  if(ph==='service_ready'){
@@ -508,7 +548,7 @@ function spoutOf(pose){
 }
 // A falling stream: leaves the lip with a little forward speed, narrows as it accelerates,
 // head falls in at the start and the tail drops away at the end.
-function drawStream(ctx,sp,tg,q,t,col){
+function drawStream(ctx,sp,tg,q,t,col,wk=1){
  const sx=sp[0],sy=sp[1]+1,ex=clamp(tg.x+(sx-tg.x)*.35,tg.x-tg.r*.5,tg.x+tg.r*.5),ey=tg.y+1;
  const fall=Math.max(20,ey-sy),vx=(ex-sx);
  const P=u=>[sx+vx*(1-Math.pow(1-u,2.2))-6*Math.sin(Math.PI*u)*(1-u),sy+fall*u*u*.55+fall*u*.45];
@@ -517,7 +557,7 @@ function drawStream(ctx,sp,tg,q,t,col){
  const u0=tail*tail,u1=1-Math.pow(1-head,2),N=36,L=[],R=[];
  for(let i=0;i<=N;i++){const u=lerp(u0,u1,i/N),p=P(u),pn=P(Math.min(1,u+.01)),pp=P(Math.max(0,u-.01));
   const dx=pn[0]-pp[0],dy=pn[1]-pp[1],l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
-  const w=(lerp(7.6,4.4,Math.sqrt(u))+.6*Math.sin(t*.02+u*18))*(.45+.55*force);
+  const w=(lerp(7.6,4.4,Math.sqrt(u))+.6*Math.sin(t*.02+u*18))*(.45+.55*force)*wk;
   L.push([p[0]+nx*w,p[1]+ny*w]);R.push([p[0]-nx*w,p[1]-ny*w])}
  const mouthY=tg.mouth+6;
  const body=c=>{c.beginPath();L.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));for(let i=R.length-1;i>=0;i--)c.lineTo(R[i][0],R[i][1]);c.closePath()};
@@ -626,5 +666,5 @@ function schedule(){lastPhase=null}
 
 window.LCStirScene={frame,phase,busy,begin,processMs,onReset,strainTiming,startStrain,schedule,
  freezeAt:ms=>{frozen=ms===null?null:Number(s.stirAnim?.startAt||0)+ms},
- timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'9.2'};
+ timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'9.3'};
 })();
