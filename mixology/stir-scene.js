@@ -77,7 +77,7 @@ const W_SPIN=2.35*TAU/1000;                     // rad per ms while stirring
 
 // ---------- state helpers ----------
 let frozen=null;                                  // test hook: freeze the visual clock
-const now=()=>frozen===null?Date.now():frozen;
+const now=()=>frozen===null?(window.mixologyClock?window.mixologyClock():Date.now()):frozen;   // bartender's clock on viewers
 function anim(kind){const a=s.stirAnim;return a&&a.kind===kind?a:null}
 function elapsed(a){return a?now()-Number(a.startAt||0):Infinity}
 function inStir(){return s.flow==='stir'}
@@ -666,5 +666,5 @@ function schedule(){lastPhase=null}
 
 window.LCStirScene={frame,phase,busy,begin,processMs,onReset,strainTiming,startStrain,schedule,
  freezeAt:ms=>{frozen=ms===null?null:Number(s.stirAnim?.startAt||0)+ms},
- timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'9.3'};
+ timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'9.4'};
 })();

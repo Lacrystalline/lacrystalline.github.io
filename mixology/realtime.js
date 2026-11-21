@@ -3,7 +3,23 @@
 'use strict';
 const $=x=>document.getElementById(x),ui=window.mixologyBridge;
 const client=window.supabase?.createClient('https://frphnumgjlpmnkplyfaa.supabase.co','sb_publishable_I-8Y6vRvelc7lysHQ6kLRg_YhfqY_bB',{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-const r={mode:'local',id:null,host:null,view:null,rev:-1,channel:null,saving:Promise.resolve(),reading:false,repeat:false,lastStir:0};
+const r={mode:'local',id:null,host:null,view:null,rev:-1,channel:null,saving:Promise.resolve(),reading:false,repeat:false,lastStir:0,heard:null,samples:[]};
+// Clock offset (bartender minus guest). A broadcast reaches the guest at least a short transit after the
+// snapshot was taken, so (sentAt - arrival) is a lower bound of the offset; keep the best recent bound.
+const TRANSIT=120;
+function learnSkew(state,rev){
+ const h=r.heard;if(!h||h.rev!==rev||!state||!Number.isFinite(Number(state.sentAt)))return;
+ r.samples.push(Number(state.sentAt)-h.at);if(r.samples.length>16)r.samples.shift();
+ window.__mixSkew=Math.max(...r.samples)+TRANSIT;
+}
+// A guest whose browser still holds an older page reloads once into the bartender's version.
+function checkVersion(state){
+ const v=state&&state.appVer,mine=window.mixologyVersion;
+ if(!v||!mine||Number(v)<=Number(mine))return;
+ const key='mixology-reload-'+v;
+ try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1')}catch(e){}
+ location.replace(location.pathname+'?v='+encodeURIComponent(v)+location.hash);
+}
 const status=t=>{$('liveStatus').textContent=t};
 const url=()=>location.origin+location.pathname+'#room='+r.id+'&view='+r.view;
 async function read(){
@@ -15,7 +31,7 @@ async function read(){
   const {data,error}=await client.rpc(host?'mixology_host_room':'mixology_view_room',host?{p_id:r.id,p_host_token:r.host}:{p_id:r.id,p_viewer_token:r.view});
   if(error)throw error;
   if(host){r.view=data.viewer_token;$('viewLink').value=url()}
-  else if(Number(data.revision)>r.rev)ui.apply(data.state);
+  else{checkVersion(data.state);learnSkew(data.state,Number(data.revision));if(Number(data.revision)>r.rev)ui.apply(data.state)}
   r.rev=Math.max(r.rev,Number(data.revision));
   status(host?'連線正常，可以把觀看連結傳給客人。':'正在同步觀看調酒師的酒杯。');
  }catch(e){console.error(e);status('遠端讀取失敗：'+(e.message||'網路異常'))}
@@ -24,7 +40,8 @@ async function read(){
 function subscribe(){
  if(!r.view)return;
  if(r.channel)client.removeChannel(r.channel);
- r.channel=client.channel('mixology:'+r.view).on('broadcast',{event:'state_changed'},()=>{
+ r.channel=client.channel('mixology:'+r.view).on('broadcast',{event:'state_changed'},msg=>{
+   const pl=msg&&msg.payload;r.heard={rev:Number(pl&&pl.revision),at:Date.now()};
    // Broadcast is only a notification. Authoritative data is re-read from SQL.
    if(r.mode==='viewer')read();
  }).subscribe(s=>{if(s==='SUBSCRIBED')read();else if(s==='TIMED_OUT'||s==='CHANNEL_ERROR')status('連線暫時中斷，正在重連…')});

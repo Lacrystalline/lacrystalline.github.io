@@ -12,6 +12,7 @@ const TYPES={
  rocks:[['none','無冰','純飲或預先冰鎮'],['sphere','球冰','推薦 · 單顆大球'],['large','大方冰','單顆切割方冰'],['cubes','小方冰','3 顆，堆疊碰撞'],['crushed','碎冰','特殊配方']],
  coupe:[['none','無冰','建議冰鎮杯身']]
 };
+const clockNow=()=>window.mixologyClock?window.mixologyClock():Date.now();
 const DISPLACEMENT={none:0,spear:86,cubes:52,crushed:67,sphere:48,large:52};
 const V8_VERSION=3,CX=280,S=400/1086,Y0=35,PI=Math.PI;
 const mix=(a,b,t)=>a+(b-a)*t,clamp=(a,l,h)=>Math.max(l,Math.min(h,a));
@@ -121,7 +122,7 @@ function reset(st){
  if(key===sys.key)return;
  sys={key,particles:make(st.glass,kind,Number(st.iceSeed)||1),dtAccum:0,lastAt:0,recoveredAt:0,rested:false,lastImpulse:0};
  if(kind==='none')return;
- const since=clamp((Date.now()-(Number(st.iceStartedAt)||Date.now()))/1000,0,5);
+ const since=clamp((clockNow()-(Number(st.iceStartedAt)||clockNow()))/1000,0,5);
  // Catch up late spectators before first drawn frame.
  for(let n=0;n<Math.min(260,Math.floor(since*65));n++)step(st,1/65,n/65);
  sys.recoveredAt=since;
@@ -188,7 +189,7 @@ function update(st,t){
  let elapsed=clamp((t-sys.lastAt)/1000,0,.045);
  sys.lastAt=t;
  sys.dtAccum+=elapsed;
- const from=(Date.now()-(Number(st.iceStartedAt)||Date.now()))/1000;
+ const from=(clockNow()-(Number(st.iceStartedAt)||clockNow()))/1000;
  let ticks=0;
  while(sys.dtAccum>=1/60&&ticks<4){step(st,1/60,Math.max(0,from-sys.dtAccum));sys.dtAccum-=1/60;ticks++}
 }
