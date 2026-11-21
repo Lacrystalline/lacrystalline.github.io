@@ -193,7 +193,7 @@ function updateUI(){
  }
  if(prep()&&s.flowStep!=='served'){
   $('phaseLabel').textContent=s.flowStep==='shaking'?(s.shakeDry?'DRY SHAKING':'SHAKING'):s.flowStep==='ready'?'READY TO STRAIN':s.flowStep==='transferring'?'STRAINING':'PREPARING '+s.flow.toUpperCase();
-  $('stageHint').textContent=s.flow==='stir'?(s.flowStep==='preparing'?(s.prepIce?(h.total()?'按「攪拌」，或在調酒杯上畫圈攪拌。':'倒入原料，開始調製。'):'原料在調酒杯中；加入調製用冰後即可攪拌。'):s.flowStep==='ready'?(sceneBusy()?'吧匙收回，調酒杯被拿起。':'成品杯準備好了；可選擇成品冰，再按「準備濾出」。'):'經濾冰器倒入成品杯，調製冰留在調酒杯內。'):s.flowStep==='shaking'?'在遊戲中搖盪，完成後按「下一步」。':s.flowStep==='ready'?'搖好了：可選擇成品冰，再按「準備濾出」。':(dryShakeDue()&&!s.prepIce?'有蛋白：先不加冰，按「蓋上 · 乾搖」。':s.prepIce?'按「蓋上 · 搖盪」，再到遊戲裡搖。':!h.total()?'倒入原料，加入調製用冰。':s.dryShaken?'乾搖完成：加入調製用冰，再搖一次。':'加入調製用冰，再按「蓋上 · 搖盪」。');
+  $('stageHint').textContent=s.flow==='stir'?(s.flowStep==='preparing'?(s.prepIce?(h.total()?'按「攪拌」，或在調酒杯上畫圈攪拌。':'倒入原料，開始調製。'):'原料在調酒杯中；加入調製用冰後即可攪拌。'):s.flowStep==='ready'?(sceneBusy()?'吧匙收回，調酒杯被拿起。':'成品杯準備好了；可選擇成品冰，再按「準備濾出」。'):'經濾冰器倒入成品杯，調製冰留在調酒杯內。'):s.flowStep==='shaking'?(viewer()?'調酒師正在遊戲中搖盪。':'在遊戲中搖盪，完成後按「下一步」。'):s.flowStep==='ready'?'搖好了：可選擇成品冰，再按「準備濾出」。':(dryShakeDue()&&!s.prepIce?'有蛋白：先不加冰，按「蓋上 · 乾搖」。':s.prepIce?'按「蓋上 · 搖盪」，再到遊戲裡搖。':!h.total()?'倒入原料，加入調製用冰。':s.dryShaken?'乾搖完成：加入調製用冰，再搖一次。':'加入調製用冰，再按「蓋上 · 搖盪」。');
   if(s.flow==='stir'&&s.flowStep==='preparing'&&s.processing)$('phaseLabel').textContent='STIRRING';
  }
 }
