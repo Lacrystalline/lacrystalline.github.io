@@ -111,12 +111,12 @@ function layersFor(visualMl){
  for(const p of s.portions){
   if(left<=.0001)break;const ml=Math.min(p.ml,left);left-=ml;
   const info=h.byId[p.id];if(!info)continue;
-  const L=h.lookOf?h.lookOf(p):{abs:[0,0,0],haze:0,color:h.rgb(info.color),op:1};
-  items.push({id:p.id,locked:!!(p.lockedAbs||p.lockedColor),ml,abs:L.abs,haze:L.haze,color:L.color,op:L.op,density:p.lockedDensity??info.density});
+  const L=h.lookOf(p);
+  items.push({id:p.id,locked:!!p.lockedColor,ml,spec:L.spec,haze:L.haze,color:L.color,op:L.op,density:p.lockedDensity??info.density});
  }
  const vol=items.reduce((a,p)=>a+p.ml,0);
- // V10: same Beer-Lambert blend as index.html (butterfly pea reacts to acid there too)
- const M=vol&&h.mixLook?h.mixLook(h.phAdjust?h.phAdjust(items):items):{color:[236,242,240],op:1};
+ // same spectral Beer-Lambert blend as index.html (butterfly pea reacts to the blend's pH there)
+ const M=vol?h.mixLook(items):{color:[236,242,240],op:1};
  return {layers:items.sort((a,b)=>b.density-a.density),avg:M.color,op:M.op,vol};
 }
 
@@ -671,5 +671,5 @@ function schedule(){lastPhase=null}
 
 window.LCStirScene={frame,phase,busy,begin,processMs,onReset,strainTiming,startStrain,schedule,
  freezeAt:ms=>{frozen=ms===null?null:Number(s.stirAnim?.startAt||0)+ms},
- timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'10.0'};
+ timings:{stir:{...T},strain:{...ST}},geometry:G,ready,version:'10.1'};
 })();
