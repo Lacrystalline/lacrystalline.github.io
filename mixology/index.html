@@ -37,7 +37,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <body>
 <header class="topbar">
  <div class="brand"><div class="brandmark" aria-hidden="true"><span>✧</span></div><div class="brandname">LA CRYSTALLINE<small>水晶庭 · MIXOLOGY ATELIER</small></div></div>
- <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V10.2</span></div>
+ <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V10.3</span></div>
 </header>
 <div class="shell">
  <div class="intro"><div><div class="eyebrow">An evening, made by your hands</div><h1>調製屬於你的那杯夜色</h1></div><p>選擇原料 · 觀察分層 · 親手攪拌 · 完成特調</p></div>
@@ -98,10 +98,10 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 </div>
 <script src="./visual-v3.js" defer></script>
 <script src="./layered-art-v4.js" defer></script>
-<script src="./asset-glass-v5.js?v=20261121-v102" defer></script>
-<script src="./flow-v6.js?v=20261121-v102" defer></script>
+<script src="./asset-glass-v5.js?v=20261121-v103" defer></script>
+<script src="./flow-v6.js?v=20261121-v103" defer></script>
 <script src="./ice-v8.js?v=20261121-v94" defer></script>
-<script src="./stir-scene.js?v=20261121-v102" defer></script>
+<script src="./stir-scene.js?v=20261121-v103" defer></script>
 <!-- sync library last: a slow CDN must not hold back the glass artwork -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js" defer></script>
 <script src="./realtime.js?v=20261121-room-pin-v95" defer></script>
@@ -120,20 +120,20 @@ const ingredientData=[
  {id:'whisky',cat:'spirit',name:'威士忌',en:'WHISKY',color:'#cf8e3a',density:.95,taste:[1,0,2,5],desc:'橡木桶・琥珀'},
  {id:'brandy',cat:'spirit',name:'白蘭地',en:'BRANDY',color:'#94461d',density:.95,taste:[2,0,1,5],desc:'葡萄・深琥珀'},
  {id:'blue',cat:'spirit',name:'藍柑橘酒',en:'BLUE CURAÇAO',color:'#00c0f4',density:1.11,taste:[4,1,1,2],desc:'柑橘・湛藍'},
- {id:'grenadine',cat:'mixer',name:'紅石榴糖漿',en:'GRENADINE',color:'#d70030',density:1.18,taste:[5,1,0,0],desc:'果紅・濃甜'},
- {id:'lemon',cat:'mixer',pH:2.3,name:'檸檬汁',en:'LEMON',color:'#fbe9a0',haze:0.45,density:1.04,taste:[1,5,0,0],desc:'清酸・明亮'},
- {id:'grapefruit',cat:'mixer',pH:3.2,name:'葡萄柚汁',en:'GRAPEFRUIT',color:'#f4a49c',haze:0.5,density:1.05,taste:[2,3,2,0],desc:'微苦・果香'},
+ {id:'grenadine',ta:8.1,pH:2.7,cat:'mixer',name:'紅石榴糖漿',en:'GRENADINE',color:'#d70030',density:1.31,taste:[5,1,0,0],desc:'果紅・濃甜'},
+ {id:'lemon',cat:'mixer',ta:48.7,pH:2.3,name:'檸檬汁',en:'LEMON',color:'#fbe9a0',haze:0.45,density:1.04,taste:[1,5,0,0],desc:'清酸・明亮'},
+ {id:'grapefruit',cat:'mixer',ta:19.6,pH:3.07,name:'葡萄柚汁',en:'GRAPEFRUIT',color:'#f4a49c',haze:0.5,density:1.05,taste:[2,3,2,0],desc:'微苦・果香'},
  {id:'elder',cat:'mixer',name:'接骨木花糖漿',en:'ELDERFLOWER',color:'#f2dfb2',density:1.18,taste:[5,0,0,0],desc:'花香・柔甜'},
- {id:'soda',cat:'soda',name:'蘇打水',en:'SODA',color:'#f7fbfb',density:1.00,taste:[0,0,0,0],desc:'氣泡・清爽'},
- {id:'tonic',cat:'soda',pH:2.8,name:'通寧水',en:'TONIC',color:'#f4faf6',density:1.02,taste:[1,0,4,0],desc:'氣泡・微苦'},
+ {id:'soda',pH:5.32,cat:'soda',name:'蘇打水',en:'SODA',color:'#f7fbfb',density:1.00,taste:[0,0,0,0],desc:'氣泡・清爽'},
+ {id:'tonic',cat:'soda',pH:2.54,name:'通寧水',en:'TONIC',color:'#f4faf6',density:1.02,taste:[1,0,4,0],desc:'氣泡・微苦'},
  // Teas. Brewed teas are clear but tinted; matcha is a suspension (haze).
- {id:'butterfly',cat:'tea',name:'蝶豆花茶',en:'BUTTERFLY PEA',color:'#0200fd',density:1.01,taste:[0,0,0,0],desc:'寶藍・遇酸轉紫'},
- {id:'earlgrey',cat:'tea',name:'伯爵茶',en:'EARL GREY',color:'#a9481d',density:1.00,taste:[0,0,2,0],desc:'佛手柑・紅琥珀'},
+ {id:'butterfly',pH:5.0,cat:'tea',name:'蝶豆花茶',en:'BUTTERFLY PEA',color:'#0200fd',density:1.01,taste:[0,0,0,0],desc:'寶藍・遇酸轉紫'},
+ {id:'earlgrey',pH:6.4,cat:'tea',name:'伯爵茶',en:'EARL GREY',color:'#fd2e00',density:1.00,taste:[0,0,2,0],desc:'佛手柑・紅琥珀'},
  {id:'oolong',cat:'tea',name:'烏龍茶',en:'OOLONG',color:'#d9a03a',density:1.00,taste:[0,0,2,0],desc:'焙香・金黃'},
- {id:'jasmine',cat:'tea',name:'茉莉綠茶',en:'JASMINE GREEN',color:'#e2db8a',density:1.00,taste:[0,0,1,0],desc:'花香・淡黃綠'},
+ {id:'jasmine',pH:6.63,cat:'tea',name:'茉莉綠茶',en:'JASMINE GREEN',color:'#e2db8a',density:1.00,taste:[0,0,1,0],desc:'花香・淡黃綠'},
  {id:'matcha',cat:'tea',name:'抹茶',en:'MATCHA',color:'#7fa53b',haze:0.9,density:1.02,taste:[0,0,3,0],desc:'茶粉懸浮・翠綠'},
  {id:'chamomile',cat:'tea',name:'洋甘菊茶',en:'CHAMOMILE',color:'#f0cf5a',density:1.00,taste:[1,0,0,0],desc:'蜜香・明黃'},
- {id:'hibiscus',cat:'tea',name:'洛神花茶',en:'HIBISCUS',color:'#7c0a22',pH:2.6,density:1.01,taste:[0,3,0,0],desc:'酸香・深紅'},
+ {id:'hibiscus',cat:'tea',name:'洛神花茶',en:'HIBISCUS',color:'#7c0a22',pH:2.5,density:1.01,taste:[0,3,0,0],desc:'酸香・深紅'},
  {id:'melt',name:'融冰稀釋',en:'MELT WATER',color:'#f8fbfb',density:1.0,taste:[0,0,0,0],desc:'調製用冰融化',hidden:true}
 ];
 const byId=Object.fromEntries(ingredientData.map(i=>[i.id,i]));
@@ -155,7 +155,7 @@ function notify(message){const t=$('toast');t.textContent=message;t.classList.ad
 // broadcast arrival times), so animations stay in step even if the two devices' clocks disagree.
 // deferred scripts have all run once DOMContentLoaded fires; until then nothing is painted
 let pageScriptsDone=false;document.addEventListener('DOMContentLoaded',()=>{pageScriptsDone=true},{once:true});
-const APP_VER='10.2',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
+const APP_VER='10.3',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
 window.mixologyBridge={
  state,
  take(){return {appVer:APP_VER,sentAt:Date.now(),stirAnim:state.stirAnim?{...state.stirAnim}:null,stirManual:state.stirManual?{...state.stirManual}:null,iceKind:state.iceKind,iceStartedAt:state.iceStartedAt,iceSeed:state.iceSeed,flow:state.flow,flowStep:state.flowStep,prepIce:state.prepIce,layerIntent:state.layerIntent,dilutionMl:state.dilutionMl,prepPour:state.prepPour?{from:state.prepPour.from,to:state.prepPour.to,color:state.prepPour.color,duration:state.prepPour.duration,startAt:Date.now()-(performance.now()-state.prepPour.start)}:null,glass:state.glass,qty:state.qty,portions:state.portions.map(p=>({...p})),decor:[...state.decor],mix:state.mix,mixKind:state.mixKind,mixedOnce:state.mixedOnce,visualML:state.visualML,pour:state.pour?{kind:state.pour.kind||'build',from:state.pour.from,to:state.pour.to,color:state.pour.color,duration:state.pour.duration,startAt:Date.now()-(performance.now()-state.pour.start)}:null,processing:state.processing?{from:state.processing.from,kind:state.processing.kind,duration:state.processing.duration,startAt:Date.now()-(performance.now()-state.processing.start)}:null}},
@@ -238,17 +238,28 @@ function fitSpec(c){ // smooth blue/green/red absorbance spectrum that reproduce
 // Blue curacao is coloured with Brilliant Blue FCF (E133): absorption maximum ~629 nm (JECFA).
 // Band width and strength at the standard depth are assumptions, set so a neat glass is deep pool-blue.
 const SPEC_BLUE=addSpec(bandSpec(629,40,3),bandSpec(410,25,.24));
-// Grenadine: red colourants (Allura Red ~504 nm, anthocyanins ~520 nm) absorb blue-green. Modelled as one
-// band at 510 nm until the brand's colourant is confirmed; this is what lets blue + grenadine go purple.
-const SPEC_GREN=addSpec(bandSpec(510,45,3),bandSpec(420,30,.5));
+// Grenadine modelled on MONIN Grenadine (EU 2025 TDS): colour E129 Allura Red, lambda max 504-505 nm
+// (EU 231/2012; Snigur 2017). Band width/strength are still assumptions (no published FWHM found).
+const SPEC_GREN=addSpec(bandSpec(505,45,3),bandSpec(420,30,.5));
 // Butterfly pea anthocyanins (ternatins): pH 0.5-3 magenta, lambda max 548 nm; pH 5-8 bright blue,
 // peaks 576/622 nm; purple around pH 4 (Fu et al., Molecules 2021). Red (flavylium) share follows pH.
 const PEA_RED=bandSpec(548,32,1),PEA_BLUE=addSpec(bandSpec(548,36,.45),bandSpec(576,32,.9),bandSpec(622,32,1)),PEA_C=2.2;
 const peaRedShare=pH=>1/(1+Math.pow(10,pH-3.6));
 const peaSpec=pH=>{const f=peaRedShare(pH);return PEA_RED.map((r,i)=>PEA_C*(f*r+(1-f)*PEA_BLUE[i]))};
-// Acidity: each acidic ingredient is treated as a citric-type weak acid (pKa1 3.13) at its own pH;
-// acid concentrations mix by volume and set the blend's pH. Neutral ingredients carry no acid.
-const PKA=3.13,acidC=pH=>Math.pow(10,PKA-2*pH),pHofC=c=>c<=1e-9?7:Math.min(7,.5*(PKA-Math.log10(c)));
+// Acidity (V10.3): every acidic ingredient is a citric-type acid (effective pKa 3.13) with its own buffer.
+// Where the titratable acidity is known (g/L as citric acid) the ingredient carries ta; with its measured pH
+// that fixes how much is free acid and how much is already salt (citrate), so a buffered juice keeps its
+// acidity when diluted while an unbuffered soft drink does not. Without ta the acid is treated as unbuffered.
+// Blend: total acid and total salt mix by volume, then [H+] comes from the charge balance
+//   h^2 + h(Ka+S) + Ka(S-C) = 0.
+const KA=Math.pow(10,-3.13),CITRIC=192.12;
+function acidOf(d){
+ if(d.pH==null||d.pH>=6)return {C:0,S:0};
+ const h=Math.pow(10,-d.pH);
+ if(d.ta==null)return {C:h+h*h/KA,S:0};
+ const C=d.ta/CITRIC,A=C*KA/(KA+h);return {C,S:Math.max(0,A-h)};
+}
+function blendPH(C,S){if(C<1e-7)return 7;const b=KA+S,h=(-b+Math.sqrt(b*b-4*KA*(S-C)))/2;return h>1e-7?Math.min(7,-Math.log10(h)):7}
 // how strongly the liquid paints over the dark stage: its average absorption, its tint, or its haze
 const inkOfLin=(T,haze=0)=>{const meanT=(T[0]+T[1]+T[2])/3,chroma=Math.max(...T)-Math.min(...T);
  return Math.min(1,Math.max(haze,(1-meanT)*1.4,chroma*1.6))};
@@ -260,7 +271,8 @@ function lookOf(p){ // a portion's own spectrum / haze (a frozen earlier blend k
 }
 function mixLook(list){ // list of {ml, spec, haze, id?, locked?}; butterfly pea reacts to the blend's pH
  const V=list.reduce((s,p)=>s+p.ml,0);if(!V)return {spec:SPEC_L.map(()=>0),haze:0,color:[236,242,240],op:0,pH:7};
- const pH=pHofC(list.reduce((s,p)=>{const d=byId[p.id];return s+(d&&!p.locked&&d.pH!=null?p.ml*acidC(d.pH):0)},0)/V);
+ let C=0,S=0;for(const p of list){const d=byId[p.id];if(!d||p.locked)continue;const a=acidOf(d);C+=p.ml*a.C;S+=p.ml*a.S}
+ const pH=blendPH(C/V,S/V);
  const A=SPEC_L.map((_,i)=>list.reduce((s,p)=>s+(p.id==='butterfly'&&!p.locked?peaSpec(pH)[i]:p.spec[i])*p.ml,0)/V);
  const haze=list.reduce((s,p)=>s+(p.haze||0)*p.ml,0)/V,lin=linOfSpec(A);
  return {spec:A,haze,color:lin.map(toSrgb),op:inkOfLin(lin,haze),pH};
