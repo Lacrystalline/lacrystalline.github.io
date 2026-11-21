@@ -348,60 +348,111 @@ function liquid(ctx,opts){
 // Real rim diameters (outer, cm) of the three glass assets; they turn asset centimetres into scene
 // pixels per glass. Typical bar glassware sizes, consistent with each image's width/height ratio.
 const RIM_CM={highball:6.5,rocks:8.5,coupe:11};
-const STAND={mint_sprig:{d:3.2,r:-.05},rosemary_sprig:{d:5.5,r:-.12},cinnamon_stick:{d:4,r:-1.05},cucumber_ribbon:{d:6.5,r:-1.15}};
+// One placement per glass and garnish (V10.4.1), chosen the way a bartender would serve it:
+//  rim    – hung on the rim by its cut
+//  float  – floating on the drink (peel, twist, dried wheel, flower, star anise)
+//  lay    – lying flat on the drink (coupe: mint sprig, cinnamon stick)
+//  lean   – lower end resting on the ice (sprigs, cinnamon) or on the floor (picks in rocks, fruit in
+//           the drink), upper part leaning on the rim
+//  across – lying across the rim opening, resting on the rim at both ends (picks in a highball,
+//           rosemary over a coupe; sprigs in a highball / rocks served without ice)
+//  wall   – pressed along the inside wall (cucumber ribbon)
+//  bowl   – lying inside the coupe bowl on its walls, the fruit in the drink (picks in a coupe)
+//  sink   – dropped in, resting on the bottom (cherries)
+const PLACE={
+ highball:{mint_sprig:'lean',rosemary_sprig:'lean',cinnamon_stick:'lean',cucumber_ribbon:'wall',olive_pick:'across',pick_gold:'across'},
+ rocks:{mint_sprig:'lean',rosemary_sprig:'lean',cinnamon_stick:'lean',cucumber_ribbon:'wall',olive_pick:'lean',pick_gold:'lean'},
+ coupe:{mint_sprig:'lay',rosemary_sprig:'across',cinnamon_stick:'lay',cucumber_ribbon:'wall',olive_pick:'bowl',pick_gold:'bowl'}};
+// Direction (radians, image space) and length (px) from each long piece's anchor to its far end.
+const AXIS={mint_sprig:[-1.424,581],rosemary_sprig:[-1.390,779],cinnamon_stick:[-.297,499],cucumber_ribbon:[.023,766],olive_pick:[-.496,626],pick_gold:[-.660,690]};
+const NEEDS_ICE={mint_sprig:1,rosemary_sprig:1,cinnamon_stick:1},SPANS={mint_sprig:9,rosemary_sprig:12,cinnamon_stick:7.5};
+function placeOf(state,k,m){const id=state.glass;let pl=(PLACE[id]&&PLACE[id][k])||m.slot;
+ // a sprig or stick only stands up when the ice holds it; otherwise it rests across the rim if it is
+ // long enough to reach both sides, else it leans from the floor
+ if(pl==='lean'&&NEEDS_ICE[k]&&iceTop(state)==null&&SPANS[k]>RIM_CM[id])pl='across';
+ return pl}
 function gItems(state){const G=window.LCGarnish,out=[];if(!G||!state.decor)return out;
- for(const k of state.decor){const m=G.meta[k];if(!m)continue;const im=G.img(k);if(im)out.push({k,m,im})}return out}
-function gPose(id,state,glasses,k,m){
+ for(const k of state.decor){const m=G.meta[k];if(!m)continue;const im=G.img(k);if(im)out.push({k,m,im,pl:placeOf(state,k,m)})}
+ let n=0;for(const it of out)if(it.pl==='across')it.ai=n++; // a second piece across the rim lies behind the first
+ return out}
+// Highest point of the ice in the glass (scene px), or null; iceTopX is its x.
+let iceTopX=CX;
+function iceTop(state){const I=window.LCIceV8;if(!I||!state.decor||!state.decor.has('ice'))return null;
+ const ps=(I.physics&&I.physics.particles)||[];if(!ps.length)return null;let top=1e9;
+ for(const p of ps){const c=Math.abs(Math.cos(p.angle||0)),n=Math.abs(Math.sin(p.angle||0));
+  const ey=p.k==='sphere'?p.height*.5:(p.height*c+p.w*n)*.5;if(p.y-ey<top){top=p.y-ey;iceTopX=p.x}}
+ return top<1e8?top:null}
+function gPose(id,state,glasses,it){const k=it.k,m=it.m,pl=it.pl;
  const g=specs[id],kcm=2*g.rim.hw*SCALE/RIM_CM[id],s=kcm/64;
- const rimY=gy(g.rim.cy),rIn=radScreen(id,rimY),rOut=g.rim.hw*SCALE;
- const bottomY=g.floor?gy(g.floor.cy):gy(g.bowl.yb);
- let x=CX,y=rimY,rot=0,q=1;
- if(m.slot==='rim'){x=CX+(rIn+rOut)/2;y=rimY;rot=.06}
- else if(m.slot==='stand'){const st=STAND[k]||{d:4,r:0};x=CX-rIn*.42;y=Math.min(rimY+st.d*kcm,bottomY-2);rot=st.r}
- else if(m.slot==='pick'){
-  if(g.bowl){ // coupe: the pick lies low across the shallow bowl so the olives sit in the drink
-   let yc=g.rim.cy;const want=half(id,g.rim.cy)*.32;while(yc<g.bowl.yb&&half(id,yc)>want)yc+=2;
-   x=CX-want*SCALE;y=gy(yc)-3;rot=.05}
-  else{x=CX-rIn*.18;y=Math.min(rimY+4.5*kcm,bottomY-3);rot=-.45}}
- else if(m.slot==='float'){const sv=liquidY(id,state.visualML,capOf(state,glasses,id));x=CX+rIn*.06;
-  y=sv+depthScreen(id,sv)*.12;if(m.squash)q=Math.max(.12,ratio(id,sy(sv))*1.15)}
- else if(m.slot==='sink'){x=CX+rIn*.28;y=g.floor?bottomY+g.floor.ry*SCALE*.3:bottomY}
- return {x,y,rot,s,q};
+ const rimY=gy(g.rim.cy),rIn=radScreen(id,rimY),rOut=g.rim.hw*SCALE,rd=rIn*ratio(id,g.rim.cy);
+ const floorY=g.floor?gy(g.floor.cy):gy(g.bowl.yb);
+ const ax=AXIS[k]||[0,0],toward=(bx,by,cx,cy)=>Math.atan2(cy-by,cx-bx)-ax[0];
+ let x=CX,y=rimY,rot=0,q=1,qs=1;
+ if(pl==='rim'){x=CX+(rIn+rOut)/2;y=rimY;rot=.06}
+ else if(pl==='lean'){
+  const pick=m.slot==='pick',top=iceTop(state);
+  let by=floorY-2;if(top!=null&&top<floorY)by=Math.min(floorY-2,Math.max(rimY+.6*kcm,top+(pick?3.5:2.2)*kcm));
+  const bx=CX+rIn*(pick?-.45:-.1),cx=CX+rIn*(pick?.62:-.92),cy=rimY-rd*.55;
+  x=bx;y=by;rot=toward(bx,by,cx,cy)}
+ else if(pl==='across'){const ph=.70,c=Math.cos(ph),n=Math.sin(ph),sh=it.ai?-.6:.2; // a second piece rests nearer the back
+  const x1=CX-rOut*c,y1=rimY+rd*n,x2=CX+rOut*c,y2=rimY-rd*n,a=Math.atan2(y2-y1,x2-x1),L=ax[1]*s;
+  x=CX-Math.cos(a)*L/2-n*rOut*sh;y=rimY-2-Math.sin(a)*L/2+c*rd*sh;rot=a-ax[0]}
+ else if(pl==='wall'){
+  if(id==='highball'){x=CX-rIn*.32;y=rimY+.7*kcm-rd*.85;rot=Math.PI/2-ax[0]}
+  else{const L=ax[1]*s;x=CX-L/2;y=rimY+(id==='rocks'?2:.9)*kcm-rd*.9;rot=-ax[0]+.04}}
+ else if(pl==='bowl'){let yc=g.rim.cy;const want=half(id,g.rim.cy)*.32;while(yc<g.bowl.yb&&half(id,yc)>want)yc+=2;
+  x=CX-want*SCALE;y=gy(yc)-3;rot=(m.slot==='pick'?.05:0)}
+ else if(pl==='float'||pl==='lay'){const sv=liquidY(id,state.visualML,capOf(state,glasses,id));
+  if(pl==='float'){const top=iceTop(state);x=CX+rIn*.06;y=sv+depthScreen(id,sv)*.12;
+   // ice standing above the drink: the piece is laid on top of the ice, as a peel on a large cube
+   if(top!=null&&top<y){x=iceTopX;y=top+.3*kcm}
+   if(m.squash)q=Math.max(.12,ratio(id,sy(sv))*1.15)}
+  else{const L=ax[1]*s;x=CX-L/2;y=sv+depthScreen(id,sv)*.1;rot=-ax[0]+.05;qs=Math.max(.3,ratio(id,sy(sv))*1.6)}}
+ else if(pl==='sink'){x=CX+rIn*.28;y=g.floor?floorY+g.floor.ry*SCALE*.3:floorY}
+ return {x,y,rot,s,q,qs};
 }
-function gPaint(ctx,it,p){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.scale(p.s,p.s*p.q);
+function gPaint(ctx,it,p){ctx.save();ctx.translate(p.x,p.y);if(p.qs!==1)ctx.scale(1,p.qs);ctx.rotate(p.rot);ctx.scale(p.s,p.s*p.q);
  ctx.drawImage(it.im,-it.m.ax,-it.m.ay,it.m.w,it.m.h);ctx.restore()}
 // Front arc of the rim opening; garnish below it and inside the glass is seen through the front wall.
 function rimArc(ctx,id,below,dy=0){const g=specs[id],y=gy(g.rim.cy)+dy,rr=radScreen(id,y),rd=rr*ratio(id,g.rim.cy),W=rr+400,N=40;
  ctx.beginPath();ctx.moveTo(CX-W,y);
  for(let i=0;i<=N;i++){const u=-1+2*i/N;ctx.lineTo(CX+u*rr,y+rd*Math.sqrt(Math.max(0,1-u*u)))}
  ctx.lineTo(CX+W,y);ctx.lineTo(CX+W,below?2400:-2400);ctx.lineTo(CX-W,below?2400:-2400);ctx.closePath()}
-const CROSS={rim:1,stand:1,pick:1};
-// Before the liquid: sunken fruit and the parts of rim / stem / pick garnish that are inside the glass
-// below the rim, so the drink tints what is submerged and the front wall later lies over all of it.
-function garnishInside(ctx,id,state,glasses){const its=gItems(state);if(!its.length)return;
- for(const it of its){if(!CROSS[it.m.slot]&&it.m.slot!=='sink')continue;
-  const p=gPose(id,state,glasses,it.k,it.m);ctx.save();interior(ctx,id,0);ctx.clip();
-  if(CROSS[it.m.slot]){rimArc(ctx,id,true,-1.5);ctx.clip()} // overlaps the outside layer by 1.5 px: no seam
+const CROSS={rim:1,lean:1,bowl:1},INSIDE={wall:1,sink:1},SURFACE={float:1,lay:1};
+// Before the liquid: what is inside the glass below the rim (sunken fruit, the ribbon on the wall, the
+// lower part of pieces crossing the rim), so the drink tints what is submerged and the front wall lies over it.
+function garnishInside(ctx,id,state,glasses){
+ for(const it of gItems(state)){if(!CROSS[it.pl]&&!INSIDE[it.pl])continue;
+  const p=gPose(id,state,glasses,it);ctx.save();interior(ctx,id,0);ctx.clip();
+  if(CROSS[it.pl]){rimArc(ctx,id,true,-1.5);ctx.clip()} // overlaps the outside layer by 1.5 px: no seam
   gPaint(ctx,it,p);ctx.restore()}
 }
-// After the liquid and ice: pieces floating on the surface.
+// After the liquid and ice: pieces floating or lying on the surface.
+// After the ice: floating pieces lie on the drink, or on top of ice that stands above it.
 function garnishFloat(ctx,id,state,glasses){if(!(state.visualML>=8))return; // nothing to float on
- for(const it of gItems(state)){if(it.m.slot!=='float')continue;
- const p=gPose(id,state,glasses,it.k,it.m);ctx.save();interior(ctx,id,0);ctx.clip();gPaint(ctx,it,p);ctx.restore()}}
+ for(const it of gItems(state)){if(!SURFACE[it.pl])continue;
+ const p=gPose(id,state,glasses,it);ctx.save();interior(ctx,id,0);ctx.clip();gPaint(ctx,it,p);ctx.restore()}}
 // After the front glass: what is outside the glass, or above the rim opening.
 // Painted whole on a scratch layer, then the part inside the glass below the front rim is erased in one
 // cut, so there is a single edge (on the rim line) instead of two clip edges meeting with a seam.
-// The layer does not depend on the liquid, so it is rebuilt only when glass, garnish or canvas change.
+// Rebuilt only when a pose, the glass or the canvas changes. Pieces lying across the rim are above the
+// glass everywhere and are drawn last, uncut.
 let gScratch=null,gKey='';
-function garnishOutside(ctx,id,state,glasses){const its=gItems(state).filter(it=>CROSS[it.m.slot]);if(!its.length)return;
- const W=ctx.canvas.width,H=ctx.canvas.height,T=ctx.getTransform();
- const key=[id,W,H,T.a,T.b,T.c,T.d,T.e,T.f,...its.map(it=>it.k)].join('|');
- if(!gScratch)gScratch=document.createElement('canvas');
- if(key!==gKey){if(gScratch.width!==W||gScratch.height!==H){gScratch.width=W;gScratch.height=H}
-  const o=gScratch.getContext('2d');o.setTransform(1,0,0,1,0,0);o.clearRect(0,0,W,H);o.setTransform(T);
-  for(const it of its)gPaint(o,it,gPose(id,state,glasses,it.k,it.m));
-  o.save();o.globalCompositeOperation='destination-out';interior(o,id,0);o.clip();rimArc(o,id,true);o.fill();o.restore();gKey=key}
- ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(gScratch,0,0);ctx.restore()}
+function garnishOutside(ctx,id,state,glasses){const all=gItems(state),its=all.filter(it=>CROSS[it.pl]);
+ if(its.length){
+  const W=ctx.canvas.width,H=ctx.canvas.height,T=ctx.getTransform(),ps=its.map(it=>gPose(id,state,glasses,it));
+  const key=[id,W,H,T.a,T.b,T.c,T.d,T.e,T.f,...its.map((it,i)=>it.k+':'+ps[i].x.toFixed(1)+','+ps[i].y.toFixed(1)+','+ps[i].rot.toFixed(3))].join('|');
+  if(!gScratch)gScratch=document.createElement('canvas');
+  if(key!==gKey){if(gScratch.width!==W||gScratch.height!==H){gScratch.width=W;gScratch.height=H}
+   const o=gScratch.getContext('2d');o.setTransform(1,0,0,1,0,0);o.clearRect(0,0,W,H);o.setTransform(T);
+   its.forEach((it,i)=>{if(it.pl!=='lean'){gPaint(o,it,ps[i]);return}
+    // a leaning piece is inside the glass below the rim: never beside the outer wall
+    const y0=gy(specs[id].rim.cy);o.save();o.beginPath();o.rect(-2000,-2000,4000,2000+y0);o.clip();gPaint(o,it,ps[i]);o.restore();
+    o.save();interior(o,id,0);o.clip();o.beginPath();o.rect(-2000,y0-1.5,4000,4000);o.clip();gPaint(o,it,ps[i]);o.restore()});
+   o.save();o.globalCompositeOperation='destination-out';interior(o,id,0);o.clip();rimArc(o,id,true);o.fill();o.restore();gKey=key}
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(gScratch,0,0);ctx.restore()}
+ for(const it of all.filter(it=>it.pl==='across').sort((a,b)=>b.ai-a.ai))gPaint(ctx,it,gPose(id,state,glasses,it));
+}
 function pour(ctx,id,state,t,cap){const p=state.pour;if(!p)return;
  // V9 STIR: the stream comes from the mixing glass spout, drawn by stir-scene.js
  if(p.kind==='strain'&&state.flow==='stir'&&window.LCStirScene)return;
