@@ -38,7 +38,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <body>
 <header class="topbar">
  <div class="brand"><div class="brandmark" aria-hidden="true"><span>✧</span></div><div class="brandname">LA CRYSTALLINE<small>水晶庭 · MIXOLOGY ATELIER</small></div></div>
- <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V10.9.1</span></div>
+ <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V10.9.2</span></div>
 </header>
 <div class="shell">
  <div class="intro"><div><div class="eyebrow">An evening, made by your hands</div><h1>調製屬於你的那杯夜色</h1></div><p>選擇原料 · 觀察分層 · 親手攪拌 · 完成特調</p></div>
@@ -123,9 +123,9 @@ const ingredientData=[
  {id:'reposado',cat:'spirit',name:'陳年龍舌蘭',en:'REPOSADO',color:'#e3b85c',density:.95,taste:[1,0,1,5],desc:'桶陳・淡金'},
  {id:'whisky',cat:'spirit',name:'威士忌',en:'WHISKY',color:'#cf8e3a',density:.95,taste:[1,0,2,5],desc:'橡木桶・琥珀'},
  {id:'brandy',cat:'spirit',name:'白蘭地',en:'BRANDY',color:'#94461d',density:.95,taste:[2,0,1,5],desc:'葡萄・深琥珀'},
- // Cointreau: 40% ABV, sugar about 228-250 g/L (maker: 6.8 g per 30 ml); colourless. SG estimated ~1.045
- // (dealcoholised and made up to volume it reads 1.10; 40% alcohol takes off about 0.05).
- {id:'cointreau',cat:'spirit',name:'君度橙酒',en:'COINTREAU',color:'#f4f6f2',density:1.045,taste:[2,0,0,3],desc:'橙皮香・透明'},
+ // Cointreau: 40% ABV, sugar about 228-250 g/L (maker: 6.8 g per 30 ml); colourless. SG 1.036 by hydrometer
+ // (Boston Apothecary liqueur table; bar charts list 1.04).
+ {id:'cointreau',cat:'spirit',name:'君度橙酒',en:'COINTREAU',color:'#f4f6f2',density:1.036,taste:[2,0,0,3],desc:'橙皮香・透明'},
  {id:'blue',cat:'spirit',name:'藍柑橘酒',en:'BLUE CURAÇAO',color:'#00c0f4',density:1.11,taste:[4,1,1,2],desc:'柑橘・湛藍'},
  {id:'grenadine',ta:8.1,pH:2.7,cat:'mixer',name:'紅石榴糖漿',en:'GRENADINE',color:'#d70030',density:1.31,taste:[5,1,0,0],desc:'果紅・濃甜'},
  {id:'lemon',cat:'mixer',ta:48.7,pH:2.3,name:'檸檬汁',en:'LEMON',color:'#fbe9a0',haze:0.45,density:1.04,taste:[1,5,0,0],desc:'清酸・明亮'},
@@ -139,15 +139,18 @@ const ingredientData=[
  {id:'syrup',cat:'mixer',name:'糖漿（1:1）',en:'SIMPLE SYRUP',color:'#f7f6ef',density:1.232,taste:[4,0,0,0],desc:'純甜・透明'},
  {id:'elder',cat:'mixer',name:'接骨木花糖漿',en:'ELDERFLOWER',color:'#f2dfb2',density:1.18,taste:[5,0,0,0],desc:'花香・柔甜'},
  {id:'soda',pH:5.32,cat:'soda',name:'蘇打水',en:'SODA',color:'#f7fbfb',density:1.00,taste:[0,0,0,0],desc:'氣泡・清爽'},
+ // TA (V10.9.2): Barac et al., Acta Medica Medianae 2023 - 50 ml titrated with 0.9613 M NaOH to pH 7.0:
+ // Coca-Cola 1.73 ml, Sprite 2.85 ml -> 33.3 / 54.8 meq/L -> 2.13 / 3.51 g/L as citric. Ginger ale / ginger beer: none found.
+ // Cola's acid is phosphoric (pKa1 2.15); the citric-based model reads it a little weaker (pure cola computes ~pH 2.6).
  // V10.9 sodas. pH: JADA 2016 beverage survey (Coca-Cola Classic 2.37, Canada Dry Ginger Ale 2.82, Sprite 3.24);
  // Bundaberg ginger beer 3.16 (Australian beverage survey). Density from sugar content via the USDA sucrose table
  // (cola ~10.6 g/100 ml -> 1.042; ginger ale ~6.9 -> 1.027; ginger beer 10.6 -> 1.041; lemon-lime ~10.8 -> 1.042).
  // Colours V10.9.1: ginger beer / ginger ale sampled from Fever-Tree bottle photos on white; cola hue from a glass photo,
  // kept low in blue so it thins to amber (the photo's deep region is lifted by reflections).
- {id:'cola',cat:'soda',pH:2.37,name:'可樂',en:'COLA',color:'#401004',density:1.042,taste:[3,1,1,0],desc:'焦糖色・氣泡'},
+ {id:'cola',cat:'soda',pH:2.37,ta:2.13,name:'可樂',en:'COLA',color:'#401004',density:1.042,taste:[3,1,1,0],desc:'焦糖色・氣泡'},
  {id:'gingerale',cat:'soda',pH:2.82,name:'薑汁汽水',en:'GINGER ALE',color:'#dac895',density:1.027,taste:[2,1,0,0],desc:'淡金・微辛'},
  {id:'gingerbeer',cat:'soda',pH:3.16,name:'薑汁啤酒',en:'GINGER BEER',color:'#ece8d4',haze:0.6,density:1.041,taste:[3,1,0,0],desc:'無酒精・辛辣微濁'},
- {id:'lemonlime',cat:'soda',pH:3.24,name:'檸檬汽水',en:'LEMON-LIME',color:'#f5f9f2',density:1.042,taste:[3,1,0,0],desc:'雪碧類・清甜'},
+ {id:'lemonlime',cat:'soda',pH:3.24,ta:3.51,name:'檸檬汽水',en:'LEMON-LIME',color:'#f5f9f2',density:1.042,taste:[3,1,0,0],desc:'雪碧類・清甜'},
  {id:'tonic',cat:'soda',pH:2.54,name:'通寧水',en:'TONIC',color:'#f4faf6',density:1.02,taste:[1,0,4,0],desc:'氣泡・微苦'},
  // Teas. Brewed teas are clear but tinted; matcha is a suspension (haze).
  {id:'butterfly',pH:5.0,cat:'tea',name:'蝶豆花茶',en:'BUTTERFLY PEA',color:'#0200fd',density:1.01,taste:[0,0,0,0],desc:'寶藍・遇酸轉紫'},
@@ -178,7 +181,7 @@ function notify(message){const t=$('toast');t.textContent=message;t.classList.ad
 // broadcast arrival times), so animations stay in step even if the two devices' clocks disagree.
 // deferred scripts have all run once DOMContentLoaded fires; until then nothing is painted
 let pageScriptsDone=false;document.addEventListener('DOMContentLoaded',()=>{pageScriptsDone=true;renderGarnishes()},{once:true});
-const APP_VER='10.91',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
+const APP_VER='10.92',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
 window.mixologyBridge={
  state,
  take(){return {appVer:APP_VER,sentAt:Date.now(),stirAnim:state.stirAnim?{...state.stirAnim}:null,stirManual:state.stirManual?{...state.stirManual}:null,iceKind:state.iceKind,iceStartedAt:state.iceStartedAt,iceSeed:state.iceSeed,flow:state.flow,flowStep:state.flowStep,shakeDry:!!state.shakeDry,dryShaken:!!state.dryShaken,foam:state.foam?{...state.foam}:null,prepIce:state.prepIce,layerIntent:state.layerIntent,dilutionMl:state.dilutionMl,prepPour:state.prepPour?{from:state.prepPour.from,to:state.prepPour.to,color:state.prepPour.color,duration:state.prepPour.duration,startAt:Date.now()-(performance.now()-state.prepPour.start)}:null,glass:state.glass,qty:state.qty,portions:state.portions.map(p=>({...p})),decor:[...state.decor],mix:state.mix,mixKind:state.mixKind,mixedOnce:state.mixedOnce,visualML:state.visualML,pour:state.pour?{kind:state.pour.kind||'build',from:state.pour.from,to:state.pour.to,color:state.pour.color,duration:state.pour.duration,startAt:Date.now()-(performance.now()-state.pour.start)}:null,processing:state.processing?{from:state.processing.from,kind:state.processing.kind,duration:state.processing.duration,startAt:Date.now()-(performance.now()-state.processing.start)}:null}},
