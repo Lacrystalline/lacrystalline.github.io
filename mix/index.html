@@ -38,7 +38,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <body>
 <header class="topbar">
  <div class="brand"><div class="brandmark" aria-hidden="true"><span>✧</span></div><div class="brandname">LA CRYSTALLINE<small>水晶庭 · MIXOLOGY ATELIER</small></div></div>
- <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V10.9</span></div>
+ <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V10.9.1</span></div>
 </header>
 <div class="shell">
  <div class="intro"><div><div class="eyebrow">An evening, made by your hands</div><h1>調製屬於你的那杯夜色</h1></div><p>選擇原料 · 觀察分層 · 親手攪拌 · 完成特調</p></div>
@@ -142,10 +142,11 @@ const ingredientData=[
  // V10.9 sodas. pH: JADA 2016 beverage survey (Coca-Cola Classic 2.37, Canada Dry Ginger Ale 2.82, Sprite 3.24);
  // Bundaberg ginger beer 3.16 (Australian beverage survey). Density from sugar content via the USDA sucrose table
  // (cola ~10.6 g/100 ml -> 1.042; ginger ale ~6.9 -> 1.027; ginger beer 10.6 -> 1.041; lemon-lime ~10.8 -> 1.042).
- // Colours are first estimates (no measured transmission data yet): replace from photos.
- {id:'cola',cat:'soda',pH:2.37,name:'可樂',en:'COLA',color:'#300600',density:1.042,taste:[3,1,1,0],desc:'焦糖色・氣泡'},
- {id:'gingerale',cat:'soda',pH:2.82,name:'薑汁汽水',en:'GINGER ALE',color:'#f4e7bd',density:1.027,taste:[2,1,0,0],desc:'淡金・微辛'},
- {id:'gingerbeer',cat:'soda',pH:3.16,name:'薑汁啤酒',en:'GINGER BEER',color:'#ecdfae',haze:0.35,density:1.041,taste:[3,1,0,0],desc:'無酒精・辛辣微濁'},
+ // Colours V10.9.1: ginger beer / ginger ale sampled from Fever-Tree bottle photos on white; cola hue from a glass photo,
+ // kept low in blue so it thins to amber (the photo's deep region is lifted by reflections).
+ {id:'cola',cat:'soda',pH:2.37,name:'可樂',en:'COLA',color:'#401004',density:1.042,taste:[3,1,1,0],desc:'焦糖色・氣泡'},
+ {id:'gingerale',cat:'soda',pH:2.82,name:'薑汁汽水',en:'GINGER ALE',color:'#dac895',density:1.027,taste:[2,1,0,0],desc:'淡金・微辛'},
+ {id:'gingerbeer',cat:'soda',pH:3.16,name:'薑汁啤酒',en:'GINGER BEER',color:'#ece8d4',haze:0.6,density:1.041,taste:[3,1,0,0],desc:'無酒精・辛辣微濁'},
  {id:'lemonlime',cat:'soda',pH:3.24,name:'檸檬汽水',en:'LEMON-LIME',color:'#f5f9f2',density:1.042,taste:[3,1,0,0],desc:'雪碧類・清甜'},
  {id:'tonic',cat:'soda',pH:2.54,name:'通寧水',en:'TONIC',color:'#f4faf6',density:1.02,taste:[1,0,4,0],desc:'氣泡・微苦'},
  // Teas. Brewed teas are clear but tinted; matcha is a suspension (haze).
@@ -177,7 +178,7 @@ function notify(message){const t=$('toast');t.textContent=message;t.classList.ad
 // broadcast arrival times), so animations stay in step even if the two devices' clocks disagree.
 // deferred scripts have all run once DOMContentLoaded fires; until then nothing is painted
 let pageScriptsDone=false;document.addEventListener('DOMContentLoaded',()=>{pageScriptsDone=true;renderGarnishes()},{once:true});
-const APP_VER='10.9',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
+const APP_VER='10.91',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
 window.mixologyBridge={
  state,
  take(){return {appVer:APP_VER,sentAt:Date.now(),stirAnim:state.stirAnim?{...state.stirAnim}:null,stirManual:state.stirManual?{...state.stirManual}:null,iceKind:state.iceKind,iceStartedAt:state.iceStartedAt,iceSeed:state.iceSeed,flow:state.flow,flowStep:state.flowStep,shakeDry:!!state.shakeDry,dryShaken:!!state.dryShaken,foam:state.foam?{...state.foam}:null,prepIce:state.prepIce,layerIntent:state.layerIntent,dilutionMl:state.dilutionMl,prepPour:state.prepPour?{from:state.prepPour.from,to:state.prepPour.to,color:state.prepPour.color,duration:state.prepPour.duration,startAt:Date.now()-(performance.now()-state.prepPour.start)}:null,glass:state.glass,qty:state.qty,portions:state.portions.map(p=>({...p})),decor:[...state.decor],mix:state.mix,mixKind:state.mixKind,mixedOnce:state.mixedOnce,visualML:state.visualML,pour:state.pour?{kind:state.pour.kind||'build',from:state.pour.from,to:state.pour.to,color:state.pour.color,duration:state.pour.duration,startAt:Date.now()-(performance.now()-state.pour.start)}:null,processing:state.processing?{from:state.processing.from,kind:state.processing.kind,duration:state.processing.duration,startAt:Date.now()-(performance.now()-state.processing.start)}:null}},
