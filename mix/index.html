@@ -38,7 +38,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <body>
 <header class="topbar">
  <div class="brand"><div class="brandmark" aria-hidden="true"><span>✧</span></div><div class="brandname">LA CRYSTALLINE<small>水晶庭 · MIXOLOGY ATELIER</small></div></div>
- <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V10.9.3</span></div>
+ <div class="headright"><span class="dot"></span><span class="edition">INTERACTIVE COCKTAIL STUDIO</span><span class="prototype">ICE & LIQUID V10.9.4</span></div>
 </header>
 <div class="shell">
  <div class="intro"><div><div class="eyebrow">An evening, made by your hands</div><h1>調製屬於你的那杯夜色</h1></div><p>選擇原料 · 觀察分層 · 親手攪拌 · 完成特調</p></div>
@@ -126,6 +126,10 @@ const ingredientData=[
  // Cointreau: 40% ABV, sugar about 228-250 g/L (maker: 6.8 g per 30 ml); colourless. SG 1.036 by hydrometer
  // (Boston Apothecary liqueur table; bar charts list 1.04).
  {id:'cointreau',cat:'spirit',name:'君度橙酒',en:'COINTREAU',color:'#f4f6f2',density:1.036,taste:[2,0,0,3],desc:'橙皮香・透明'},
+ // V10.9.4 Amber River set. Rakı 45 % ABV, unsweetened: SG of 45 % ethanol-water ~0.945; louches with water.
+ // Poire Williams eau-de-vie 40 % ABV, clear: SG ~0.948.
+ {id:'raki',cat:'spirit',abv:.45,anise:1,name:'Rakı 茴香酒',en:'RAKI',color:'#f3f6f5',density:.945,taste:[1,0,1,5],desc:'茴香・遇水乳白'},
+ {id:'poire',cat:'spirit',name:'西洋梨白蘭地',en:'POIRE WILLIAMS',color:'#f4f6f3',density:.948,taste:[1,0,0,5],desc:'梨香・透明'},
  {id:'blue',cat:'spirit',name:'藍柑橘酒',en:'BLUE CURAÇAO',color:'#00c0f4',density:1.11,taste:[4,1,1,2],desc:'柑橘・湛藍'},
  {id:'grenadine',ta:8.1,pH:2.7,cat:'mixer',name:'紅石榴糖漿',en:'GRENADINE',color:'#d70030',density:1.31,taste:[5,1,0,0],desc:'果紅・濃甜'},
  {id:'lemon',cat:'mixer',ta:48.7,pH:2.3,name:'檸檬汁',en:'LEMON',color:'#fbe9a0',haze:0.45,density:1.04,taste:[1,5,0,0],desc:'清酸・明亮'},
@@ -135,6 +139,9 @@ const ingredientData=[
  {id:'orange',cat:'mixer',ta:13.3,pH:3.5,name:'柳橙汁',en:'ORANGE',color:'#eb9526',haze:0.7,density:1.045,taste:[3,2,0,0],desc:'果甜・橙黃'},
  // Egg white: only foams when shaken. SG of albumen about 1.035; faintly yellow, slightly cloudy.
  {id:'eggwhite',cat:'mixer',name:'蛋白',en:'EGG WHITE',color:'#efecd4',haze:0.3,density:1.035,taste:[0,0,0,0],desc:'搖盪起泡・綿密',shakeOnly:true},
+ // Fresh Asian pear (nashi) juice: about 11-13 Brix (SG ~1.05), low acid (pH ~4.8, TA ~1.5 g/L), pale and cloudy.
+ {id:'pear',cat:'mixer',ta:1.5,pH:4.8,name:'新鮮水梨汁',en:'NASHI PEAR',color:'#f1eacb',haze:0.45,density:1.05,taste:[3,1,0,0],desc:'清甜・淡乳黃'},
+ {id:'water',cat:'mixer',name:'冰鎮純水',en:'CHILLED WATER',color:'#f8fbfb',density:1.0,taste:[0,0,0,0],desc:'稀釋・引出乳化'},
  // Simple syrup 1:1 by weight = 50 Brix; USDA sucrose table: apparent SG 1.23202 at 50.0 Brix. Neutral, colourless.
  {id:'syrup',cat:'mixer',name:'糖漿（1:1）',en:'SIMPLE SYRUP',color:'#f7f6ef',density:1.232,taste:[4,0,0,0],desc:'純甜・透明'},
  {id:'elder',cat:'mixer',name:'接骨木花糖漿',en:'ELDERFLOWER',color:'#f2dfb2',density:1.18,taste:[5,0,0,0],desc:'花香・柔甜'},
@@ -164,7 +171,7 @@ const ingredientData=[
 ];
 const byId=Object.fromEntries(ingredientData.map(i=>[i.id,i]));
 const glasses={highball:{label:'高球杯',capacity:300,top:143,bottom:511,wt:108,wb:81},rocks:{label:'古典杯',capacity:240,top:238,bottom:507,wt:142,wb:119},coupe:{label:'淺碟杯',capacity:180,top:219,bottom:368,wt:171,wb:0}};
-const presets=[{name:'長島冰茶',en:'LONG ISLAND ICED TEA',glass:'highball',ice:'cubes',layer:false,garnish:['lemon_wheel'],recipe:[['vodka',15],['tequila',15],['rum',15],['gin',15],['cointreau',15],['lemon',25],['syrup',30],['cola',60],['stir',0]]},{name:'龍舌蘭日出',en:'TEQUILA SUNRISE',glass:'highball',ice:'cubes',layer:false,garnish:['orange_halfwheel'],recipe:[['tequila',45],['orange',90],['stir',0],['grenadine',15]]},{name:'極光序曲',en:'AURORA OVERTURE',glass:'highball',recipe:[['grenadine',30],['blue',45],['soda',90]]},{name:'暮櫻之夜',en:'SAKURA AT DUSK',glass:'coupe',recipe:[['elder',30],['grapefruit',45],['gin',45]]},{name:'月下海潮',en:'MOONLIT TIDE',glass:'rocks',recipe:[['blue',30],['lemon',30],['tonic',90]]}];
+const presets=[{name:'琥珀川',en:'AMBER RIVER',glass:'highball',ice:'spear',layer:false,recipe:[['pear',65],['lemon',10],['poire',20],['water',45],['stir',0],['raki',15]]},{name:'長島冰茶',en:'LONG ISLAND ICED TEA',glass:'highball',ice:'cubes',layer:false,garnish:['lemon_wheel'],recipe:[['vodka',15],['tequila',15],['rum',15],['gin',15],['cointreau',15],['lemon',25],['syrup',30],['cola',60],['stir',0]]},{name:'龍舌蘭日出',en:'TEQUILA SUNRISE',glass:'highball',ice:'cubes',layer:false,garnish:['orange_halfwheel'],recipe:[['tequila',45],['orange',90],['stir',0],['grenadine',15]]},{name:'極光序曲',en:'AURORA OVERTURE',glass:'highball',recipe:[['grenadine',30],['blue',45],['soda',90]]},{name:'暮櫻之夜',en:'SAKURA AT DUSK',glass:'coupe',recipe:[['elder',30],['grapefruit',45],['gin',45]]},{name:'月下海潮',en:'MOONLIT TIDE',glass:'rocks',recipe:[['blue',30],['lemon',30],['tonic',90]]}];
 const state={glass:'highball',qty:30,portions:[],decor:new Set(),mix:0,mixKind:'layered',visualML:0,pour:null,processing:null,busy:false,demo:false,drag:false,dragPrevious:null,stirMotion:0,revision:0,mixGeneration:0,mixedOnce:false,flow:'build',flowStep:'served',prepIce:false,layerIntent:false,dilutionMl:0,prepPour:null,iceKind:'none',iceStartedAt:0,iceSeed:0,stirAnim:null,stirManual:null};
 const canvas=$('glassCanvas'),ctx=canvas.getContext('2d',{alpha:true});
 let raf=0,lastTime=performance.now(),toastTimer=0;
@@ -181,7 +188,7 @@ function notify(message){const t=$('toast');t.textContent=message;t.classList.ad
 // broadcast arrival times), so animations stay in step even if the two devices' clocks disagree.
 // deferred scripts have all run once DOMContentLoaded fires; until then nothing is painted
 let pageScriptsDone=false;document.addEventListener('DOMContentLoaded',()=>{pageScriptsDone=true;renderGarnishes()},{once:true});
-const APP_VER='10.93',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
+const APP_VER='10.94',hostClock=()=>Date.now()+(Number(window.__mixSkew)||0);window.mixologyClock=hostClock;window.mixologyVersion=APP_VER;
 window.mixologyBridge={
  state,
  take(){return {appVer:APP_VER,sentAt:Date.now(),stirAnim:state.stirAnim?{...state.stirAnim}:null,stirManual:state.stirManual?{...state.stirManual}:null,iceKind:state.iceKind,iceStartedAt:state.iceStartedAt,iceSeed:state.iceSeed,flow:state.flow,flowStep:state.flowStep,shakeDry:!!state.shakeDry,dryShaken:!!state.dryShaken,foam:state.foam?{...state.foam}:null,prepIce:state.prepIce,layerIntent:state.layerIntent,dilutionMl:state.dilutionMl,prepPour:state.prepPour?{from:state.prepPour.from,to:state.prepPour.to,color:state.prepPour.color,duration:state.prepPour.duration,startAt:Date.now()-(performance.now()-state.prepPour.start)}:null,glass:state.glass,qty:state.qty,portions:state.portions.map(p=>({...p})),decor:[...state.decor],mix:state.mix,mixKind:state.mixKind,mixedOnce:state.mixedOnce,visualML:state.visualML,pour:state.pour?{kind:state.pour.kind||'build',from:state.pour.from,to:state.pour.to,color:state.pour.color,duration:state.pour.duration,startAt:Date.now()-(performance.now()-state.pour.start)}:null,processing:state.processing?{from:state.processing.from,kind:state.processing.kind,duration:state.processing.duration,startAt:Date.now()-(performance.now()-state.processing.start)}:null}},
@@ -212,7 +219,7 @@ function selectGlass(type){if(state.busy||state.demo)return;const ml=total();if(
 async function add(id,ml,fromDemo=false){if(byId[id]&&byId[id].shakeOnly&&state.flow!=='shake'){notify('蛋白要搖盪才會起泡，請改用「搖盪 SHAKE」。');return false}if(window.flowV6&&window.flowV6.shouldHandleAdd(id))return window.flowV6.addPrep(id,ml,fromDemo);if(state.busy||(!fromDemo&&state.demo))return false;const cap=window.flowV6?window.flowV6.effectiveCapacity():glasses[state.glass].capacity;if(total()+ml>cap){notify(`這只杯子最多可裝 ${cap} ml，請減少倒入量。`);return false}const currentRev=state.revision;const previous=total();if(state.mix>.001)freezePreviousBlend();const plan=pourPlan(id,ml,state.layerIntent);state.portions.push(plan?{id,ml,...plan}:{id,ml});state.busy=true;state.pour={start:performance.now(),kind:'build',duration:state.layerIntent?1500:900,from:state.visualML,to:previous+ml,color:rgb(byId[id].color)};
  state.stirMotion=state.layerIntent?.14:.76;updateUI();syncRoom('pour_begin');await sleep(state.pour.duration+25);if(currentRev!==state.revision)return false;state.visualML=total();state.pour=null;state.busy=false;updateUI();syncRoom('pour_end');return true}
 async function loadPreset(p){if(state.busy||state.demo)return;reset(true);state.glass=p.glass;state.flow='build';state.flowStep='served';state.layerIntent=p.layer!==false;state.prepIce=false;if(p.ice&&window.LCIceV7&&p.glass!=='coupe')window.LCIceV7.pick(p.ice);state.demo=true;updateUI();syncRoom('glass');const revision=state.revision;for(const [id,ml] of p.recipe){if(revision!==state.revision)return;if(id==='stir'){state.mix=1;state.mixKind='stirred';state.mixedOnce=true;state.stirMotion=1;updateUI();syncRoom('mix_end');await sleep(700);continue}await add(id,ml,true);await sleep(110)}if(revision===state.revision){state.demo=false;if(p.garnish&&window.LCGarnish)for(const k of p.garnish)if(window.LCGarnish.isGarnish(k))state.decor.add(k);updateUI();if(p.garnish)syncRoom('decor');notify(`${p.name} 已完成。試試攪拌，觀察酒液的變化。`)}}
-function freezePreviousBlend(){const B=blendLook();const weight=total();let density=0;state.portions.forEach(p=>density+=p.ml*(p.lockedDensity??byId[p.id].density));density=weight?density/weight:1;const gen=Math.max(state.mixGeneration,...state.portions.map(p=>Number(p.mixGroup)||0))+1;state.mixGeneration=gen;state.portions.forEach(p=>{const own=lookOf(p),t=state.mix;p.lockedColor=colOfSpec(own.spec.map((a,i)=>a+(B.spec[i]-a)*t));p.lockedHaze=own.haze+(B.haze-own.haze)*t;delete p.lockedAbs;delete p.lockedOp;if(state.mix>.94){p.lockedDensity=density;p.mixGroup=gen;delete p.pm;delete p.pr;delete p.pe}else{p.mixGroup=null}});state.mixedOnce=state.mixedOnce||state.mix>.65;state.mix=0}
+function freezePreviousBlend(){const B=blendLook();const weight=total();let density=0;state.portions.forEach(p=>density+=p.ml*(p.lockedDensity??byId[p.id].density));density=weight?density/weight:1;const gen=Math.max(state.mixGeneration,...state.portions.map(p=>Number(p.mixGroup)||0))+1;state.mixGeneration=gen;state.portions.forEach(p=>{const own=lookOf(p),t=state.mix;p.lockedColor=colOfSpec(own.spec.map((a,i)=>a+(B.spec[i]-a)*t));p.lockedHaze=own.haze+(B.haze-own.haze)*t;p.lockedAbv=own.abv+(B.abv-own.abv)*t;delete p.lockedAbs;delete p.lockedOp;if(state.mix>.94){p.lockedDensity=density;p.mixGroup=gen;delete p.pm;delete p.pr;delete p.pe}else{p.mixGroup=null}});state.mixedOnce=state.mixedOnce||state.mix>.65;state.mix=0}
 function startProcess(kind){if(window.mixologyBridge.isViewer()||state.busy||state.demo||state.drag||!total())return;if(state.flow==='shake'&&window.flowV6&&window.flowV6.startShake){window.flowV6.startShake();return}if(window.flowV6&&!window.flowV6.allowProcess(kind))return;const stirScene=state.flow==='stir'&&kind==='stirred'&&window.LCStirScene;state.processing={kind,start:performance.now(),duration:kind==='shaken'?1250:stirScene?window.LCStirScene.processMs():1600,from:state.mix};if(stirScene)window.LCStirScene.begin(kind);state.busy=true;state.mixKind=kind;state.mixedOnce=true;updateUI();syncRoom('mix_begin')}
 function changeDecoration(type){const G=window.LCGarnish,m=G&&G.meta[type];if(state.decor.has(type))state.decor.delete(type);else{if(m)for(const k of [...state.decor])if(G.meta[k]&&G.meta[k].slot===m.slot)state.decor.delete(k);state.decor.add(type);if(m)G.img(type)}updateUI();syncRoom('decor')}
 function garnishNames(){return [...state.decor].filter(k=>k!=='ice').map(k=>window.LCGarnish?window.LCGarnish.name(k):k).join('、')}
@@ -234,7 +241,7 @@ function visiblePortions(){
  return state.portions.map((p,index)=>{
   const liveMl=state.pour&&state.pour.kind!=='strain'&&index===last?clamp(state.visualML-state.pour.from,0,p.ml):p.ml;
   const L=lookOf(p);
-  return {...p,idx:index,full:p.ml,ml:liveMl,spec:L.spec,haze:L.haze,layerColor:L.color,opacity:L.op,density:p.lockedDensity??byId[p.id].density};
+  return {...p,idx:index,full:p.ml,ml:liveMl,spec:L.spec,haze:L.haze,abv:L.abv,anise:L.anise,layerColor:L.color,opacity:L.op,density:p.lockedDensity??byId[p.id].density};
  }).filter(p=>p.ml>0.00001);
 }
 // ---------- V10.1 colour engine: spectral Beer-Lambert mixing ----------
@@ -306,17 +313,24 @@ const inkOfLin=(T,haze=0)=>{const meanT=(T[0]+T[1]+T[2])/3,chroma=Math.max(...T)
  return Math.min(1,Math.max(haze,(1-meanT)*1.4,chroma*1.6))};
 function ownSpec(d,pH){return d.id==='blue'?SPEC_BLUE:d.id==='grenadine'?SPEC_GREN:d.id==='butterfly'?peaSpec(pH??d.pH??7):fitSpec(rgb(d.color))}
 for(const d of ingredientData){const sp=ownSpec(d);d.op=inkOfLin(linOfSpec(sp),d.haze||0)}
+// V10.9.4 louche (ouzo effect): anise spirits are clear neat, but once the alcohol in the glass falls below
+// about 30 % the anethole comes out of solution as a fine milky emulsion. anise = volume share of the anise
+// spirit; the cloud thickens with it (rakı 1:1 with water is fully milky, 1:10 is a light mist).
+const abvOf=d=>d?(d.abv??(d.cat==='spirit'?(d.id==='blue'?.2:.4):0)):0;
+const loucheOf=(anise,abv)=>anise>0?.95*(1-Math.exp(-4.5*anise))*clamp((.30-abv)/.08,0,1):0;
 function lookOf(p){ // a portion's own spectrum / haze (a frozen earlier blend keeps its own colour)
  const d=byId[p.id],spec=p.lockedColor?fitSpec(p.lockedColor):ownSpec(d),haze=p.lockedHaze??(d.haze||0);
- return {spec,haze,color:colOfSpec(spec),op:inkOfLin(linOfSpec(spec),haze)};
+ return {spec,haze,color:colOfSpec(spec),op:inkOfLin(linOfSpec(spec),haze),abv:p.lockedAbv??abvOf(d),anise:p.lockedColor?0:(d.anise||0)};
 }
 function mixLook(list){ // list of {ml, spec, haze, id?, locked?}; butterfly pea reacts to the blend's pH
- const V=list.reduce((s,p)=>s+p.ml,0);if(!V)return {spec:SPEC_L.map(()=>0),haze:0,color:[236,242,240],op:0,pH:7};
+ const V=list.reduce((s,p)=>s+p.ml,0);if(!V)return {spec:SPEC_L.map(()=>0),haze:0,color:[236,242,240],op:0,pH:7,abv:0,anise:0};
  let C=0,S=0;for(const p of list){const d=byId[p.id];if(!d||p.locked)continue;const a=acidOf(d);C+=p.ml*a.C;S+=p.ml*a.S}
  const pH=blendPH(C/V,S/V);
  const A=SPEC_L.map((_,i)=>list.reduce((s,p)=>s+(p.id==='butterfly'&&!p.locked?peaSpec(pH)[i]:p.spec[i])*p.ml,0)/V);
- const haze=list.reduce((s,p)=>s+(p.haze||0)*p.ml,0)/V,lin=linOfSpec(A);
- return {spec:A,haze,color:lin.map(toSrgb),op:inkOfLin(lin,haze),pH};
+ const abv=list.reduce((s,p)=>s+(p.abv??p.lockedAbv??abvOf(byId[p.id]))*p.ml,0)/V;
+ const anise=list.reduce((s,p)=>s+(p.anise??(p.lockedColor||p.locked?0:(byId[p.id]&&byId[p.id].anise)||0))*p.ml,0)/V;
+ const haze=Math.max(list.reduce((s,p)=>s+(p.haze||0)*p.ml,0)/V,loucheOf(anise,abv)),lin=linOfSpec(A);
+ return {spec:A,haze,color:lin.map(toSrgb),op:inkOfLin(lin,haze),pH,abv,anise};
 }
 function phAdjust(items){return items}   // V10.1: the pH reaction now lives inside mixLook()
 function blendLook(){return mixLook(visiblePortions().map(p=>({...p,locked:!!p.lockedColor})))}
@@ -361,7 +375,7 @@ function layerize(items){ // pour zones + stirred groups -> layers sorted by den
    const key=String(p.mixGroup),g=groups.get(key);
    if(g){
     const nextMl=g.ml+p.ml,m=mixLook([g,p]);
-    g.spec=m.spec;g.haze=m.haze;g.layerColor=m.color;g.opacity=m.op;
+    g.spec=m.spec;g.haze=m.haze;g.abv=m.abv;g.anise=m.anise;g.layerColor=m.color;g.opacity=m.op;
     g.density=(g.density*g.ml+p.density*p.ml)/nextMl;g.ml=nextMl;g.members.push(p.idx);
    }else{const merged={...p,members:[p.idx]};groups.set(key,merged);layers.push(merged)}
   }else layers.push({...p,members:[p.idx]});
