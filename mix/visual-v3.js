@@ -132,7 +132,7 @@ function drawFluid(c,geo,state,t){
  const sheen=gradient(c,CX-g.wt,0,CX+g.wt,0,[[0,'rgba(252,255,254,.19)'],[.12,'rgba(251,252,246,.015)'],[.43,'rgba(255,255,255,.075)'],[.71,'rgba(250,242,223,.02)'],[.9,'rgba(231,250,253,.07)'],[1,'rgba(246,249,236,.18)']]);
  c.fillStyle=sheen;c.fillRect(80,g.top,400,g.bottom-g.top+8);
  // Very small bubbles, stable deterministic locations only in sparkling mixes.
- const sparkling=state.portions.some(p=>p.id==='soda'||p.id==='tonic');
+ const sparkling=state.portions.some(p=>{const d=window.mixologyHooks&&window.mixologyHooks.byId&&window.mixologyHooks.byId[p.id];return d?d.cat==='soda':p.id==='soda'||p.id==='tonic'});
  if(sparkling){for(let i=0;i<16;i++){
    const n=((i*47)%79)/79,s=((t*.016+i*19)%(g.bottom-topY+20)),y=g.bottom-s;
    if(y<topY+6||y>g.bottom-8)continue;

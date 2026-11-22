@@ -2,7 +2,7 @@
 (()=>{
 'use strict';
 const h=window.mixologyHooks;if(!h){console.error('V6 hooks unavailable');return}
-const s=h.state,$=id=>document.getElementById(id),isBubbly=id=>id==='soda'||id==='tonic';
+const s=h.state,$=id=>document.getElementById(id),isBubbly=id=>!!(h.byId[id]&&h.byId[id].cat==='soda');
 const prep=()=>s.flow==='stir'||s.flow==='shake', cap=()=>h.glasses[s.glass].capacity;
 const viewer=()=>!!(window.mixologyBridge&&window.mixologyBridge.isViewer());
 const scene=()=>s.flow==='stir'&&window.LCStirScene?window.LCStirScene:null;   // V9 STIR visuals

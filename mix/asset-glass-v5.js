@@ -331,7 +331,7 @@ function liquid(ctx,opts){
   current.addColorStop(1,'rgba(245,249,250,0)');
   ctx.fillStyle=current;ctx.fillRect(CX-55,surfaceY+6,110,60);
  }
- if(state.portions.some(p=>p.id==='soda'||p.id==='tonic')){
+ if(state.portions.some(p=>{const d=window.mixologyHooks&&window.mixologyHooks.byId&&window.mixologyHooks.byId[p.id];return d?d.cat==='soda':p.id==='soda'||p.id==='tonic'})){
   const down=liquidY(id,0,cap);
   for(let k=0;k<17;k++){
    const h=down-surfaceY;if(h<12)break;
