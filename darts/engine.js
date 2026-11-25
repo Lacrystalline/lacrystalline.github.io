@@ -10,14 +10,15 @@ const R_BULL=6.35,R_OBULL=15.9,R_T_IN=99,R_T_OUT=107,R_D_IN=162,R_D_OUT=170,R_FR
 // ---------------- 擲鏢手感參數（以蒙地卡羅模擬調校難度） ----------------
 // 速度單位：螢幕像素／毫秒（px/ms），以實際手指或滑鼠移動量計
 const TUNING={
-  IDEAL_TOUCH:1.2,   // 手機理想甩出速度（px/ms）
-  IDEAL_MOUSE:1.6,   // 滑鼠理想甩出速度（px/ms）
+  IDEAL_TOUCH:0.75,  // 手機理想甩出速度（px/ms）：實機回饋「都偏輕」→ 由 1.2 下修
+  IDEAL_MOUSE:1.05,  // 滑鼠理想甩出速度（px/ms）：同比例下修
+  POWER_GAIN:0.5,    // 力道 = log2(實際/理想)×此值；快一倍或慢一半都只算 ±50%，手感差一點不會飄太遠
   MIN_SPEED:0.35,    // 甩出峰值低於此速度 = 沒有擲出（取消）
   AIM_SPEED:0.25,    // 低於此速度的移動視為瞄準
   FLICK_WINDOW:180,  // 放手前多少毫秒內找甩出的峰值速度
-  POWER_DEAD:0.08,   // 力道誤差在 ±8% 內視為完美（娛樂取向：給玩家明確的「甜蜜區」）
+  POWER_DEAD:0.10,   // 力道誤差在 ±10% 內視為完美（娛樂取向：給玩家明確的「甜蜜區」）
   ANGLE_DEAD:2.5,    // 方向誤差在 ±2.5° 內視為筆直
-  POWER_MM:85,       // 力道誤差（扣掉完美區後）100% 時的上下偏移（mm）
+  POWER_MM:72,       // 力道誤差（扣掉完美區後）100% 時的上下偏移（mm）
   ANGLE_MM:105,      // 方向誤差 tan(θ)=1 時的左右偏移（mm）
   SWAY_MM:7,         // 瞄準時手的自然晃動幅度（mm）
   NOISE_MM:2.2,      // 每鏢不可控的微小誤差（mm）
@@ -218,6 +219,8 @@ function create(opts){
     return best;
   }
   const FLICK_WINDOW_MS=()=>TUNING.FLICK_WINDOW;
+  // 力道用比例（對數）計：同樣「差 20%」的手感，不論甩快甩慢，偏差一致
+  const powerOf=(up,ideal)=>up<=0?-1:Math.max(-1,Math.min(1.5,Math.log2(up/ideal)*TUNING.POWER_GAIN));
   const lift=()=>isTouch?TUNING.TOUCH_LIFT:0;
   cv.addEventListener('pointermove',ev=>{
     if(pointerId!==null&&ev.pointerId!==pointerId)return;
@@ -249,7 +252,7 @@ function create(opts){
     const up=-v.vy,ideal=isTouch?TUNING.IDEAL_TOUCH:TUNING.IDEAL_MOUSE;
     if(up<TUNING.MIN_SPEED){verdict('沒有擲出：按住後<b>往上快速一甩</b>，邊甩邊放手。');if(isTouch)aim=null;return;}
     const now=performance.now(),o=swayOffset(now);
-    const power=Math.max(-1,Math.min(1.5,(up-ideal)/ideal));
+    const power=powerOf(up,ideal);
     const theta=Math.atan2(v.vx,up);
     const dead=(e,d)=>Math.abs(e)<=d?0:e-Math.sign(e)*d;   // 完美區內不偏移
     const pEff=dead(power,TUNING.POWER_DEAD),tEff=dead(theta,TUNING.ANGLE_DEAD*Math.PI/180);
@@ -275,7 +278,7 @@ function create(opts){
   // 甩的當下即時顯示力道（力道條上的亮點）
   function liveGauge(){
     const v=flickVelocity(samples),ideal=isTouch?TUNING.IDEAL_TOUCH:TUNING.IDEAL_MOUSE;
-    const p=Math.max(-1,Math.min(1.5,(-v.vy-ideal)/ideal));
+    const p=powerOf(-v.vy,ideal);
     liveP=p;const g=opts.gaugeEl;if(!g)return;
     let m=g.querySelector('.live');if(!m){m=document.createElement('span');m.className='mk live';g.appendChild(m);}
     m.style.left=Math.max(2,Math.min(98,50+p*50/1.2))+'%';
