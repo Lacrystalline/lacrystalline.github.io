@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>飛鏢對戰｜水晶庭 La Crystalline</title>
+<link rel="icon" type="image/png" href="../assets/emblem_nav.png">
+<meta name="description" content="水晶庭 La Crystalline — 水晶飛鏢・多人對戰（1v1、2v2 組隊、合作挑戰）">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0e14;--night:#111a2b;--deep:#0d1420;
+  --crys:#7fd3d6;--crys-dim:#4a8f95;--gold:#d8b87a;
+  --mist:#e8edf2;--mute:#9aa7b4;--line:rgba(127,211,214,.18);--warn:#e59a8f;
+  --serif:"Cormorant Garamond",serif;--tc:"Noto Serif TC",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overscroll-behavior:none}
+body{background:var(--ink);color:var(--mist);font-family:var(--tc);font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(1100px 760px at 80% -6%,rgba(50,90,130,.30),transparent 60%),radial-gradient(950px 700px at 10% 14%,rgba(35,65,110,.26),transparent 58%),linear-gradient(180deg,#070b12,#0a1120 45%,#080d16)}
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:rgba(8,12,20,.9);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.nav-logo img{height:26px;width:auto}
+.nav-logo .lt{font-family:var(--serif);font-size:1.05rem;color:var(--mist);letter-spacing:.12em;line-height:1}
+.nav-logo .lt small{display:block;font-family:var(--tc);font-size:.58rem;color:var(--crys-dim);letter-spacing:.28em;margin-top:2px}
+.nav .links{display:flex;gap:16px}
+.nav a.back{color:var(--mute);text-decoration:none;font-size:.85rem;letter-spacing:.1em}
+.nav a.back:hover{color:var(--crys)}
+.wrap{max-width:760px;margin:0 auto;padding:76px 14px 40px}
+.head{text-align:center;padding:4px 0 10px}
+.head .ey{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1rem}
+.head h1{font-family:var(--serif);font-size:clamp(1.8rem,6vw,2.4rem);font-weight:500;letter-spacing:.12em;line-height:1.2}
+.modes{display:inline-flex;gap:6px;margin-top:8px;padding:3px;border:1px solid var(--line);border-radius:999px;font-size:.8rem}
+.modes>*{padding:4px 14px;border-radius:999px;color:var(--mute);text-decoration:none;letter-spacing:.06em}
+.modes .on{background:var(--crys);color:var(--ink)}
+.modes a:hover{color:var(--crys)}
+
+.view{display:none}.view.show{display:block}
+.panel{border:1px solid var(--line);border-radius:4px;background:rgba(17,26,43,.42);padding:18px 16px;text-align:center}
+.panel+.panel{margin-top:14px}
+.panel h2{font-family:var(--serif);font-weight:500;font-size:1.35rem;letter-spacing:.1em}
+.panel p{color:var(--mute);font-size:.86rem;margin-top:6px}
+.panel p b{color:var(--mist);font-weight:400}
+.idline{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:.88rem;margin:10px 0 4px}
+.idline .k{color:var(--crys-dim);font-family:var(--serif);letter-spacing:.1em;font-size:.78rem;margin-right:.35em}
+.rules{text-align:left;color:var(--mute);font-size:.8rem;line-height:1.85}
+.rules b{color:var(--mist);font-weight:400}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.btn{padding:9px 22px;border-radius:999px;border:1px solid var(--crys);background:rgba(127,211,214,.08);color:var(--crys);font-family:var(--tc);font-size:.9rem;letter-spacing:.08em;cursor:pointer;text-decoration:none}
+.btn.gold{border-color:var(--gold);color:var(--gold);background:rgba(216,184,122,.07)}
+.btn.ghost{border-color:rgba(154,167,180,.4);color:var(--mute);background:none}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn[hidden]{display:none}
+.status{font-size:.84rem;margin-top:10px;min-height:1.4em;color:var(--mute)}
+.status.ok{color:var(--crys)}.status.err{color:var(--warn)}
+.pulse{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--crys);margin-right:8px;animation:pl 1.4s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(127,211,214,.6)}70%{box-shadow:0 0 0 10px rgba(127,211,214,0)}100%{box-shadow:0 0 0 0 rgba(127,211,214,0)}}
+
+.staffgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:14px}
+.staffcard{border:1px solid var(--line);border-radius:4px;padding:12px 8px;background:rgba(13,20,32,.6);cursor:pointer;color:var(--mist);font-family:var(--tc);transition:.2s}
+.staffcard:hover,.staffcard.sel{border-color:var(--gold);background:rgba(216,184,122,.08)}
+.staffcard small{display:block;color:var(--mute);font-size:.7rem;margin-top:2px}
+.ava{width:54px;height:54px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.4rem;color:var(--ink);background:linear-gradient(135deg,var(--crys),var(--gold));overflow:hidden}
+.ava{position:relative}.ava img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+/* 對戰畫面 */
+.score{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch;margin-bottom:10px}
+.pcard{border:1px solid var(--line);border-radius:4px;padding:10px 8px;text-align:center;background:rgba(17,26,43,.42);transition:.25s;position:relative}
+.pcard.active{border-color:var(--crys);box-shadow:0 0 0 1px rgba(127,211,214,.3) inset,0 0 18px rgba(127,211,214,.12)}
+.pcard.staff.active{border-color:var(--gold);box-shadow:0 0 0 1px rgba(216,184,122,.3) inset,0 0 18px rgba(216,184,122,.12)}
+.pcard .who{font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .who small{display:block;font-size:.68rem;color:var(--mute)}
+.pcard .rem{font-family:var(--serif);font-size:clamp(2.2rem,9vw,3rem);line-height:1.05;color:var(--mist)}
+.pcard .tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:.62rem;letter-spacing:.12em;padding:0 8px;border-radius:999px;background:var(--ink);color:var(--crys-dim);border:1px solid var(--line)}
+.vs{display:flex;flex-direction:column;justify-content:center;align-items:center;font-family:var(--serif);color:var(--mute);font-size:.9rem;letter-spacing:.1em}
+.vs b{font-size:1.15rem;color:var(--crys);font-weight:500}
+.turnbar{text-align:center;font-size:.92rem;padding:8px;border-radius:3px;margin-bottom:10px;border:1px solid var(--line);background:rgba(13,20,32,.6)}
+.turnbar.mine{border-color:var(--crys);color:var(--crys)}
+.stage{position:relative;border:1px solid var(--line);border-radius:4px;background:rgba(8,12,20,.55);padding:10px;user-select:none;-webkit-user-select:none}
+.stage canvas{display:block;width:100%;height:auto;touch-action:none;cursor:none}
+.stage.locked canvas{cursor:default;opacity:.92}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 4px 2px}
+.slot{border:1px solid var(--line);border-radius:3px;padding:6px 4px;text-align:center;min-height:52px;background:rgba(17,26,43,.35)}
+.slot .lbl{font-family:var(--serif);font-size:1.15rem;letter-spacing:.06em}
+.slot .pt{font-size:.72rem;color:var(--mute)}
+.slot.bust .lbl{color:var(--warn)}
+.coach{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;padding:10px 6px 2px;font-size:.76rem;color:var(--mute)}
+.gauge{position:relative;height:10px;border-radius:999px;background:linear-gradient(90deg,rgba(229,154,143,.35),rgba(216,184,122,.25) 30%,rgba(127,211,214,.55) 44%,rgba(127,211,214,.55) 56%,rgba(216,184,122,.25) 70%,rgba(229,154,143,.35))}
+.gauge .mk{position:absolute;top:-4px;width:3px;height:18px;border-radius:2px;background:var(--mist);transform:translateX(-50%);transition:left .25s}
+.gauge .mk.old{background:rgba(232,237,242,.28);width:2px}
+.gauge .ends{position:absolute;inset:auto 0 -16px 0;display:flex;justify-content:space-between;font-size:.62rem;color:var(--crys-dim)}
+.verdict{grid-column:1/-1;min-height:1.5em;text-align:center;color:var(--mist);font-size:.82rem;margin-top:12px}
+.verdict b{font-weight:400;color:var(--gold)}
+.flash{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.8);font-family:var(--serif);font-size:clamp(2rem,9vw,3.6rem);letter-spacing:.12em;color:var(--gold);text-shadow:0 0 18px rgba(216,184,122,.55);opacity:0;pointer-events:none;transition:opacity .2s,transform .35s;white-space:nowrap}
+.flash.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.flash.award{font-size:clamp(2.4rem,11vw,4.4rem);color:var(--crys);text-shadow:0 0 22px rgba(127,211,214,.75),0 0 2px #fff}
+.flash small{display:block;font-family:var(--tc);font-size:.9rem;letter-spacing:.2em;color:var(--mist);text-align:center}
+table.hist{width:100%;border-collapse:collapse;margin-top:12px;font-size:.78rem;table-layout:fixed}
+table.hist th,table.hist td{border:1px solid rgba(127,211,214,.12);padding:3px 0;text-align:center}
+table.hist th{color:var(--crys-dim);font-weight:400;font-family:var(--serif)}
+table.hist td.bust{color:var(--warn);font-size:.66rem}
+table.hist td.now{background:rgba(127,211,214,.08)}
+table.hist td:first-child,table.hist th:first-child{width:3.6em;color:var(--mute)}
+.tools{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.tools .btn{padding:6px 14px;font-size:.78rem}
+
+.modal{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(4,7,12,.72);backdrop-filter:blur(3px);padding:20px}
+.modal.show{display:flex}
+.card{width:min(420px,100%);border:1px solid rgba(127,211,214,.35);border-radius:4px;background:linear-gradient(180deg,#0f1828,#0a111d);padding:22px 18px;text-align:center}
+.card .ey{font-family:var(--serif);font-style:italic;color:var(--crys)}
+.card .big{font-family:var(--serif);font-size:2.8rem;font-weight:500;line-height:1.15;color:var(--gold);letter-spacing:.16em;margin:6px 0 4px;padding-left:.16em}
+.card .big[data-result=victory],.card .big[data-result=clear]{color:var(--gold);text-shadow:0 0 22px rgba(216,184,122,.45)}
+.card .big[data-result=defeat],.card .big[data-result=failed]{color:var(--mist);opacity:.8}
+.card .big[data-result=draw],.card .big[data-result^=team_]{color:var(--crys)}
+.card .big[data-result=cancelled],.card .big[data-result=expired],.card .big[data-result=abandoned]{color:var(--mute);font-size:2.2rem}
+.card .big .rArt{display:block;max-width:100%;max-height:140px;margin:0 auto}
+.card .sub{color:var(--mute);font-size:.84rem}
+.card .line{margin-top:10px;font-size:.9rem}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;background:rgba(13,20,32,.95);border:1px solid var(--line);border-radius:999px;padding:8px 18px;font-size:.84rem;opacity:0;transition:.25s;pointer-events:none;max-width:92vw}
+.toast.show{opacity:1}
+.toast.err{border-color:rgba(229,154,143,.6);color:var(--warn)}
+
+/* 模式選擇 */
+.modegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px;text-align:left}
+@media (max-width:520px){.modegrid{grid-template-columns:1fr}}
+.modecard{border:1px solid var(--line);border-radius:4px;padding:12px 12px 10px;background:rgba(13,20,32,.6);cursor:pointer;color:var(--mist);font-family:var(--tc);text-align:left;transition:.2s}
+.modecard:hover{border-color:var(--crys-dim)}
+.modecard.sel{border-color:var(--gold);background:rgba(216,184,122,.08)}
+.modecard b{display:block;font-family:var(--serif);font-weight:500;font-size:1.12rem;letter-spacing:.06em}
+.modecard small{display:block;color:var(--mute);font-size:.74rem;line-height:1.6;margin-top:2px}
+.modecard .badge{display:inline-block;margin-top:6px;font-size:.66rem;padding:0 8px;border-radius:999px;border:1px solid rgba(127,211,214,.35);color:var(--crys)}
+.joinrow{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:10px}
+.joinrow input{width:8.5em;text-align:center;text-transform:uppercase;letter-spacing:.35em;font-family:var(--serif);font-size:1.2rem;background:rgba(13,20,32,.7);border:1px solid var(--line);border-radius:3px;color:var(--mist);padding:7px 10px;outline:none}
+.joinrow input:focus{border-color:var(--crys)}
+.code{font-family:var(--serif);font-size:2.6rem;letter-spacing:.35em;color:var(--gold);line-height:1.2;margin:6px 0 0;padding-left:.35em}
+.seatcols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;text-align:left}
+.seatcols.one{grid-template-columns:1fr}
+.teambox{border:1px solid var(--line);border-radius:4px;padding:10px;background:rgba(13,20,32,.5)}
+.teambox h3{font-family:var(--serif);font-weight:500;font-size:1rem;letter-spacing:.12em;color:var(--crys);margin-bottom:6px}
+.teambox.b h3{color:var(--gold)}
+.seat{display:flex;align-items:center;gap:8px;padding:6px 4px;border-top:1px dashed rgba(127,211,214,.1);font-size:.86rem}
+.seat:first-of-type{border-top:0}
+.seat .n{min-width:0;flex:1}
+.seat button{white-space:nowrap;flex:none}
+.seat .k{font-size:.66rem;color:var(--crys-dim);border:1px solid var(--line);border-radius:999px;padding:0 7px;white-space:nowrap}
+.seat.wait .n{color:var(--mute);font-style:italic}
+.seat.me .n{color:var(--crys)}
+.seat button{margin-left:auto}
+.lb2{list-style:none;text-align:left;margin-top:8px}
+.lb2 li{display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:center;padding:5px 2px;border-bottom:1px dashed rgba(127,211,214,.1);font-size:.84rem}
+.lb2 li .r{font-family:var(--serif);color:var(--crys);text-align:center}
+.lb2 li .s{font-family:var(--serif);font-size:1.05rem}
+.lb2 li small{color:var(--mute);font-size:.7rem}
+.lb2 li.empty{display:block;border:0;color:var(--mute);font-size:.8rem}
+.tabs{display:flex;gap:6px;margin:10px auto 0;max-width:260px}
+.tab{flex:1;padding:5px 0;border:1px solid var(--line);border-radius:999px;background:none;color:var(--mute);font-family:var(--tc);font-size:.78rem;cursor:pointer}
+.tab.on{color:var(--ink);background:var(--crys);border-color:var(--crys)}
+.pcard .mem{font-size:.74rem;color:var(--mute);line-height:1.5;min-height:2.2em}
+.pcard .mem span.cur{color:var(--mist);border-bottom:1px solid var(--crys)}
+.pcard.b.active{border-color:var(--gold);box-shadow:0 0 0 1px rgba(216,184,122,.3) inset,0 0 18px rgba(216,184,122,.12)}
+.score.coop{grid-template-columns:1fr auto}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-logo" href="../index.html"><img src="../assets/emblem_nav.png" alt=""><span class="lt">La Crystalline<small>水晶庭</small></span></a>
+  <div class="links"><a class="back" href="../order.html">點餐</a><a class="back" href="../index.html">← 主頁</a></div>
+</nav>
+
+<main class="wrap">
+  <header class="head">
+    <div class="ey">Crystal Darts · Match</div>
+    <h1>飛鏢對戰</h1>
+    <div class="modes"><a href="index.html">← 單人 COUNT-UP</a><span class="on">多人對戰</span></div>
+  </header>
+
+  <!-- 載入中 -->
+  <section class="view show" id="vLoading"><div class="panel"><p>正在確認對戰狀態…</p></div></section>
+
+  <!-- 旅者：選模式／輸入房號 -->
+  <section class="view" id="vHome">
+    <div class="panel">
+      <h2>選擇對戰模式</h2>
+      <div class="idline" id="homeId"></div>
+      <p id="homeMsg"></p>
+      <div class="modegrid" id="modeGrid">
+        <button class="modecard" data-mode="doubles"><b>2v2 組隊</b><small>你＋店員 vs 另一位旅者＋店員。隊友共用 501，A1→B1→A2→B2 輪流。</small><span class="badge">需 1 位旅者＋2 位店員</span></button>
+        <button class="modecard" data-mode="coop"><b>合作挑戰</b><small>你和店員同隊，8 回合內把 501 扣到剛好 0。鏢數越少，今晚挑戰榜名次越高。</small><span class="badge">需 1 位店員</span></button>
+        <button class="modecard" data-mode="duel_staff"><b>1v1 對店員</b><small>和店員單挑 301。</small><span class="badge">需 1 位店員</span></button>
+        <button class="modecard" data-mode="duel_guest"><b>1v1 旅者對決</b><small>和另一位旅者單挑 301。</small><span class="badge">需 1 位旅者</span></button>
+      </div>
+      <div class="btns"><button class="btn gold" id="createBtn" disabled>開局</button></div>
+      <div class="status" id="homeStatus"></div>
+    </div>
+    <div class="panel">
+      <h2>加入別人的房間</h2>
+      <p>輸入對方畫面上的 4 碼房號。</p>
+      <div class="joinrow"><input id="codeInput" maxlength="4" autocomplete="off" placeholder="房號"><button class="btn" id="joinCodeBtn">加入</button></div>
+      <div class="status" id="joinStatus"></div>
+    </div>
+    <div class="panel">
+      <h2>合作挑戰榜</h2>
+      <div class="tabs"><button class="tab on" data-scope="tonight">今晚</button><button class="tab" data-scope="all">歷代</button></div>
+      <ol class="lb2" id="coopBoard"><li class="empty">載入中…</li></ol>
+    </div>
+    <div class="panel rules">
+      <h2 style="text-align:center">規則</h2>
+      <p>01 規則：扣到 <b>剛好 0</b> 獲勝；扣過頭＝<b>BUST</b>，這次 3 鏢立即結束並退回這次開始時的分數。紅心內外皆 <b>50</b>，不需雙倍收尾。</p>
+      <p>每人每次 3 鏢輪流。1v1 為 301、10 回合；2v2 為 501、10 回合，隊友共用分數；回合打滿仍無人歸零時，剩餘分數低者勝。</p>
+      <p>對戰紀錄以點餐時的旅者身分保存；店員座位限今晚已打卡上班的店員。</p>
+    </div>
+  </section>
+
+  <!-- 房間大廳：等待入座 -->
+  <section class="view" id="vRoom">
+    <div class="panel">
+      <h2 id="roomTitle"></h2>
+      <p id="roomSub" style="margin-top:2px"></p>
+      <div id="codeBox" hidden><p>請另一位旅者打開「飛鏢對戰」頁，輸入房號：</p><div class="code" id="roomCode"></div></div>
+      <div class="seatcols" id="roomSeats"></div>
+      <p><span class="pulse"></span>座位坐滿就會自動開始・剩 <b id="roomLeft">15:00</b></p>
+      <div class="btns">
+        <button class="btn" id="renotifyBtn" hidden>重新通知店員</button>
+        <button class="btn ghost" id="roomLeaveBtn">離開</button>
+      </div>
+      <div class="status" id="roomStatus"></div>
+    </div>
+  </section>
+
+  <!-- 店員：選自己＋選隊伍 -->
+  <section class="view" id="vStaff">
+    <div class="panel">
+      <h2>接受飛鏢挑戰</h2>
+      <p id="staffMode"></p>
+      <div class="seatcols" id="staffSeats"></div>
+      <p style="margin-top:14px">請選擇你自己（僅列出今晚已打卡上班、尚未入座的店員）：</p>
+      <div class="staffgrid" id="staffGrid"></div>
+      <div class="btns"><button class="btn gold" id="joinBtn" disabled>入座</button></div>
+      <div class="status" id="staffStatus"></div>
+    </div>
+  </section>
+
+  <!-- 對戰 -->
+  <section class="view" id="vGame">
+    <div class="score" id="scoreRow"></div>
+    <div class="turnbar" id="turnbar"></div>
+    <div class="stage" id="stage">
+      <canvas id="board" width="600" height="600" aria-label="飛鏢靶"></canvas>
+      <div class="flash" id="flash"></div>
+      <div class="slots" id="slots"></div>
+      <div class="coach" id="coach">
+        <span>力道</span>
+        <div class="gauge" id="gauge"><span class="ends"><span>太輕・落低</span><span>剛好</span><span>太重・飛高</span></span></div>
+        <div class="verdict" id="verdict">按住瞄準，往上甩出放手。</div>
+      </div>
+    </div>
+    <table class="hist" id="hist"></table>
+    <div class="tools">
+      <button class="btn" id="copyView">複製觀戰連結</button>
+      <button class="btn ghost" id="quitBtn" hidden>結束對戰</button>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="result">
+  <div class="card">
+    <div class="ey" id="rEy">Game Shot</div>
+    <div class="big" id="rTitle"></div>
+    <div class="sub" id="rSub"></div>
+    <div class="line" id="rLine"></div>
+    <div class="status" id="rStatus"></div>
+    <div class="btns">
+      <a class="btn" href="index.html">單人模式</a>
+      <button class="btn gold" id="rAgain" hidden>再開一局</button>
+      <button class="btn ghost" id="rClose">查看靶面</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="engine.js?v=3"></script>
+<script>
+(()=>{
+'use strict';
+// 與 order.html 相同的 Supabase 專案與身分來源
+const SUPABASE_URL="https://idqysanzhafayovieqig.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T";
+const NOTIFY_URL=SUPABASE_URL+"/functions/v1/darts-match-notify";
+const VISIT_STORAGE_KEY="la_crystalline_active_visit_v1";
+const VISIT_BACKUP_KEY="la_crystalline_active_visit_backup_v1";
+const SEAT_KEY=id=>"la_crystalline_darts_seat_"+id;   // {seat_no, seat_token}
+const MODE_NAME={duel_staff:'1v1 對店員',duel_guest:'1v1 旅者對決',doubles:'2v2 組隊',coop:'合作挑戰'};
+const MODE_SUB={duel_staff:'301・10 回合',duel_guest:'301・10 回合',doubles:'501・10 回合・隊友共用分數',coop:'501・8 回合內扣到剛好 0'};
+
+const $=id=>document.getElementById(id);
+const {esc,pts,label}=CrystalDarts;
+let sb=null;
+try{if(window.supabase)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});}catch(e){console.warn('Supabase 初始化失敗',e);}
+
+// ---------------- 共用 ----------------
+function show(view){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('show',v.id===view));}
+function toast(msg,err){const t=$('toast');t.textContent=msg;t.className='toast show'+(err?' err':'');clearTimeout(toast.t);toast.t=setTimeout(()=>t.className='toast',2600);}
+const errMsg=e=>String(e?.message||e?.details||e||'網路異常');
+function setStatus(id,msg,cls){const el=$(id);el.textContent=msg||'';el.className='status'+(cls?' '+cls:'');}
+function readVisit(){
+  for(const k of [VISIT_STORAGE_KEY,VISIT_BACKUP_KEY]){
+    try{const raw=localStorage.getItem(k);if(!raw)continue;const v=JSON.parse(raw);if(v&&v.join_token)return v;}catch(e){}
+  }
+  return null;
+}
+function readHash(){const q=new URLSearchParams(location.hash.slice(1));return {m:q.get('m'),staff:q.get('staff'),v:q.get('v')};}
+function setHash(m,v){history.replaceState(null,'','#m='+encodeURIComponent(m)+'&v='+encodeURIComponent(v));}
+// 座位憑證：分頁內（sessionStorage）優先；店員另存一份在 localStorage，換分頁也能回來
+function saveSeat(id,seatNo,token,persist){
+  const raw=JSON.stringify({seat_no:seatNo,seat_token:token});
+  try{sessionStorage.setItem(SEAT_KEY(id),raw);}catch(e){}
+  if(persist){try{localStorage.setItem(SEAT_KEY(id),raw);}catch(e){}}
+}
+function loadSeat(id,store){try{const r=(store||sessionStorage).getItem(SEAT_KEY(id));return r?JSON.parse(r):null;}catch(e){return null;}}
+async function notify(kind){
+  if(!M.id||!M.view)return {ok:false};
+  const res=await fetch(NOTIFY_URL,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY},
+    body:JSON.stringify({match_id:M.id,view_token:M.view,kind})});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok||data.ok===false)throw new Error(data.error||('通知失敗 '+res.status));
+  return data;
+}
+function avatarHtml(name,path){
+  const ch=esc(String(name||'?').trim().slice(0,1));
+  return `<div class="ava"><span>${ch}</span>${path?`<img src="../${esc(path)}" alt="" onerror="this.remove()">`:''}</div>`;
+}
+
+// ---------------- 狀態 ----------------
+const M={id:null,view:null,seatNo:null,seatToken:null,st:null,known:0,group:null,pending:false,channel:null,poll:null,resultShown:false,notified:{}};
+const me={joinToken:null,memberToken:null};
+
+const eng=CrystalDarts.create({
+  canvas:$('board'),gaugeEl:$('gauge'),verdictEl:$('verdict'),flashEl:$('flash'),
+  canThrow:()=>isMyTurn()&&!M.pending,
+  onLand:(h,pos)=>localThrow(h,pos)
+});
+const seatOf=no=>(M.st?.seats||[]).find(s=>s.seat_no===no);
+const mySeat=()=>seatOf(M.seatNo);
+function isMyTurn(){return !!M.st&&M.st.status==='playing'&&M.seatNo!=null&&M.st.current_seat===M.seatNo;}
+const toneOf=team=>team==='b'?'gold':'crys';
+const groupKey=t=>t?t.seat_no+'#'+t.round_no:null;
+function groupThrows(key){return (M.st?.throws||[]).filter(t=>groupKey(t)===key);}
+const seatLabel=s=>s?(s.filled?esc(s.name)+(s.kind==='guest'&&s.server?`<small>${esc(s.server)}</small>`:''):'<i>等待'+(s.kind==='staff'?'店員':'旅者')+'</i>'):'';
+const plainName=s=>s?.filled?s.name:(s?.kind==='staff'?'店員':'旅者');
+const teamName=t=>M.st?.mode==='coop'?'隊伍':(t==='a'?'A 隊':'B 隊');
+const teamMembers=t=>(M.st?.seats||[]).filter(s=>s.team===t);
+
+async function fetchState(){
+  if(!sb||!M.id||!M.view)return;
+  try{
+    const {data,error}=await sb.rpc('darts_match_state',{p_match_id:M.id,p_view_token:M.view});
+    if(error)throw error;
+    applyState(data,false);
+  }catch(e){console.warn('讀取對戰狀態失敗',e);}
+}
+function applyState(st,fromLocal){
+  if(!st)return;
+  if(M.st&&st.revision<M.st.revision)return;
+  const prev=M.st,prevKnown=M.known;
+  M.st=st;M.known=(st.throws||[]).length;
+  if(st.status==='lobby'){renderRoom();return;}
+  if(!st.started_at){renderEnded();return;}           // 大廳階段就結束（取消／逾時）
+  if(prev?.status==='lobby'&&st.status==='playing'){toast('人到齊了，對戰開始！');eng.resetCoach();}
+  show('vGame');
+  renderBoard(prevKnown,fromLocal);
+  renderScore();
+  if(st.status!=='playing')setTimeout(renderEnded,900);
+}
+
+// ---------------- 房間大廳 ----------------
+let roomTimer=null;
+function seatColsHtml(st,{pickStaff}={}){
+  const teams=st.mode==='coop'?['a']:['a','b'];
+  return teams.map(t=>`<div class="teambox ${t}"><h3>${st.mode==='coop'?'隊伍':(t==='a'?'A 隊':'B 隊')}</h3>${
+    st.seats.filter(s=>s.team===t).map(s=>{
+      const mine=s.seat_no===M.seatNo;
+      const pick=pickStaff&&s.kind==='staff'&&!s.filled?`<button class="btn" data-seat="${s.seat_no}" style="padding:3px 12px;font-size:.76rem">坐這裡</button>`:'';
+      return `<div class="seat${s.filled?'':' wait'}${mine?' me':''}"><span class="k">${s.kind==='staff'?'店員':'旅者'}</span><span class="n">${s.filled?esc(s.name)+(s.server?`（${esc(s.server)}）`:''):(pick?'空位':'等待入座…')}${mine?'・你':''}</span>${pick}</div>`;
+    }).join('')}</div>`).join('');
+}
+function renderRoom(){
+  const st=M.st;show('vRoom');
+  $('roomTitle').textContent=MODE_NAME[st.mode];$('roomSub').textContent=MODE_SUB[st.mode];
+  $('codeBox').hidden=!st.room_code;$('roomCode').textContent=st.room_code||'';
+  $('roomSeats').className='seatcols'+(st.mode==='coop'?' one':'');
+  $('roomSeats').innerHTML=seatColsHtml(st);
+  const host=mySeat()?.host;
+  $('roomLeaveBtn').textContent=host?'取消這一局':'離開座位';
+  $('roomLeaveBtn').hidden=M.seatNo==null;
+  const needStaff=st.seats.some(s=>s.kind==='staff'&&!s.filled);
+  $('renotifyBtn').hidden=!(host&&needStaff&&M.inviteFailed);
+  clearInterval(roomTimer);
+  const created=Date.parse(st.created_at);
+  const tick=()=>{const left=Math.max(0,created+15*60000-Date.now());$('roomLeft').textContent=`${String(Math.floor(left/60000)).padStart(2,'0')}:${String(Math.floor(left/1000)%60).padStart(2,'0')}`;};
+  tick();roomTimer=setInterval(tick,1000);
+}
+async function sendInvite(){
+  setStatus('roomStatus','正在通知店員…');
+  try{const r=await notify('invite');M.inviteFailed=false;setStatus('roomStatus',r.already_notified?'已通知過店員，請稍候。':'已通知今晚當班的店員。','ok');}
+  catch(e){console.warn(e);M.inviteFailed=true;setStatus('roomStatus','Discord 通知失敗：'+errMsg(e)+'。也可以直接請身邊的店員協助。','err');}
+  if(M.st?.status==='lobby')renderRoom();
+}
+$('renotifyBtn').addEventListener('click',sendInvite);
+$('roomLeaveBtn').addEventListener('click',async()=>{
+  const host=mySeat()?.host;
+  if(!confirm(host?'取消這一局？':'離開座位？'))return;
+  try{
+    const {data,error}=await sb.rpc('darts_match_leave',{p_match_id:M.id,p_seat_token:M.seatToken});
+    if(error)throw error;
+    notify('seats').catch(()=>{});
+    if(!host){try{sessionStorage.removeItem(SEAT_KEY(M.id));localStorage.removeItem(SEAT_KEY(M.id));}catch(e){}location.href='match.html';return;}
+    applyState(data,false);
+  }catch(e){toast(errMsg(e),true);}
+});
+
+// ---------------- 對戰畫面 ----------------
+function renderBoard(prevKnown,fromLocal){
+  const throws=M.st.throws||[],last=throws[throws.length-1],key=groupKey(last);
+  const fresh=throws.slice(prevKnown);
+  if(prevKnown===0||fresh.length>3||fromLocal){
+    M.group=key;eng.setDarts(groupThrows(key).map(t=>({x:t.x,y:t.y,tone:toneOf(t.team)})));
+    if(fromLocal)announce(fresh[fresh.length-1]);
+    return;
+  }
+  fresh.forEach((t,i)=>setTimeout(()=>{
+    if(groupKey(t)!==M.group){M.group=groupKey(t);eng.clearDarts();}
+    eng.throwRemote(t.x,t.y,toneOf(t.team),()=>{
+      announce(t);
+      eng.setDarts(groupThrows(M.group).filter(x=>x.seq<=t.seq).map(x=>({x:x.x,y:x.y,tone:toneOf(x.team)})));
+      renderScore();
+    });
+  },i*420));
+}
+function announce(t){
+  if(!t)return;
+  const st=M.st;
+  if(st.status==='finished'&&st.finish_reason==='checkout'&&t.remaining_after===0){eng.flash(st.mode==='coop'?'CLEAR!':'GAME SHOT',true,label(t));eng.chime(5);return;}
+  if(t.bust){eng.flash('BUST',false,'退回 '+t.remaining_after);return;}
+  if(t.s===25){eng.flash(label(t));eng.chime(2);}
+  else if(t.s===0)eng.flash('MISS');
+}
+function teamCard(t){
+  const st=M.st,cur=seatOf(st.current_seat),active=st.status==='playing'&&cur?.team===t;
+  const mem=teamMembers(t).map(s=>`<span class="${active&&s.seat_no===st.current_seat?'cur':''}">${esc(plainName(s))}</span>`).join('＋');
+  return `<div class="pcard ${t}${active?' active':''}"><span class="tag">${teamName(t)}</span><div class="mem">${mem}</div><div class="rem">${st.teams[t]}</div></div>`;
+}
+function renderScore(){
+  const st=M.st;if(!st)return;
+  const coop=st.mode==='coop';
+  $('scoreRow').className='score'+(coop?' coop':'');
+  $('scoreRow').innerHTML=coop
+    ?teamCard('a')+`<div class="vs"><span>ROUND</span><b>${st.round_no}</b><span>/ ${st.round_limit}</span></div>`
+    :teamCard('a')+`<div class="vs"><span>ROUND</span><b>${st.round_no}</b><span>/ ${st.round_limit}</span></div>`+teamCard('b');
+  const playing=st.status==='playing',mine=isMyTurn(),cur=seatOf(st.current_seat);
+  const tb=$('turnbar');tb.classList.toggle('mine',mine);
+  if(!playing)tb.textContent='對戰結束';
+  else if(mine)tb.innerHTML=`輪到你擲鏢・第 ${st.dart_in_turn+1} 鏢（${teamName(cur.team)}剩 ${st.teams[cur.team]}）`;
+  else tb.textContent=`等待 ${plainName(cur)}（${teamName(cur?.team)}）擲鏢・第 ${st.dart_in_turn+1} 鏢`+(M.seatNo==null?'（觀戰中）':'');
+  $('stage').classList.toggle('locked',!mine);
+  $('coach').style.display=M.seatNo==null?'none':'';
+  const g=groupThrows(M.group);
+  $('slots').innerHTML=[0,1,2].map(i=>{const t=g[i];return `<div class="slot${t?.bust?' bust':''}"><div class="lbl">${t?label(t):'—'}</div><div class="pt">${t?(t.bust?'BUST':pts(t)+' 分'):''}</div></div>`;}).join('');
+  // 回合紀錄：每個座位一列
+  let head='<tr><th></th>',rows='';
+  for(let r=1;r<=st.round_limit;r++)head+=`<th>${r}</th>`;
+  for(const no of st.play_order){
+    const s=seatOf(no);rows+=`<tr><td title="${esc(plainName(s))}">${esc(String(plainName(s)).slice(0,4))}</td>`;
+    for(let r=1;r<=st.round_limit;r++){
+      const ts=(st.throws||[]).filter(t=>t.seat_no===no&&t.round_no===r),bust=ts.some(t=>t.bust),sum=ts.reduce((a,t)=>a+(t.bust?0:pts(t)),0);
+      const now=playing&&st.current_seat===no&&st.round_no===r;
+      rows+=`<td class="${bust?'bust':''}${now?' now':''}">${ts.length?(bust?'BUST':sum):''}</td>`;
+    }
+    rows+='</tr>';
+  }
+  $('hist').innerHTML=head+'</tr>'+rows;
+  const canEnd=playing&&(mySeat()?.host||mySeat()?.kind==='staff');
+  $('quitBtn').hidden=!canEnd;
+}
+// 結果標題（英文）。之後有美術圖時，在 RESULT_ART 填入圖檔路徑即可替換文字，
+// 例如 victory:'art/result_victory.webp'；圖片載入失敗會自動退回文字。
+const RESULT_TEXT={victory:'VICTORY',defeat:'DEFEAT',draw:'DRAW',clear:'CLEAR',failed:'FAILED',
+  team_a:'TEAM A WINS',team_b:'TEAM B WINS',cancelled:'CANCELLED',expired:'TIME OUT',abandoned:'ABANDONED'};
+const RESULT_ART={};
+function setResultTitle(key){
+  const el=$('rTitle'),txt=RESULT_TEXT[key]||key.toUpperCase();
+  el.dataset.result=key;el.textContent=txt;
+  const src=RESULT_ART[key];
+  if(src){const img=new Image();img.alt=txt;img.className='rArt';img.onload=()=>{el.textContent='';el.appendChild(img);};img.src=src;}
+}
+function renderEnded(){
+  const st=M.st;if(!st||M.resultShown||st.status==='lobby'||st.status==='playing')return;
+  M.resultShown=true;stopSync();clearInterval(roomTimer);
+  const myTeam=mySeat()?.team;
+  let ey='Match Over',key='',sub='',line='';
+  if(st.status==='finished'){
+    if(st.mode==='coop'){
+      ey='Co-op Challenge';
+      if(st.winner==='a'){key='clear';sub=`${st.darts_used} 鏢把 501 扣到剛好 0`;}
+      else{key='failed';sub=`打滿 ${st.round_limit} 回合，還剩 ${st.teams.a} 分`;}
+      line=teamMembers('a').map(s=>esc(plainName(s))).join(' ＋ ');
+    }else{
+      ey=st.finish_reason==='checkout'?'Game Shot':'Round Limit';
+      if(st.winner==='draw')key='draw';
+      else if(myTeam)key=myTeam===st.winner?'victory':'defeat';
+      else key='team_'+st.winner;              // 觀戰者
+      sub=st.finish_reason==='checkout'?'剛好歸零收尾':`打滿 ${st.round_limit} 回合，剩餘分數較低者勝`;
+      line=['a','b'].map(t=>`${teamName(t)}（${teamMembers(t).map(s=>esc(plainName(s))).join('＋')}）<b>${st.teams[t]}</b>`).join('　·　');
+    }
+    if(M.seatNo!=null&&!M.notified.result){
+      M.notified.result=true;
+      notify('result').then(()=>setStatus('rStatus','戰報已發送至 Discord。','ok'))
+        .catch(e=>{console.warn(e);setStatus('rStatus','戰報發送失敗（不影響對戰紀錄）。','err');});
+    }
+  }else{
+    key=st.status==='expired'?'expired':st.status==='abandoned'?'abandoned':'cancelled';
+    sub=st.status==='expired'?'15 分鐘內沒有坐滿。':st.status==='abandoned'?'超過 30 分鐘沒有動作。':(st.finish_reason==='staff_cancel'?'店員已結束這一局。':'開局的旅者已取消這一局。');
+  }
+  $('rEy').textContent=ey;setResultTitle(key);$('rSub').textContent=sub;$('rLine').innerHTML=line;
+  $('rAgain').hidden=mySeat()?.kind!=='guest';
+  $('result').classList.add('show');
+}
+$('rClose').addEventListener('click',()=>$('result').classList.remove('show'));
+$('rAgain').addEventListener('click',()=>{location.href='match.html';});
+
+// ---------------- 擲鏢 ----------------
+async function localThrow(h,pos){
+  const st=M.st;if(!st)return;
+  const myKey=M.seatNo+'#'+st.round_no;
+  if(M.group!==myKey){M.group=myKey;eng.setDarts([{x:pos.x,y:pos.y,tone:toneOf(mySeat()?.team)}]);}
+  M.pending=true;
+  try{
+    const {data,error}=await sb.rpc('darts_match_throw',{p_match_id:M.id,p_seat_token:M.seatToken,p_x:pos.x,p_y:pos.y,p_seq:M.known});
+    if(error)throw error;
+    const t=data.throws[data.throws.length-1];
+    if(t&&(t.s!==h.s||t.m!==h.m))console.warn('伺服器判定與本機不同',t,h);
+    applyState(data,true);
+  }catch(e){
+    console.error('擲鏢送出失敗',e);
+    toast('這一鏢沒有送出：'+errMsg(e),true);
+    M.st=null;M.known=0;await fetchState();
+  }finally{M.pending=false;renderScore();}
+}
+$('quitBtn').addEventListener('click',async()=>{
+  if(!confirm('確定要結束這一局？'))return;
+  try{const {data,error}=await sb.rpc('darts_match_leave',{p_match_id:M.id,p_seat_token:M.seatToken});if(error)throw error;applyState(data,false);}
+  catch(e){toast(errMsg(e),true);}
+});
+$('copyView').addEventListener('click',async()=>{
+  const u=location.origin+location.pathname+'#m='+M.id+'&v='+M.view;
+  try{await navigator.clipboard.writeText(u);toast('觀戰連結已複製，同桌夥伴打開就能一起看。');}
+  catch(e){prompt('觀戰連結',u);}
+});
+
+// ---------------- 同步：Realtime 通知＋輪詢備援 ----------------
+function startSync(){
+  stopSync();
+  try{M.channel=sb.channel('darts-match:'+M.view).on('broadcast',{event:'state_changed'},()=>fetchState()).subscribe(s=>{if(s==='SUBSCRIBED')fetchState();});}
+  catch(e){console.warn('即時通道建立失敗，改用輪詢',e);}
+  M.poll=setInterval(()=>{if(!document.hidden&&!M.pending)fetchState();},2500);
+}
+function stopSync(){if(M.poll)clearInterval(M.poll);M.poll=null;if(M.channel){try{sb.removeChannel(M.channel);}catch(e){}M.channel=null;}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&M.id&&!M.resultShown)fetchState();});
+async function enterMatch(id,view,seatNo,seatToken,persist){
+  M.id=id;M.view=view;M.seatNo=seatNo??null;M.seatToken=seatToken??null;
+  if(seatToken)saveSeat(id,seatNo,seatToken,persist);
+  setHash(id,view);
+  await fetchState();
+  if(!M.st){show('vHome');setStatus('homeStatus','找不到這場對戰，連結可能有誤。','err');return;}
+  if(['lobby','playing'].includes(M.st.status))startSync();
+}
+
+// ---------------- 旅者首頁 ----------------
+let pickedMode=null;
+document.querySelectorAll('.modecard').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.modecard').forEach(x=>x.classList.toggle('sel',x===b));pickedMode=b.dataset.mode;
+  $('createBtn').disabled=!me.memberToken;
+}));
+$('createBtn').addEventListener('click',async()=>{
+  if(!pickedMode)return;
+  $('createBtn').disabled=true;setStatus('homeStatus','正在開局…');
+  try{
+    const {data,error}=await sb.rpc('darts_match_create',{p_join_token:me.joinToken,p_member_token:me.memberToken,p_mode:pickedMode});
+    if(error)throw error;
+    await enterMatch(data.match_id,data.view_token,data.seat_no,data.seat_token,false);
+    if(data.needs_staff)sendInvite();
+  }catch(e){setStatus('homeStatus',errMsg(e),'err');$('createBtn').disabled=false;}
+});
+$('codeInput').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);});
+$('codeInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('joinCodeBtn').click();});
+$('joinCodeBtn').addEventListener('click',async()=>{
+  const code=$('codeInput').value.trim();
+  if(code.length!==4){setStatus('joinStatus','房號是 4 碼。','err');return;}
+  if(!me.memberToken){setStatus('joinStatus','需要先在點餐頁取號並完成帶位。','err');return;}
+  $('joinCodeBtn').disabled=true;setStatus('joinStatus','正在加入…');
+  try{
+    const {data,error}=await sb.rpc('darts_match_join_guest',{p_join_token:me.joinToken,p_member_token:me.memberToken,p_room_code:code});
+    if(error)throw error;
+    await enterMatch(data.match_id,data.view_token,data.seat_no,data.seat_token,false);
+    notify('seats').catch(()=>{});
+  }catch(e){setStatus('joinStatus',errMsg(e),'err');$('joinCodeBtn').disabled=false;}
+});
+let boardScope='tonight';
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));boardScope=b.dataset.scope;loadCoopBoard();}));
+async function loadCoopBoard(){
+  const el=$('coopBoard');
+  try{
+    const {data,error}=await sb.rpc('darts_coop_leaderboard',{p_scope:boardScope,p_limit:10});
+    if(error)throw error;
+    if(!data?.length){el.innerHTML=`<li class="empty">${boardScope==='tonight'?'今晚還沒有隊伍挑戰成功。':'尚無紀錄。'}</li>`;return;}
+    el.innerHTML=data.map((r,i)=>`<li><span class="r">${i+1}</span><span>${esc(r.guest_name)}<small>（${esc(r.server)}）</small> ＋ ${esc(r.staff_name||'店員')}</span><span class="s">${r.darts_used}<small> 鏢</small></span></li>`).join('');
+  }catch(e){console.warn(e);el.innerHTML='<li class="empty">挑戰榜暫時無法載入。</li>';}
+}
+async function bootHome(){
+  show('vHome');loadCoopBoard();
+  const v=readVisit();
+  if(!v||!v.member_token){
+    $('homeMsg').innerHTML='需要先在<a href="../order.html" style="color:var(--gold)">點餐頁</a>取號並完成帶位，才能開局或加入。';return;
+  }
+  try{
+    const {data:mem,error}=await sb.rpc('get_dining_member_public',{p_join_token:v.join_token,p_member_token:v.member_token});
+    if(error)throw error;
+    $('homeId').innerHTML=`<span><span class="k">旅者</span>${esc(mem.guest_name)}</span><span><span class="k">伺服器</span>${esc(mem.server)}</span><span><span class="k">號碼牌</span>${esc(mem.ticket_code)}</span>`;
+    if(mem.session_status!=='seated'){$('homeMsg').textContent=mem.session_status==='waiting'?'等待帶位中，帶位後即可開局。':'本次來店已結束，無法再開局。';return;}
+    me.joinToken=v.join_token;me.memberToken=v.member_token;
+    if(pickedMode)$('createBtn').disabled=false;
+    const {data:mine}=await sb.rpc('darts_match_mine',{p_join_token:me.joinToken,p_member_token:me.memberToken});
+    if(mine&&['lobby','playing'].includes(mine.status))return enterMatch(mine.match_id,mine.view_token,mine.seat_no,mine.seat_token,false);
+  }catch(e){console.warn(e);$('homeMsg').textContent='來店身分無法驗證：'+errMsg(e);}
+}
+
+// ---------------- 店員：入座 ----------------
+let pickedStaff=null,pickedSeat=null;
+async function bootStaff(mid,invite){
+  show('vStaff');
+  try{
+    const {data,error}=await sb.rpc('darts_match_staff_options',{p_match_id:mid,p_invite_token:invite});
+    if(error)throw error;
+    const st=data.state;
+    $('staffMode').innerHTML=`<b>${MODE_NAME[st.mode]}</b>｜${MODE_SUB[st.mode]}`;
+    if(st.status!=='lobby'){setStatus('staffStatus',st.status==='playing'?'這一局已經開始了。':'這一局已結束或逾時。','err');$('staffSeats').innerHTML='';return;}
+    $('staffSeats').className='seatcols'+(st.mode==='coop'?' one':'');
+    $('staffSeats').innerHTML=seatColsHtml(st,{pickStaff:true});
+    const open=st.seats.filter(s=>s.kind==='staff'&&!s.filled);
+    if(!open.length){setStatus('staffStatus','店員座位都已坐滿。','err');return;}
+    if(open.length===1)pickedSeat=open[0].seat_no;
+    const markSeat=()=>$('staffSeats').querySelectorAll('button[data-seat]').forEach(b=>{b.className='btn'+(+b.dataset.seat===pickedSeat?' gold':'');b.textContent=+b.dataset.seat===pickedSeat?'✓ 坐這裡':'坐這裡';});
+    $('staffSeats').querySelectorAll('button[data-seat]').forEach(b=>b.addEventListener('click',()=>{pickedSeat=+b.dataset.seat;markSeat();refreshJoin();}));
+    markSeat();
+    const list=data.staff||[];
+    if(!list.length){setStatus('staffStatus','目前沒有可入座的上班中店員；請先打卡。','err');return;}
+    $('staffGrid').innerHTML=list.map(s=>`<button class="staffcard" data-id="${esc(s.id)}">${avatarHtml(s.name,s.avatar_path)}${esc(s.name)}<small>${s.shift_status==='away'?'暫離中':'當班中'}</small></button>`).join('');
+    $('staffGrid').querySelectorAll('.staffcard').forEach(b=>b.addEventListener('click',()=>{
+      $('staffGrid').querySelectorAll('.staffcard').forEach(x=>x.classList.toggle('sel',x===b));pickedStaff=b.dataset.id;refreshJoin();
+    }));
+    function refreshJoin(){$('joinBtn').disabled=!(pickedStaff&&pickedSeat);}
+    $('joinBtn').onclick=async()=>{
+      $('joinBtn').disabled=true;
+      try{
+        const {data:j,error:je}=await sb.rpc('darts_match_staff_join',{p_match_id:mid,p_invite_token:invite,p_staff_id:pickedStaff,p_seat_no:pickedSeat});
+        if(je)throw je;
+        M.id=mid;M.view=j.view_token;
+        notify('seats').catch(e=>console.warn('更新 Discord 邀請訊息失敗',e));
+        await enterMatch(mid,j.view_token,j.seat_no,j.seat_token,true);
+      }catch(e){setStatus('staffStatus',errMsg(e),'err');$('joinBtn').disabled=false;}
+    };
+  }catch(e){setStatus('staffStatus',errMsg(e),'err');}
+}
+
+// ---------------- 觀戰／重新整理後回到對戰 ----------------
+async function bootMatch(mid,view){
+  let seat=loadSeat(mid,sessionStorage);
+  if(!seat){
+    const v=readVisit();
+    if(v&&v.member_token){
+      try{
+        const {data:mine}=await sb.rpc('darts_match_mine',{p_join_token:v.join_token,p_member_token:v.member_token});
+        if(mine&&mine.match_id===mid&&mine.seat_token)seat={seat_no:mine.seat_no,seat_token:mine.seat_token};
+      }catch(e){}
+    }
+  }
+  if(!seat)seat=loadSeat(mid,localStorage);   // 店員換分頁
+  await enterMatch(mid,view,seat?.seat_no,seat?.seat_token,false);
+}
+
+// ---------------- 啟動 ----------------
+(async()=>{
+  if(!sb){show('vHome');setStatus('homeStatus','連線元件未載入，請重新整理。','err');return;}
+  const h=readHash();
+  if(h.m&&h.staff)return bootStaff(h.m,h.staff);
+  if(h.m&&h.v)return bootMatch(h.m,h.v);
+  return bootHome();
+})();
+})();
+</script>
+</body>
+</html>

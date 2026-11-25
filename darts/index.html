@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>水晶飛鏢｜水晶庭 La Crystalline</title>
+<link rel="icon" type="image/png" href="../assets/emblem_nav.png">
+<meta name="description" content="水晶庭 La Crystalline — 水晶飛鏢・COUNT-UP 八回合計分挑戰">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0e14;--night:#111a2b;--deep:#0d1420;
+  --crys:#7fd3d6;--crys-dim:#4a8f95;--gold:#d8b87a;
+  --mist:#e8edf2;--mute:#9aa7b4;--line:rgba(127,211,214,.18);--warn:#e59a8f;
+  --serif:"Cormorant Garamond",serif;--tc:"Noto Serif TC",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overscroll-behavior:none}
+body{background:var(--ink);color:var(--mist);font-family:var(--tc);font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(1100px 760px at 80% -6%,rgba(50,90,130,.30),transparent 60%),radial-gradient(950px 700px at 10% 14%,rgba(35,65,110,.26),transparent 58%),linear-gradient(180deg,#070b12,#0a1120 45%,#080d16)}
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:rgba(8,12,20,.9);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.nav-logo img{height:26px;width:auto}
+.nav-logo .lt{font-family:var(--serif);font-size:1.05rem;color:var(--mist);letter-spacing:.12em;line-height:1}
+.nav-logo .lt small{display:block;font-family:var(--tc);font-size:.58rem;color:var(--crys-dim);letter-spacing:.28em;margin-top:2px}
+.nav .links{display:flex;gap:16px}
+.nav a.back{color:var(--mute);text-decoration:none;font-size:.85rem;letter-spacing:.1em}
+.nav a.back:hover{color:var(--crys)}
+.wrap{max-width:1000px;margin:0 auto;padding:76px 14px 40px}
+.head{text-align:center;padding:4px 0 10px}
+.head .ey{font-family:var(--serif);font-style:italic;color:var(--crys);font-size:1rem}
+.head h1{font-family:var(--serif);font-size:clamp(1.8rem,6vw,2.5rem);font-weight:500;letter-spacing:.12em;line-height:1.2}
+.head .sub{color:var(--mute);font-size:.86rem;letter-spacing:.04em}
+.modes{display:inline-flex;gap:6px;margin-top:8px;padding:3px;border:1px solid var(--line);border-radius:999px;font-size:.8rem}
+.modes>*{padding:4px 14px;border-radius:999px;color:var(--mute);text-decoration:none;letter-spacing:.06em}
+.modes .on{background:var(--crys);color:var(--ink)}
+.modes a:hover{color:var(--crys)}
+
+.idcard{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 14px;margin:8px auto 14px;padding:10px 14px;max-width:640px;border:1px solid var(--line);border-radius:3px;background:rgba(17,26,43,.42);font-size:.86rem}
+.idcard .k{color:var(--crys-dim);font-family:var(--serif);letter-spacing:.1em;font-size:.78rem;margin-right:.35em}
+.idcard .ticket{font-family:var(--serif);color:var(--crys);letter-spacing:.14em;font-size:1.05rem}
+.idcard .pill{padding:2px 10px;border-radius:999px;font-size:.74rem;letter-spacing:.08em;border:1px solid}
+.pill.on{color:var(--crys);border-color:rgba(127,211,214,.45);background:rgba(127,211,214,.07)}
+.pill.off{color:var(--gold);border-color:rgba(216,184,122,.45);background:rgba(216,184,122,.06)}
+.idcard a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(216,184,122,.4)}
+
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+
+.stage{position:relative;border:1px solid var(--line);border-radius:4px;background:rgba(8,12,20,.55);padding:10px;user-select:none;-webkit-user-select:none}
+.stage canvas{display:block;width:100%;height:auto;touch-action:none;cursor:none}
+.hud{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;padding:2px 6px 8px}
+.hud .total{font-family:var(--serif);font-size:2.4rem;line-height:1;color:var(--mist)}
+.hud .total small{font-size:.82rem;color:var(--mute);margin-left:.4em;letter-spacing:.08em}
+.hud .round{font-family:var(--serif);color:var(--crys);letter-spacing:.14em;font-size:1rem;text-align:right}
+.hud .round span{display:block;color:var(--mute);font-family:var(--tc);font-size:.72rem;letter-spacing:.1em}
+.rounds{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;padding:0 4px 8px}
+.rounds div{text-align:center;border:1px solid rgba(127,211,214,.12);border-radius:3px;padding:2px 0;font-family:var(--serif);font-size:.95rem;color:var(--mute);line-height:1.3}
+.rounds div small{display:block;font-family:var(--tc);font-size:.6rem;color:var(--crys-dim)}
+.rounds div.now{border-color:var(--crys);color:var(--mist)}
+.rounds div.done{color:var(--mist)}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 4px 2px}
+.slot{border:1px solid var(--line);border-radius:3px;padding:6px 4px;text-align:center;min-height:52px;background:rgba(17,26,43,.35);transition:.2s}
+.slot .lbl{font-family:var(--serif);font-size:1.15rem;letter-spacing:.06em;color:var(--mist)}
+.slot .pt{font-size:.72rem;color:var(--mute)}
+.slot.now{border-color:var(--crys);box-shadow:0 0 0 1px rgba(127,211,214,.25) inset}
+.slot.hot .lbl{color:var(--gold)}
+
+/* 擲鏢回饋：力道計與方向 */
+.coach{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;padding:10px 6px 2px;font-size:.76rem;color:var(--mute)}
+.gauge{position:relative;height:10px;border-radius:999px;background:linear-gradient(90deg,rgba(229,154,143,.35),rgba(216,184,122,.25) 30%,rgba(127,211,214,.55) 44%,rgba(127,211,214,.55) 56%,rgba(216,184,122,.25) 70%,rgba(229,154,143,.35))}
+.gauge .mk{position:absolute;top:-4px;width:3px;height:18px;border-radius:2px;background:var(--mist);transform:translateX(-50%);transition:left .25s}
+.gauge .mk.old{background:rgba(232,237,242,.28);width:2px}
+.gauge .ends{position:absolute;inset:auto 0 -16px 0;display:flex;justify-content:space-between;font-size:.62rem;color:var(--crys-dim)}
+.verdict{grid-column:1/-1;min-height:1.5em;text-align:center;color:var(--mist);font-size:.82rem;margin-top:12px}
+.verdict b{font-weight:400;color:var(--gold)}
+.tip{color:var(--mute);font-size:.78rem;text-align:center;padding:6px 4px 2px;letter-spacing:.03em}
+.flash{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.8);font-family:var(--serif);font-size:clamp(2rem,9vw,3.6rem);letter-spacing:.12em;color:var(--gold);text-shadow:0 0 18px rgba(216,184,122,.55);opacity:0;pointer-events:none;transition:opacity .2s,transform .35s;white-space:nowrap}
+.flash.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.flash.award{font-size:clamp(2.4rem,11vw,4.4rem);color:var(--crys);text-shadow:0 0 22px rgba(127,211,214,.75),0 0 2px #fff}
+.flash small{display:block;font-family:var(--tc);font-size:.9rem;letter-spacing:.2em;color:var(--mist);text-align:center}
+
+.panel{border:1px solid var(--line);border-radius:4px;background:rgba(17,26,43,.38);padding:14px}
+.panel+.panel{margin-top:14px}
+.panel h2{font-family:var(--serif);font-weight:500;font-size:1.25rem;letter-spacing:.1em;display:flex;align-items:baseline;gap:8px}
+.panel h2 em{font-size:.8rem;color:var(--crys-dim)}
+.tabs{display:flex;gap:6px;margin:8px 0 10px}
+.tab{flex:1;padding:6px 0;border:1px solid var(--line);border-radius:999px;background:none;color:var(--mute);font-family:var(--tc);font-size:.8rem;letter-spacing:.08em;cursor:pointer}
+.tab.on{color:var(--ink);background:var(--crys);border-color:var(--crys)}
+ol.lb{list-style:none}
+ol.lb li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 2px;border-bottom:1px dashed rgba(127,211,214,.1);font-size:.86rem}
+ol.lb li .r{font-family:var(--serif);color:var(--crys);font-size:1.05rem;text-align:center}
+ol.lb li:nth-child(1) .r{color:var(--gold)}
+ol.lb li .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ol.lb li .n small{color:var(--mute);margin-left:.4em;font-size:.72rem}
+ol.lb li .s{font-family:var(--serif);font-size:1.15rem;color:var(--mist);text-align:right;line-height:1.2}
+ol.lb li .s small{display:block;font-family:var(--tc);font-size:.62rem;color:var(--mute)}
+ol.lb li.me{background:rgba(127,211,214,.07)}
+ol.lb li.empty{display:block;border:0;color:var(--mute);font-size:.82rem;padding:8px 2px}
+.rules{color:var(--mute);font-size:.8rem;line-height:1.85}
+.rules b{color:var(--mist);font-weight:400}
+.rules p+p{margin-top:6px}
+
+.modal{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(4,7,12,.72);backdrop-filter:blur(3px);padding:20px;overflow:auto}
+.modal.show{display:flex}
+.card{width:min(440px,100%);border:1px solid rgba(127,211,214,.35);border-radius:4px;background:linear-gradient(180deg,#0f1828,#0a111d);padding:20px 18px;text-align:center}
+.card .ey{font-family:var(--serif);font-style:italic;color:var(--crys)}
+.card .big{font-family:var(--serif);font-size:3.6rem;line-height:1.1;color:var(--gold);letter-spacing:.06em}
+.card .stats{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 16px;color:var(--mute);font-size:.82rem;margin:4px 0 10px}
+.card .rows{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0 10px;font-size:.72rem;color:var(--mute)}
+.card .rows div{border:1px solid var(--line);border-radius:3px;padding:4px 2px}
+.card .rows b{display:block;font-family:var(--serif);font-size:1.15rem;font-weight:500;color:var(--mist)}
+.card .awards{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:2px 0 6px}
+.card .awards span{padding:2px 10px;border-radius:999px;border:1px solid rgba(127,211,214,.4);color:var(--crys);font-family:var(--serif);font-size:.85rem;letter-spacing:.08em}
+.status{font-size:.84rem;margin:8px 0 4px;min-height:1.4em}
+.status.ok{color:var(--crys)}.status.err{color:var(--warn)}.status.wait{color:var(--mute)}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.btn{padding:9px 20px;border-radius:999px;border:1px solid var(--crys);background:rgba(127,211,214,.08);color:var(--crys);font-family:var(--tc);font-size:.88rem;letter-spacing:.08em;cursor:pointer;text-decoration:none}
+.btn.gold{border-color:var(--gold);color:var(--gold);background:rgba(216,184,122,.07)}
+.btn[hidden]{display:none}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-logo" href="../index.html"><img src="../assets/emblem_nav.png" alt=""><span class="lt">La Crystalline<small>水晶庭</small></span></a>
+  <div class="links"><a class="back" href="../order.html">點餐</a><a class="back" href="../index.html">← 主頁</a></div>
+</nav>
+
+<main class="wrap">
+  <header class="head">
+    <div class="ey">Crystal Darts · Count-Up</div>
+    <h1>水晶飛鏢</h1>
+    <div class="sub">八回合・每回合三鏢，24 鏢累計最高分</div>
+    <div class="modes"><span class="on">單人 COUNT-UP</span><a href="match.html">多人對戰 →</a></div>
+  </header>
+
+  <div class="idcard" id="idcard"><span>正在確認來店身分…</span></div>
+
+  <div class="grid">
+    <section>
+      <div class="stage" id="stage">
+        <div class="hud">
+          <div class="total" id="total">0<small>平均 0.0 / 鏢</small></div>
+          <div class="round" id="roundLbl">ROUND 1 / 8<span>第 1 鏢</span></div>
+        </div>
+        <div class="rounds" id="rounds"></div>
+        <canvas id="board" width="600" height="600" aria-label="飛鏢靶"></canvas>
+        <div class="flash" id="flash"></div>
+        <div class="slots" id="slots"></div>
+        <div class="coach">
+          <span>力道</span>
+          <div class="gauge" id="gauge"><span class="ends"><span>太輕・落低</span><span>剛好</span><span>太重・飛高</span></span></div>
+          <div class="verdict" id="verdict">按住瞄準，往上甩出放手。</div>
+        </div>
+        <div class="tip" id="tip">手指／滑鼠按住慢慢移動來瞄準 → 往上快速一甩並放開。甩的速度決定高低，甩歪會往左右偏。</div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="panel">
+        <h2>水晶榜 <em>Leaderboard</em></h2>
+        <div class="tabs"><button class="tab on" data-scope="tonight">今晚</button><button class="tab" data-scope="all">歷代</button></div>
+        <ol class="lb" id="lb"><li class="empty">載入中…</li></ol>
+      </div>
+      <div class="panel">
+        <h2>我的紀錄 <em>This Visit</em></h2>
+        <ol class="lb" id="mine"><li class="empty">帶位後挑戰的成績會記錄在這裡。</li></ol>
+      </div>
+      <div class="panel rules">
+        <h2>規則 <em>Rules</em></h2>
+        <p>COUNT-UP：8 回合 × 3 鏢，共 24 鏢累計。外圈窄環 <b>雙倍</b>、內圈窄環 <b>三倍</b>，紅心內外皆 <b>50</b>（軟式飛鏢 Fat Bull）。</p>
+        <p>單回合成就：<b>TON 80</b>（180）、<b>HAT TRICK</b>（三鏢紅心）、<b>THREE IN A BED</b>（同一個三倍區三鏢）、<b>HIGH TON</b>（151–179）、<b>LOW TON</b>（100–150）。</p>
+        <p>成績以點餐時登錄的 <b>旅者名稱＋伺服器</b> 記錄，與本桌號碼牌綁定；未帶位時為練習模式，不列入水晶榜。</p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div class="modal" id="result">
+  <div class="card">
+    <div class="ey">Count-Up Result</div>
+    <div class="big" id="rScore">0</div>
+    <div class="stats" id="rStats"></div>
+    <div class="awards" id="rAwards"></div>
+    <div class="rows" id="rRows"></div>
+    <div class="status" id="rStatus"></div>
+    <div class="btns">
+      <button class="btn gold" id="rRetry" hidden>重新送出紀錄</button>
+      <button class="btn" id="rAgain">再來一局</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="engine.js?v=3"></script>
+<script>
+(()=>{
+'use strict';
+// 與 order.html 相同的 Supabase 專案與身分來源
+const SUPABASE_URL="https://idqysanzhafayovieqig.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_h-0u9bNzU_cqyVah3QTmKg_pIScFn5T";
+const VISIT_STORAGE_KEY="la_crystalline_active_visit_v1";
+const VISIT_BACKUP_KEY="la_crystalline_active_visit_backup_v1";
+const MODE="countup";
+const ROUNDS=8,DARTS=ROUNDS*3;
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let sb=null;
+try{if(window.supabase)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});}catch(e){console.warn('Supabase 初始化失敗',e);}
+
+// ---------------- 身分（沿用點餐頁的本機來店卡） ----------------
+const id={joinToken:null,memberToken:null,guestName:null,server:null,ticket:null,canRecord:false};
+function readVisit(){
+  for(const k of [VISIT_STORAGE_KEY,VISIT_BACKUP_KEY]){
+    try{const raw=localStorage.getItem(k);if(!raw)continue;const v=JSON.parse(raw);if(v&&v.join_token)return v;}catch(e){}
+  }
+  return null;
+}
+function renderId(msg){
+  const c=$('idcard');
+  if(id.canRecord){
+    c.innerHTML=`<span><span class="k">旅者</span>${esc(id.guestName)}</span><span><span class="k">伺服器</span>${esc(id.server)}</span>`+
+      `<span><span class="k">號碼牌</span><span class="ticket">${esc(id.ticket)}</span></span><span class="pill on">成績記錄中</span>`;
+  }else{
+    c.innerHTML=`<span class="pill off">練習模式</span><span>${esc(msg||'尚未帶位，成績不會記錄。')}</span> <a href="../order.html">前往取號／點餐</a>`;
+  }
+}
+async function verifyIdentity(){
+  const v=readVisit();
+  if(!v||!v.member_token){id.canRecord=false;renderId('找不到本機來店身分，成績不會記錄。');return;}
+  if(!sb){renderId('連線元件未載入，暫以練習模式進行。');return;}
+  try{
+    const {data,error}=await sb.rpc('get_dining_member_public',{p_join_token:v.join_token,p_member_token:v.member_token});
+    if(error)throw error;
+    id.joinToken=v.join_token;id.memberToken=v.member_token;
+    id.guestName=data.guest_name;id.server=data.server;id.ticket=data.ticket_code;
+    id.canRecord=data.session_status==='seated';
+    renderId(data.session_status==='waiting'?'等待帶位中，帶位後即開始記錄成績。':'本次來店已結束，成績不會記錄。');
+    loadMine();
+  }catch(e){
+    console.warn('身分驗證失敗',e);id.canRecord=false;
+    renderId('來店身分無法驗證，成績不會記錄。');
+  }
+}
+
+// ---------------- 擲鏢引擎（engine.js 共用） ----------------
+const game={throws:[],awards:[],busy:false,over:false};
+const eng=CrystalDarts.create({
+  canvas:$('board'),gaugeEl:$('gauge'),verdictEl:$('verdict'),flashEl:$('flash'),
+  canThrow:()=>!game.busy&&!game.over,
+  onLand:h=>land(h)
+});
+const {pts,label}=CrystalDarts;
+const flash=(...a)=>eng.flash(...a),chime=n=>eng.chime(n);
+
+// ---------------- 回合成就（與伺服器規則一致） ----------------
+function roundAward(r){
+  if(r.length<3)return null;
+  const sum=r.reduce((a,h)=>a+pts(h),0);
+  if(r.every(h=>h.s===20&&h.m===3))return {key:'ton80',name:'TON 80'};
+  if(r.every(h=>h.s===25))return {key:'hat_trick',name:'HAT TRICK'};
+  if(r.every(h=>h.m===3&&h.s===r[0].s))return {key:'three_in_bed',name:'THREE IN A BED'};
+  if(sum>=151)return {key:'high_ton',name:'HIGH TON'};
+  if(sum>=100)return {key:'low_ton',name:'LOW TON'};
+  return null;
+}
+
+// ---------------- 計分流程 ----------------
+function total(){return game.throws.reduce((a,h)=>a+pts(h),0);}
+function renderHud(){
+  const n=game.throws.length,round=Math.min(ROUNDS,Math.floor(n/3)+1),inRound=n%3,t=total();
+  $('total').innerHTML=`${t}<small>平均 ${(n?t/n:0).toFixed(1)} / 鏢</small>`;
+  $('roundLbl').innerHTML=game.over?'FINISH<span>24 鏢完成</span>':`ROUND ${round} / ${ROUNDS}<span>第 ${inRound+1} 鏢</span>`;
+  let html='';
+  for(let r=0;r<ROUNDS;r++){
+    const s=game.throws.slice(r*3,r*3+3),done=s.length===3,cur=!game.over&&r===round-1;
+    html+=`<div class="${cur?'now':done?'done':''}">${s.length?s.reduce((a,h)=>a+pts(h),0):'·'}<small>R${r+1}</small></div>`;
+  }
+  $('rounds').innerHTML=html;
+  const base=game.over?DARTS-3:Math.floor(n/3)*3;
+  $('slots').innerHTML=[0,1,2].map(i=>{
+    const h=game.throws[base+i],now=!game.over&&base+i===n;
+    return `<div class="slot${now?' now':''}${h&&(h.m===3||h.s===25)?' hot':''}"><div class="lbl">${h?label(h):'—'}</div><div class="pt">${h?pts(h)+' 分':''}</div></div>`;
+  }).join('');
+}
+function land(h){
+  game.throws.push(h);
+  const n=game.throws.length;
+  let pause=0;
+  if(n%3===0){
+    const r=game.throws.slice(n-3,n),aw=roundAward(r);
+    if(aw){game.awards.push(aw.key);flash(aw.name,true,r.reduce((a,x)=>a+pts(x),0)+' 分');chime(aw.key==='low_ton'?3:5);pause=600;}
+    else if(h.s===25)flash(label(h));
+    else if(h.s===0)flash('MISS');
+  }else if(h.s===25){flash(label(h));chime(2);}
+  else if(h.s===0)flash('MISS');
+  renderHud();
+  if(n>=DARTS){game.over=true;renderHud();setTimeout(finish,900+pause);return;}
+  if(n%3===0){game.busy=true;setTimeout(()=>{eng.clearDarts();renderHud();game.busy=false;},900+pause);}
+}
+function newGame(){
+  game.throws=[];game.awards=[];game.busy=false;game.over=false;
+  eng.clearDarts();eng.resetCoach();
+  $('result').classList.remove('show');renderHud();
+}
+
+let submitting=false;
+function setStatus(t,c){const s=$('rStatus');s.textContent=t;s.className='status '+(c||'');}
+async function submit(){
+  if(submitting)return;
+  if(!id.canRecord||!sb){setStatus('練習模式：本局不列入水晶榜。帶位後即可記錄成績。','wait');return;}
+  submitting=true;$('rRetry').hidden=true;
+  setStatus('正在記錄至水晶庭…','wait');
+  try{
+    const {data,error}=await sb.rpc('darts_submit_score',{p_join_token:id.joinToken,p_member_token:id.memberToken,p_mode:MODE,p_throws:game.throws.map(h=>({s:h.s,m:h.m}))});
+    if(error)throw error;
+    if(Number(data.score)!==total())console.warn('伺服器計分與本機不同',data.score,total());
+    $('rScore').textContent=data.score;
+    setStatus(`已記錄｜${data.guest_name}・${data.server}　今晚最佳 ${data.best_tonight} 分・第 ${data.rank_tonight} 名`,'ok');
+    loadBoard();loadMine();
+  }catch(e){
+    console.error('飛鏢成績送出失敗',e);
+    setStatus('記錄失敗：'+(e?.message||'網路異常'),'err');
+    $('rRetry').hidden=false;
+  }finally{submitting=false;}
+}
+const AWARD_NAME={ton80:'TON 80',hat_trick:'HAT TRICK',three_in_bed:'THREE IN A BED',high_ton:'HIGH TON',low_ton:'LOW TON'};
+function finish(){
+  const t=total(),bulls=game.throws.filter(h=>h.s===25).length,tr=game.throws.filter(h=>h.m===3).length;
+  $('rScore').textContent=t;
+  $('rStats').innerHTML=`<span>平均 ${(t/DARTS).toFixed(2)} / 鏢</span><span>紅心 ${bulls}</span><span>三倍 ${tr}</span>`;
+  const cnt={};game.awards.forEach(k=>cnt[k]=(cnt[k]||0)+1);
+  $('rAwards').innerHTML=Object.keys(AWARD_NAME).filter(k=>cnt[k]).map(k=>`<span>${AWARD_NAME[k]}${cnt[k]>1?' ×'+cnt[k]:''}</span>`).join('');
+  $('rRows').innerHTML=Array.from({length:ROUNDS},(_,r)=>{const s=game.throws.slice(r*3,r*3+3);return `<div>R${r+1}<b>${s.reduce((a,h)=>a+pts(h),0)}</b></div>`;}).join('');
+  $('rRetry').hidden=true;$('result').classList.add('show');
+  submit();
+}
+$('rRetry').addEventListener('click',submit);
+$('rAgain').addEventListener('click',newGame);
+
+// ---------------- 排行榜 ----------------
+let scope='tonight';
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  scope=b.dataset.scope;loadBoard();
+}));
+async function loadBoard(){
+  const el=$('lb');
+  if(!sb){el.innerHTML='<li class="empty">排行榜暫時無法載入。</li>';return;}
+  try{
+    const {data,error}=await sb.rpc('darts_leaderboard',{p_scope:scope,p_limit:10});
+    if(error)throw error;
+    if(!Array.isArray(data)||!data.length){el.innerHTML=`<li class="empty">${scope==='tonight'?'今晚還沒有人上榜，來搶頭香吧。':'尚無紀錄。'}</li>`;return;}
+    el.innerHTML=data.map(r=>{
+      const me=id.canRecord&&r.guest_name===id.guestName&&r.server===id.server;
+      return `<li class="${me?'me':''}"><span class="r">${r.rank}</span><span class="n">${esc(r.guest_name)}<small>${esc(r.server)}</small></span><span class="s">${r.score}<small>${(r.score/DARTS).toFixed(1)} / 鏢</small></span></li>`;
+    }).join('');
+  }catch(e){console.warn(e);el.innerHTML='<li class="empty">排行榜暫時無法載入。</li>';}
+}
+async function loadMine(){
+  const el=$('mine');
+  if(!sb||!id.joinToken)return;
+  try{
+    const {data,error}=await sb.rpc('darts_my_records',{p_join_token:id.joinToken,p_member_token:id.memberToken});
+    if(error)throw error;
+    const rec=data.records||[];
+    if(!rec.length){el.innerHTML='<li class="empty">本次來店尚無成績。</li>';return;}
+    const fmt=s=>{try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(s));}catch(e){return '';}};
+    el.innerHTML=rec.slice(0,10).map((r,i)=>{
+      const a=r.awards||{},tags=[a.ton80&&'T80',a.hat_trick&&'HT×'+a.hat_trick].filter(Boolean).join(' ');
+      return `<li><span class="r">${rec.length-i}</span><span class="n">${fmt(r.at)}<small>紅心 ${r.bulls}・三倍 ${r.trebles}${tags?'・'+tags:''}</small></span><span class="s">${r.score}</span></li>`;
+    }).join('');
+  }catch(e){console.warn(e);}
+}
+
+// ---------------- 啟動 ----------------
+renderHud();
+verifyIdentity();loadBoard();
+setInterval(()=>{if(!document.hidden)loadBoard();},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){verifyIdentity();loadBoard();}});
+})();
+</script>
+</body>
+</html>
