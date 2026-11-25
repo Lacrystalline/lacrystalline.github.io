@@ -70,9 +70,10 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-grad
 
 /* 擲鏢回饋：力道計與方向 */
 .coach{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;padding:10px 6px 2px;font-size:.76rem;color:var(--mute)}
-.gauge{position:relative;height:10px;border-radius:999px;background:linear-gradient(90deg,rgba(229,154,143,.35),rgba(216,184,122,.25) 30%,rgba(127,211,214,.55) 44%,rgba(127,211,214,.55) 56%,rgba(216,184,122,.25) 70%,rgba(229,154,143,.35))}
+.gauge{position:relative;height:10px;border-radius:999px;background:linear-gradient(90deg,rgba(127,211,214,.18),rgba(127,211,214,.4) 46.5%,rgba(216,184,122,.95) 46.5%,rgba(216,184,122,.95) 53.5%,rgba(229,154,143,.4) 53.5%,rgba(229,154,143,.6))}
 .gauge .mk{position:absolute;top:-4px;width:3px;height:18px;border-radius:2px;background:var(--mist);transform:translateX(-50%);transition:left .25s}
 .gauge .mk.old{background:rgba(232,237,242,.28);width:2px}
+.gauge .mk.live{background:var(--gold);box-shadow:0 0 8px rgba(216,184,122,.9);transition:none}
 .gauge .ends{position:absolute;inset:auto 0 -16px 0;display:flex;justify-content:space-between;font-size:.62rem;color:var(--crys-dim)}
 .verdict{grid-column:1/-1;min-height:1.5em;text-align:center;color:var(--mist);font-size:.82rem;margin-top:12px}
 .verdict b{font-weight:400;color:var(--gold)}
@@ -194,7 +195,7 @@ ol.lb li.empty{display:block;border:0;color:var(--mute);font-size:.82rem;padding
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="engine.js?v=4"></script>
+<script src="engine.js?v=5"></script>
 <script>
 (()=>{
 'use strict';

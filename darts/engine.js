@@ -15,10 +15,12 @@ const TUNING={
   MIN_SPEED:0.35,    // 甩出峰值低於此速度 = 沒有擲出（取消）
   AIM_SPEED:0.25,    // 低於此速度的移動視為瞄準
   FLICK_WINDOW:180,  // 放手前多少毫秒內找甩出的峰值速度
-  POWER_MM:110,      // 力道誤差 100% 時的上下偏移（mm）
-  ANGLE_MM:130,      // 方向誤差 tan(θ)=1 時的左右偏移（mm）
-  SWAY_MM:10,        // 瞄準時手的自然晃動幅度（mm）
-  NOISE_MM:3,        // 每鏢不可控的微小誤差（mm）
+  POWER_DEAD:0.08,   // 力道誤差在 ±8% 內視為完美（娛樂取向：給玩家明確的「甜蜜區」）
+  ANGLE_DEAD:2.5,    // 方向誤差在 ±2.5° 內視為筆直
+  POWER_MM:85,       // 力道誤差（扣掉完美區後）100% 時的上下偏移（mm）
+  ANGLE_MM:105,      // 方向誤差 tan(θ)=1 時的左右偏移（mm）
+  SWAY_MM:7,         // 瞄準時手的自然晃動幅度（mm）
+  NOISE_MM:2.2,      // 每鏢不可控的微小誤差（mm）
   TOUCH_LIFT:64      // 觸控時準星在指尖上方（px），避免被手指擋住
 };
 
@@ -59,6 +61,7 @@ function create(opts){
   let darts=[];            // 已插在靶上的鏢 {x,y,tone}（mm）
   let flights=[];          // 飛行中的鏢 {x,y,t0,local,tone}
   let aim=null,pressed=false,isTouch=false,pointerId=null,samples=[],hist=[];
+  let liveP=null,lastP=null,lastPAt=0;   // 甩出中的即時力道、上一鏢力道（畫在準星旁的力道計）
 
   function resize(){
     const box=cv.getBoundingClientRect();
@@ -122,10 +125,34 @@ function create(opts){
     ctx.strokeStyle=pressed?'rgba(216,184,122,.95)':'rgba(127,211,214,.9)';ctx.lineWidth=1.4;
     ctx.beginPath();ctx.arc(x,y,TUNING.SWAY_MM*K*.7+4,0,Math.PI*2);ctx.stroke();
     ctx.beginPath();ctx.moveTo(x-10,y);ctx.lineTo(x-3,y);ctx.moveTo(x+3,y);ctx.lineTo(x+10,y);ctx.moveTo(x,y-10);ctx.lineTo(x,y-3);ctx.moveTo(x,y+3);ctx.lineTo(x,y+10);ctx.stroke();
-    if(pressed){   // 按住時提示：往上甩
+    drawPowerMeter(x,y);
+    if(pressed&&liveP===null){   // 按住時提示：往上甩
       const r=TUNING.SWAY_MM*K*.7+12,bob=Math.sin(performance.now()/160)*3;
       ctx.fillStyle='rgba(216,184,122,.9)';
       for(let k=0;k<2;k++){const yy=y-r-k*9+bob;ctx.beginPath();ctx.moveTo(x,yy-7);ctx.lineTo(x-6,yy);ctx.lineTo(x+6,yy);ctx.closePath();ctx.globalAlpha=k?.45:.9;ctx.fill();}
+    }
+    ctx.restore();
+  }
+  // 準星右側的直立力道計：下段偏輕、中間金色甜蜜區、上段偏重；甩的當下即時移動
+  const pToY=(p,top,h)=>top+h*(1-(Math.max(-1,Math.min(1.5,p))+1)/2.5);
+  function drawPowerMeter(x,y){
+    const show=pressed||(lastP!==null&&performance.now()-lastPAt<1400);
+    if(!show)return;
+    const h=Math.max(70,W*.16),w=8,bx=Math.min(W-w-6,x+TUNING.SWAY_MM*K*.7+22),top=Math.max(6,y-h/2);
+    ctx.save();
+    const g=ctx.createLinearGradient(0,top,0,top+h);
+    g.addColorStop(0,'rgba(229,154,143,.85)');g.addColorStop(.32,'rgba(216,184,122,.55)');
+    g.addColorStop(.5,'rgba(127,211,214,.35)');g.addColorStop(1,'rgba(127,211,214,.15)');
+    ctx.fillStyle='rgba(8,12,20,.7)';ctx.fillRect(bx-3,top-3,w+6,h+6);
+    ctx.fillStyle=g;ctx.fillRect(bx,top,w,h);
+    const z0=pToY(TUNING.POWER_DEAD,top,h),z1=pToY(-TUNING.POWER_DEAD,top,h);
+    ctx.fillStyle='rgba(216,184,122,.95)';ctx.fillRect(bx-2,z0,w+4,Math.max(3,z1-z0));
+    const p=liveP!==null?liveP:(pressed?-1:lastP);
+    if(p!==null){
+      const my=pToY(p,top,h);
+      ctx.fillStyle='#fff';ctx.shadowColor='rgba(255,255,255,.9)';ctx.shadowBlur=8;
+      ctx.beginPath();ctx.moveTo(bx-6,my);ctx.lineTo(bx-1,my-4);ctx.lineTo(bx-1,my+4);ctx.closePath();ctx.fill();
+      ctx.fillRect(bx-1,my-1,w+2,2);
     }
     ctx.restore();
   }
@@ -145,6 +172,7 @@ function create(opts){
       }
     }
     if(aim&&!flights.length&&canThrow()){const o=swayOffset(now);drawReticle(aim.x+o.x,aim.y+o.y);}
+    else if(lastP!==null&&aim&&now-lastPAt<1400)drawPowerMeter(aim.x,aim.y);
     requestAnimationFrame(frame);
   }
 
@@ -155,6 +183,7 @@ function create(opts){
   }
   function pushSample(ev){
     const p=toBoard(ev);samples.push({t:performance.now(),x:p.x,y:p.y});
+    if(samples.length>1&&samples[samples.length-1].t-samples[samples.length-2].t>40)samples[samples.length-1].rest=true;
     const cut=performance.now()-800;while(samples.length>2&&samples[0].t<cut)samples.shift();
     return p;
   }
@@ -170,15 +199,18 @@ function create(opts){
     while(i>0&&segSpeed(i)>=TUNING.AIM_SPEED)i--;
     return samples[i];
   }
-  // 甩出速度：放手前 FLICK_WINDOW 毫秒內，取「往上」最快的一段（每段至少 20ms）
-  // 放手瞬間的重複取樣、手指收尾減速都不會把速度拉低
-  function flickVelocity(){
-    const n=samples.length;if(n<2)return {vx:0,vy:0};
-    const end=samples[n-1].t;let best={vx:0,vy:0};
-    for(let i=n-2;i>=0&&end-samples[i].t<=FLICK_WINDOW_MS();i--){
+  // 甩出速度：放手前 FLICK_WINDOW 毫秒內，取「往上」最快的一段（每段至少 16ms）
+  // 手指靜止一陣子後才開始甩時，瀏覽器不會回報靜止期間的移動，
+  // 所以兩個取樣間隔超過 33ms 的那一段，時間以 33ms 計（等於「從靜止處開始甩」）。
+  function flickVelocity(arr){
+    const a=arr||samples,n=a.length;if(n<2)return {vx:0,vy:0};
+    const te=[a[0].t];for(let k=1;k<n;k++)te.push(te[k-1]+Math.min(a[k].t-a[k-1].t,33));
+    const end=te[n-1];let best={vx:0,vy:0};
+    for(let i=n-2;i>=0;i--){
+      if(end-te[i]>FLICK_WINDOW_MS())break;
       for(let j=i+1;j<n;j++){
-        const dt=samples[j].t-samples[i].t;if(dt<20)continue;
-        const vx=(samples[j].x-samples[i].x)/dt,vy=(samples[j].y-samples[i].y)/dt;
+        const dt=te[j]-te[i];if(dt<16)continue;
+        const vx=(a[j].x-a[i].x)/dt,vy=(a[j].y-a[i].y)/dt;
         if(-vy>-best.vy)best={vx,vy};
         break;
       }
@@ -191,8 +223,10 @@ function create(opts){
     if(pointerId!==null&&ev.pointerId!==pointerId)return;
     isTouch=ev.pointerType!=='mouse';
     if(!pressed){if(!isTouch){const p=toBoard(ev);aim={x:p.x,y:p.y};}return;}
-    const p=pushSample(ev);
+    const list=(typeof ev.getCoalescedEvents==='function'&&ev.getCoalescedEvents().length)?ev.getCoalescedEvents():[ev];
+    let p;for(const e of list)p=pushSample(e);
     if(segSpeed(samples.length-1)<TUNING.AIM_SPEED)aim={x:p.x,y:p.y-lift()};
+    else liveGauge();
   });
   cv.addEventListener('pointerleave',()=>{if(!pressed)aim=null;});
   cv.addEventListener('pointerdown',ev=>{
@@ -210,21 +244,23 @@ function create(opts){
     if(!pressed)return;
     pushSample(ev);pressed=false;
     if(flights.length||!canThrow()||!aim){samples=[];return;}
-    const v=flickVelocity(),st=flickStart();samples=[];
+    const v=flickVelocity(),st=flickStart();samples=[];hideLive();
     if(st)aim={x:st.x,y:st.y-lift()};
     const up=-v.vy,ideal=isTouch?TUNING.IDEAL_TOUCH:TUNING.IDEAL_MOUSE;
     if(up<TUNING.MIN_SPEED){verdict('沒有擲出：按住後<b>往上快速一甩</b>，邊甩邊放手。');if(isTouch)aim=null;return;}
     const now=performance.now(),o=swayOffset(now);
     const power=Math.max(-1,Math.min(1.5,(up-ideal)/ideal));
     const theta=Math.atan2(v.vx,up);
-    const px=aim.x+o.x+Math.tan(Math.max(-1,Math.min(1,theta)))*TUNING.ANGLE_MM*K+gauss()*TUNING.NOISE_MM*K;
-    const py=aim.y+o.y-power*TUNING.POWER_MM*K+gauss()*TUNING.NOISE_MM*K;
-    showCoach(power,theta);
+    const dead=(e,d)=>Math.abs(e)<=d?0:e-Math.sign(e)*d;   // 完美區內不偏移
+    const pEff=dead(power,TUNING.POWER_DEAD),tEff=dead(theta,TUNING.ANGLE_DEAD*Math.PI/180);
+    const px=aim.x+o.x+Math.tan(Math.max(-1,Math.min(1,tEff)))*TUNING.ANGLE_MM*K+gauss()*TUNING.NOISE_MM*K;
+    const py=aim.y+o.y-pEff*TUNING.POWER_MM*K+gauss()*TUNING.NOISE_MM*K;
+    showCoach(power,theta);lastP=power;lastPAt=now;
     flights.push({x:(px-C)/K,y:(py-C)/K,t0:now,local:true,tone:opts.localTone||'crys'});
     if(isTouch)aim=null;
   }
   cv.addEventListener('pointerup',release);
-  cv.addEventListener('pointercancel',ev=>{if(ev.pointerId===pointerId){pointerId=null;pressed=false;samples=[];}});
+  cv.addEventListener('pointercancel',ev=>{if(ev.pointerId===pointerId){pointerId=null;pressed=false;samples=[];hideLive();}});
 
   // ---------------- 回饋 ----------------
   function verdict(html){if(opts.verdictEl)opts.verdictEl.innerHTML=html;}
@@ -232,10 +268,20 @@ function create(opts){
     hist.push(power);if(hist.length>6)hist.shift();
     renderGauge();
     const pc=Math.round(power*100),deg=Math.round(theta*180/Math.PI);
-    const pw=Math.abs(pc)<=10?'<b>剛好</b>':pc<0?`偏輕 ${-pc}%（落低）`:`偏重 ${pc}%（飛高）`;
+    const pw=Math.abs(pc)<=Math.round(TUNING.POWER_DEAD*100)?'<b>剛好</b>':pc<0?`偏輕 ${-pc}%（落低）`:`偏重 ${pc}%（飛高）`;
     const dr=Math.abs(deg)<=2?'<b>筆直</b>':deg<0?`偏左 ${-deg}°`:`偏右 ${deg}°`;
     verdict(`力道 ${pw}　·　方向 ${dr}`);
   }
+  // 甩的當下即時顯示力道（力道條上的亮點）
+  function liveGauge(){
+    const v=flickVelocity(samples),ideal=isTouch?TUNING.IDEAL_TOUCH:TUNING.IDEAL_MOUSE;
+    const p=Math.max(-1,Math.min(1.5,(-v.vy-ideal)/ideal));
+    liveP=p;const g=opts.gaugeEl;if(!g)return;
+    let m=g.querySelector('.live');if(!m){m=document.createElement('span');m.className='mk live';g.appendChild(m);}
+    m.style.left=Math.max(2,Math.min(98,50+p*50/1.2))+'%';
+    liveP=p;
+  }
+  function hideLive(){liveP=null;const m=opts.gaugeEl&&opts.gaugeEl.querySelector('.live');if(m)m.remove();}
   function renderGauge(){
     const g=opts.gaugeEl;if(!g)return;
     const pos=p=>Math.max(2,Math.min(98,50+p*50/1.2));
